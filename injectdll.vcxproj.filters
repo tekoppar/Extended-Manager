@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\GhostClasses">
+      <UniqueIdentifier>{853d5636-46ab-402d-a46b-f01407f0bc1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MessageClasses">
+      <UniqueIdentifier>{2c296806-3f66-4530-87c1-d753effd5ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GameClasses">
+      <UniqueIdentifier>{c0c45a46-ff59-4136-941c-c31537db1600}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CustomUtils">
+      <UniqueIdentifier>{8fa5f9f2-811d-40d5-bc8c-14ad32d448ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MoonTypes">
+      <UniqueIdentifier>{dd59e510-88ee-4b70-8798-b9f330e45390}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="inject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Adresses.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inject.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SeinCharacter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveGameController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InvisibleCheckpoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MoonDriverSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MonoBehaviour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostFrame.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostManager.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostPlayer.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostRecorder.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostRecorderData.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostCharacterData.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostService.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RaceSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QuestsController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Quest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageControllerB.h">
+      <Filter>Header Files\MessageClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageProvider.h">
+      <Filter>Header Files\MessageClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MoonMessageBox.h">
+      <Filter>Header Files\MessageClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="AkLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenesManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameController.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GameParameters.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GameUI.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GetClasses.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="HString.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClass.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="MoonString.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtils.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemString2.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemString.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="Adresses.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\MoonTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemString3.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

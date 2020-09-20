@@ -1,0 +1,5 @@
+﻿  inject.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\inject.cpp(320,37): warning C4305: 'argument': truncation from 'int' to 'char'
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\inject.cpp(320,33): warning C4309: 'argument': truncation of constant value
+Adresses.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  injectdll.vcxproj -> C:\Users\Tekoppar\source\repos\injectdll\injectdll\..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\injectdll.dll
