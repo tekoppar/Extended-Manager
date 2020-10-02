@@ -1,3 +1,5 @@
+#include "pch-il2cpp.h"
+
 #include "Adresses.h"
 
 unsigned long long Assembly_BaseAddr = 0x0;

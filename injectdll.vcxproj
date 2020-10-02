@@ -100,6 +100,11 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>C:\Users\Tekoppar\source\repos\injectdll\injectdll\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\appdata;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,11 +135,13 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\framework\pch-il2cpp.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,12 +156,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Adresses.cpp" />
-    <ClCompile Include="inject.cpp" />
+    <ClCompile Include="Base64.cpp" />
+    <ClCompile Include="FindClass.cpp" />
+    <ClCompile Include="framework\helpers.cpp" />
+    <ClCompile Include="framework\il2cpp-init.cpp" />
+    <ClCompile Include="framework\pch-il2cpp.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="inject.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Adresses.h" />
+    <ClInclude Include="appdata\il2cpp-api-functions-ptr.h" />
+    <ClInclude Include="appdata\il2cpp-api-functions.h" />
+    <ClInclude Include="appdata\il2cpp-functions.h" />
+    <ClInclude Include="appdata\il2cpp-functions1.h" />
+    <ClInclude Include="appdata\il2cpp-functions2.h" />
+    <ClInclude Include="appdata\il2cpp-functions3.h" />
+    <ClInclude Include="appdata\il2cpp-functions4.h" />
+    <ClInclude Include="appdata\il2cpp-types-ptr.h" />
+    <ClInclude Include="appdata\il2cpp-types.h" />
+    <ClInclude Include="Base64.h" />
+    <ClInclude Include="Behaviour.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="AkLogger.h" />
+    <ClInclude Include="CPPBeDumb.h" />
+    <ClInclude Include="FindObjectsWrapper.h" />
+    <ClInclude Include="framework\helpers.h" />
+    <ClInclude Include="framework\il2cpp-appdata.h" />
+    <ClInclude Include="framework\il2cpp-init.h" />
+    <ClInclude Include="framework\pch-il2cpp.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameParameters.h" />
@@ -167,29 +202,34 @@
     <ClInclude Include="GhostPlayer.h" />
     <ClInclude Include="GhostRecorder.h" />
     <ClInclude Include="GhostRecorderData.h" />
+    <ClInclude Include="GhostRecorderPlugins.h" />
     <ClInclude Include="GhostService.h" />
     <ClInclude Include="inject.h" />
     <ClInclude Include="InvisibleCheckpoint.h" />
+    <ClInclude Include="Manager.h" />
+    <ClInclude Include="ManagerDef.h" />
     <ClInclude Include="MoonMessageBox.h" />
     <ClInclude Include="MessageClass.h" />
     <ClInclude Include="MessageControllerB.h" />
     <ClInclude Include="MessageProvider.h" />
     <ClInclude Include="MonoBehaviour.h" />
-    <ClInclude Include="MoonString.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Quest.h" />
     <ClInclude Include="QuestsController.h" />
+    <ClInclude Include="RaceManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="RaceSystem.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="SaveGameController.h" />
+    <ClInclude Include="ScenariosRecorder.h" />
     <ClInclude Include="ScenesManager.h" />
     <ClInclude Include="SeinCharacter.h" />
     <ClInclude Include="MoonDriverSystem.h" />
     <ClInclude Include="HString.h" />
     <ClInclude Include="StringUtils.h" />
-    <ClInclude Include="SystemString.h" />
-    <ClInclude Include="SystemString2.h" />
     <ClInclude Include="SystemString3.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Vector2.h" />

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Adresses.h"
 #include "GhostManager.h"
 #include "RaceSystem.h"
 #include "MoonDriverSystem.h"
@@ -13,12 +12,15 @@
 #include "GameUI.h"
 #include "Object.h"
 #include "GameObject.h"
+#include "ScenariosRecorder.h"
+#include "FindObjectsWrapper.h"
 
-GameUI* BaseGameUI;
-InvisibleCheckpoint* BaseInvisibleCheckpoint;
-GhostManager* BaseGhostManager;
-RaceSystem* BaseRaceSystem;
-QuestsController* BaseQuestsController;
+Moon::GameUI* BaseGameUI;
+Moon::InvisibleCheckpoint* BaseInvisibleCheckpoint;
+Moon::RaceSystem* BaseRaceSystem;
+Moon::QuestsController* BaseQuestsController;
+Moon::ScenariosRecorder* BaseScenarioRecorder;
+Moon::GhostRecorder* BaseGhostRecorder;
 
 SeinCharacter* GetSeinCharacter(HANDLE hProcess) {
 	if (hProcess != NULL) {
@@ -39,7 +41,7 @@ SeinCharacter* GetSeinCharacter(HANDLE hProcess) {
 	}
 };
 
-MoonDriverSystem* GetMoonDriverSystem(HANDLE hProcess) {
+Moon::MoonDriverSystem* GetMoonDriverSystem(HANDLE hProcess) {
 	if (hProcess != NULL) {
 		uintptr_t dynamicPtrBaseAddr = Assembly_BaseAddr + 0x446F628;
 
@@ -51,14 +53,14 @@ MoonDriverSystem* GetMoonDriverSystem(HANDLE hProcess) {
 		if (!dynamicPtrBaseAddr || !&dynamicPtrBaseAddr)
 			return NULL;
 
-		return (MoonDriverSystem*)(dynamicPtrBaseAddr);
+		return (Moon::MoonDriverSystem*)(dynamicPtrBaseAddr);
 	}
 	else {
 		return NULL;
 	}
 };
 
-GameWorld* GetGameWorld(HANDLE hProcess) {
+Moon::GameWorld* GetGameWorld(HANDLE hProcess) {
 	if (hProcess != NULL) {
 		uintptr_t dynamicPtrBaseAddr = Assembly_BaseAddr + 0x0442B648;
 		std::vector<unsigned int> offsets = { 0x68, 0x98, 0x88, 0xB8, 0xB8, 0x0, 0x0 };
@@ -69,14 +71,14 @@ GameWorld* GetGameWorld(HANDLE hProcess) {
 			ReadProcessMemory(hProcess, (BYTE*)addr, &addr, sizeof(addr), 0);
 			addr += offsets[i];
 		}
-		return (GameWorld*)(addr);
+		return (Moon::GameWorld*)(addr);
 	}
 	else {
 		return NULL;
 	}
 };
 
-GameController* GetGameController(HANDLE hProcess) {
+Moon::GameController* GetGameController(HANDLE hProcess) {
 	if (hProcess != NULL) {
 		uintptr_t dynamicPtrBaseAddr = Assembly_BaseAddr + 0x04456A90;
 		std::vector<unsigned int> offsets = { 0x68, 0xB8, 0x10, 0x68, 0xF8, 0x70, 0x640 };
@@ -87,26 +89,26 @@ GameController* GetGameController(HANDLE hProcess) {
 			ReadProcessMemory(hProcess, (BYTE*)addr, &addr, sizeof(addr), 0);
 			addr += offsets[i];
 		}
-		return (GameController*)(addr);
+		return (Moon::GameController*)(addr);
 	}
 	else {
 		return NULL;
 	}
 }
 
-RaceSystem* GetRaceSystem(HANDLE hProcess)
+Moon::RaceSystem* GetRaceSystem(HANDLE hProcess)
 {
 	if (hProcess != NULL) {
 		uintptr_t* RaceSystemBaseAdress = (uintptr_t*)(Assembly_BaseAddr + 0x441EF00);
 		uintptr_t RacePtr = *RaceSystemBaseAdress;
-		return (RaceSystem*)(RacePtr);
+		return (Moon::RaceSystem*)(RacePtr);
 	}
 	else {
 		return NULL;
 	}
 }
 
-QuestsController* GetQuestsController(HANDLE hProcess)
+Moon::QuestsController* GetQuestsController(HANDLE hProcess)
 {
 	if (hProcess != NULL) {
 		uintptr_t dynamicPtrBaseAddr = Assembly_BaseAddr + 0x440CBA0;
@@ -119,22 +121,22 @@ QuestsController* GetQuestsController(HANDLE hProcess)
 		if (!dynamicPtrBaseAddr || !&dynamicPtrBaseAddr)
 			return NULL;
 
-		return (QuestsController*)(dynamicPtrBaseAddr);
+		return (Moon::QuestsController*)(dynamicPtrBaseAddr);
 	}
 	else {
 		return NULL;
 	}
 }
 
-MessageControllerB* GetMessageController(HANDLE hProcess) {
+Moon::MessageControllerB* GetMessageController(HANDLE hProcess) {
 
 	uintptr_t* GameUIBaseAdress = (uintptr_t*)(Assembly_BaseAddr + 0x4464828);
 	uintptr_t GameUIT = *GameUIBaseAdress;
 	if (GameUIBaseAdress != NULL)
-		BaseGameUI = (GameUI*)(GameUIT);
+		BaseGameUI = (Moon::GameUI*)(GameUIT);
 
 	if (BaseGameUI != nullptr) {
-		return (MessageControllerB*)(BaseGameUI->m_messageController);
+		return (Moon::MessageControllerB*)(BaseGameUI->m_messageController);
 	}
 
 	return NULL;

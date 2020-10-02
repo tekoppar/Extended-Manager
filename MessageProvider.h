@@ -3,26 +3,28 @@
 #include "HString.h"
 
 #pragma pack(push, 1)
-class MessageProvider
-{
-public:
-
-	MessageProvider()
+namespace Moon {
+	class MessageProvider
 	{
-		this->m_messages = new HString(0x1);
-		this->x17[0x11] = 0x0;
-	}
+	public:
 
-	MessageProvider(std::wstring message)
-	{
-		this->x17[0x11] = 0x0;
-		this->m_messages = new HString(message, 0x1);
-	}
+		MessageProvider()
+		{
+			this->m_messages = new Moon::HString(0x1);
+			this->x17[0x11] = 0x0;
+		}
 
-	unsigned char x17[0x17];
-	HString* m_messages; // 0x18 string[]
+		MessageProvider(std::wstring message)
+		{
+			this->x17[0x11] = 0x0;
+			this->m_messages = new Moon::HString(message, 0x1);
+		}
 
-protected:
-private:
-};
+		unsigned char x17[0x17];
+		Moon::HString* m_messages; // 0x18 string[]
+
+	protected:
+	private:
+	};
+}
 #pragma pack(pop)

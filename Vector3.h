@@ -1,39 +1,43 @@
 #pragma once
 
 #pragma pack(push, 1)
-typedef struct t_Vector3
-{
-public:
-
-	t_Vector3(float argx, float argy)
+namespace Moon {
+	typedef struct Vector3
 	{
-		this->x = argx;
-		this->y = argy;
-		this->z = 0.0f;
-	}
-	t_Vector3()
-	{
-		this->x = 0.0f;
-		this->y = 0.0f;
-		this->z = 0.0f;
-	}
+	public:
 
-	inline void Set(float ax, float ay, float az)
-	{
-		this->x = ax;
-		this->y = ay;
-		this->z = az;
-	}
+		Vector3(float x, float y, float z)
+		{
+			this->x = x;
+			this->y = y;
+			this->z = z;
+		}
+		Vector3(float x, float y)
+		{
+			this->x = x;
+			this->y = y;
+			this->z = 0.0f;
+		}
+		Vector3()
+		{
+			this->x = 0.0f;
+			this->y = 0.0f;
+			this->z = 0.0f;
+		}
 
-	// 0x00 - 0x03
-	float x;
+		inline void Set(float x, float y, float z)
+		{
+			this->x = x;
+			this->y = y;
+			this->z = z;
+		}
 
-	// 0x04 - 0x07
-	float y;
+		float x; //0x0
+		float y; //0x4
+		float z; //0x8
 
-	// 0x08 - 0x0B
-	float z;
-protected:
-private:
-} Vector3;
+	protected:
+	private:
+	} Vector3;
+}
 #pragma pack(pop)

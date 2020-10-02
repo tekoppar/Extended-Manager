@@ -28,6 +28,12 @@
     <Filter Include="Header Files\MoonTypes">
       <UniqueIdentifier>{dd59e510-88ee-4b70-8798-b9f330e45390}</UniqueIdentifier>
     </Filter>
+    <Filter Include="framework">
+      <UniqueIdentifier>{cd57c879-e559-4e49-ae7c-d668f3f9f145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="appdata">
+      <UniqueIdentifier>{05b979e1-70b5-41db-9619-b24148869719}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inject.cpp">
@@ -36,11 +42,26 @@
     <ClCompile Include="Adresses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FindClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\helpers.cpp">
+      <Filter>framework</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\il2cpp-init.cpp">
+      <Filter>framework</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\pch-il2cpp.cpp">
+      <Filter>framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inject.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="SeinCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -51,9 +72,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MoonDriverSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MonoBehaviour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GhostFrame.h">
@@ -125,16 +143,7 @@
     <ClInclude Include="MessageClass.h">
       <Filter>Header Files\CustomUtils</Filter>
     </ClInclude>
-    <ClInclude Include="MoonString.h">
-      <Filter>Header Files\CustomUtils</Filter>
-    </ClInclude>
     <ClInclude Include="StringUtils.h">
-      <Filter>Header Files\CustomUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemString2.h">
-      <Filter>Header Files\CustomUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemString.h">
       <Filter>Header Files\CustomUtils</Filter>
     </ClInclude>
     <ClInclude Include="Adresses.h">
@@ -155,14 +164,86 @@
     <ClInclude Include="Quaternion.h">
       <Filter>Header Files\MoonTypes</Filter>
     </ClInclude>
-    <ClInclude Include="Component.h">
-      <Filter>Header Files\MoonTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files\MoonTypes</Filter>
-    </ClInclude>
     <ClInclude Include="SystemString3.h">
       <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MonoBehaviour.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Behaviour.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="inject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenariosRecorder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GhostRecorderPlugins.h">
+      <Filter>Header Files\GhostClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FindObjectsWrapper.h">
+      <Filter>Header Files\GameClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPPBeDumb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-api-functions.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-api-functions-ptr.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-functions.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types-ptr.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\helpers.h">
+      <Filter>framework</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\il2cpp-appdata.h">
+      <Filter>framework</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\il2cpp-init.h">
+      <Filter>framework</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\pch-il2cpp.h">
+      <Filter>framework</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-functions1.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-functions2.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-functions3.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-functions4.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="Base64.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="RaceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagerDef.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

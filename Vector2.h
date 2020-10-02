@@ -1,29 +1,31 @@
 #pragma once
 
 #pragma pack(push, 1)
-typedef struct t_Vector2
-{
-public:
-
-	t_Vector2()
+namespace Moon {
+	typedef struct t_Vector2
 	{
-		this->X = 0.0f;
-		this->Y = 0.0f;
-	}
+	public:
 
-	t_Vector2(float x, float y)
-	{
-		this->X = x;
-		this->Y = y;
-	}
+		t_Vector2()
+		{
+			this->X = 0.0f;
+			this->Y = 0.0f;
+		}
 
-	// 0x00 - 0x03
-	float X;
+		t_Vector2(float x, float y)
+		{
+			this->X = x;
+			this->Y = y;
+		}
 
-	// 0x04 - 0x07
-	float Y;
-protected:
-private:
+		// 0x00 - 0x03
+		float X;
 
-} Vector2;
+		// 0x04 - 0x07
+		float Y;
+	protected:
+	private:
+
+	} Vector2;
+}
 #pragma pack(pop)
