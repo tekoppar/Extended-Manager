@@ -15,6 +15,9 @@
 #include "ScenariosRecorder.h"
 #include "FindObjectsWrapper.h"
 
+#ifndef _GETCLASSES_H
+#define _GETCLASSES_H
+
 Moon::GameUI* BaseGameUI;
 Moon::InvisibleCheckpoint* BaseInvisibleCheckpoint;
 Moon::RaceSystem* BaseRaceSystem;
@@ -22,7 +25,7 @@ Moon::QuestsController* BaseQuestsController;
 Moon::ScenariosRecorder* BaseScenarioRecorder;
 Moon::GhostRecorder* BaseGhostRecorder;
 
-SeinCharacter* GetSeinCharacter(HANDLE hProcess) {
+app::SeinCharacter* GetSeinCharacter(HANDLE hProcess) {
 	if (hProcess != NULL) {
 		uintptr_t dynamicPtrBaseAddr = Assembly_BaseAddr + 0x0449A608;
 
@@ -34,7 +37,7 @@ SeinCharacter* GetSeinCharacter(HANDLE hProcess) {
 		if (!dynamicPtrBaseAddr || !&dynamicPtrBaseAddr)
 			return NULL;
 
-		return (SeinCharacter*)(dynamicPtrBaseAddr);
+		return (app::SeinCharacter*)(dynamicPtrBaseAddr);
 	}
 	else {
 		return NULL;
@@ -141,3 +144,5 @@ Moon::MessageControllerB* GetMessageController(HANDLE hProcess) {
 
 	return NULL;
 }
+
+#endif

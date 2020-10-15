@@ -29,6 +29,17 @@ char* GetQualified(std::string Namespace, std::string name);
 template<typename Return = Il2CppClass>
 Return* GetClass(std::string Namespace, std::string name);
 
+template<typename Return>
+static Return* GetObjectByType(std::string Namespace, std::string Name)
+{
+    app::Type* objectType = GetType(Namespace, Name);
+    app::Object_1__Array* objectArr = app::Object_1_FindObjectsOfType(objectType, NULL);
+
+    if (objectArr != nullptr && objectArr->vector[0] != nullptr)
+        return reinterpret_cast<Return*>(objectArr->vector[0]);
+
+    return nullptr;
+}
 /*template<typename Return = Il2CppClass>
 Return* GetClass(std::string Namespace, std::string name)
 {

@@ -1,10 +1,13 @@
-#ifndef MANAGER_FILE_GUARD 
-#define MANAGER_FILE_GUARD
+#pragma once
+
+#ifndef _MANAGER_H
+#define _MANAGER_H
 
 #include "Adresses.h"
 #include "detours.h"
 #include "StringUtils.h"
 #include "MessageClass.h"
+#include "HelperClasses.h"
 
 #include "Vector2.h"
 #include "Vector3.h"
@@ -29,13 +32,13 @@ tInstantiate oInstantiate;
 typedef void(__thiscall* CClassFunction_t)(void* __this);
 CClassFunction_t Real_CClassFunction;
 
-typedef String* (__thiscall* tIl2CppString)(const char* str);
+typedef app::String* (__thiscall* tIl2CppString)(const char* str);
 tIl2CppString RealIl2cpp_string_new_wrapper;
 
 typedef void(__thiscall* tGameControllerUpdate)(void* __this);
 tGameControllerUpdate Real_GameControllerUpdate;
 
-/*typedef Moon_MoonString_o(* tIl2CppString)(const char* str); //Moon_MoonString_o
-tIl2CppString oIl2cpp_string_new_wrapper;*/
+typedef void(__thiscall* tOnPointerClick)(void* __this);
+tOnPointerClick Real_OnPointerClick;
 
 #endif

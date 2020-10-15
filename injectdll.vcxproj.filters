@@ -34,6 +34,21 @@
     <Filter Include="appdata">
       <UniqueIdentifier>{05b979e1-70b5-41db-9619-b24148869719}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ManagerUtils">
+      <UniqueIdentifier>{9b846f52-6cce-4d26-87af-d90ba9002f20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagerUtils\DrawingClasses">
+      <UniqueIdentifier>{2c98fcd2-5947-4521-a1b3-64626360daa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagerUtils\RaceClasses">
+      <UniqueIdentifier>{07afd9a4-cbf8-4d2b-bfbb-77672e8bd8e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagerUtils\AreaMapManager">
+      <UniqueIdentifier>{7b04006b-5e6b-4ea3-86a2-49f71142bebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Animation Classes">
+      <UniqueIdentifier>{d9e1945e-e8fa-4bd3-9276-fb9623e3b9e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inject.cpp">
@@ -43,9 +58,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FindClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="framework\helpers.cpp">
@@ -59,6 +71,21 @@
     </ClCompile>
     <ClCompile Include="Base64.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ManagerDef.cpp">
+      <Filter>ManagerUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AreaMapManager.cpp">
+      <Filter>ManagerUtils\AreaMapManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphDrawer.cpp">
+      <Filter>ManagerUtils\DrawingClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDrawer.cpp">
+      <Filter>ManagerUtils\RaceClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,12 +167,6 @@
     <ClInclude Include="HString.h">
       <Filter>Header Files\CustomUtils</Filter>
     </ClInclude>
-    <ClInclude Include="MessageClass.h">
-      <Filter>Header Files\CustomUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="StringUtils.h">
-      <Filter>Header Files\CustomUtils</Filter>
-    </ClInclude>
     <ClInclude Include="Adresses.h">
       <Filter>Header Files\CustomUtils</Filter>
     </ClInclude>
@@ -221,9 +242,6 @@
     <ClInclude Include="framework\pch-il2cpp.h">
       <Filter>framework</Filter>
     </ClInclude>
-    <ClInclude Include="appdata\il2cpp-types.h">
-      <Filter>appdata</Filter>
-    </ClInclude>
     <ClInclude Include="appdata\il2cpp-functions1.h">
       <Filter>appdata</Filter>
     </ClInclude>
@@ -239,11 +257,77 @@
     <ClInclude Include="Base64.h">
       <Filter>Header Files\CustomUtils</Filter>
     </ClInclude>
-    <ClInclude Include="RaceManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperClasses.h">
+      <Filter>Header Files\CustomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphDrawer.h">
+      <Filter>ManagerUtils\DrawingClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateUI.h">
+      <Filter>ManagerUtils\DrawingClasses</Filter>
     </ClInclude>
     <ClInclude Include="ManagerDef.h">
-      <Filter>Header Files</Filter>
+      <Filter>ManagerUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="RaceManager.h">
+      <Filter>ManagerUtils\RaceClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameLogger.h">
+      <Filter>ManagerUtils\RaceClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtils.h">
+      <Filter>ManagerUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClass.h">
+      <Filter>ManagerUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="AreaMapManager.h">
+      <Filter>ManagerUtils\AreaMapManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GettingAnimations.h">
+      <Filter>Animation Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types1.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types2.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types3.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types4.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types5.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types6.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types7.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types8.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types9.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types10.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types11.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types12.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="appdata\il2cpp-types13.h">
+      <Filter>appdata</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDrawer.h">
+      <Filter>ManagerUtils\RaceClasses</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

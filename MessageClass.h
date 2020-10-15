@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <vector>
 
+#ifndef _MESSAGECLASS_H
+#define _MESSAGECLASS_H
+
 enum class MessageType 
 {
 	EndThread = 0,
@@ -16,13 +19,17 @@ enum class MessageType
 	GetQuestByName = 8,
 	FrameStep = 9,
 	FrameStepStop = 10,
-	NextAnimation = 11
+	NextAnimation = 11,
+	GetShriekData = 12,
+	CreateRaceCheckpoint = 13,
+	RunRace = 14
 };
 
 class Message {
 public:
 	MessageType Type = MessageType::GameCompletion;
 	int TypeInt;
+	std::string Content = "";
 };
 
 class MessageManager {
@@ -59,3 +66,5 @@ public:
 	FrameStepping State = FrameStepping::FrameSteppingDisabled;
 	bool ShouldFrameStep = false;
 };
+
+#endif

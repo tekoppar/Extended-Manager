@@ -5,7 +5,20 @@
 #include <cstdint>
 
 // Application-specific types
-#include "il2cpp-types.h"
+//#include "il2cpp-types.h"
+#include "il2cpp-types1.h"
+#include "il2cpp-types2.h"
+#include "il2cpp-types3.h"
+#include "il2cpp-types4.h"
+#include "il2cpp-types5.h"
+#include "il2cpp-types6.h"
+#include "il2cpp-types7.h"
+#include "il2cpp-types8.h"
+#include "il2cpp-types9.h"
+#include "il2cpp-types10.h"
+#include "il2cpp-types11.h"
+#include "il2cpp-types12.h"
+#include "il2cpp-types13.h"
 
 // IL2CPP API function pointers
 #include "il2cpp-api-functions-ptr.h"

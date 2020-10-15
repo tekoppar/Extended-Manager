@@ -36,7 +36,7 @@ void NewConsole() {
     freopen_s((FILE**) stdout, "CONOUT$", "w", stdout);
 }
 
-template<typename Return = Il2CppClass>
+template<typename Return>
 Return* GetClass(std::string Namespace, std::string name)
 {
     std::string const& fullName = Namespace + "." + name;
