@@ -19,9 +19,18 @@ namespace tem {
 
 		Vector3(app::Vector3* other)
 		{
-			X = other->x;
-			Y = other->y;
-			Z = other->z;
+			if (other != nullptr)
+			{
+				X = other->x;
+				Y = other->y;
+				Z = other->z;
+			}
+			else 
+			{
+				X = 0.0f;
+				Y = 0.0f;
+				Z = 0.0f;
+			}
 		}
 
 		Vector3(app::Vector3 other)
@@ -29,6 +38,14 @@ namespace tem {
 			X = other.x;
 			Y = other.y;
 			Z = other.z;
+		}
+
+		Vector3(std::string other)
+		{
+			auto content = sutil::SplitTem(other, ";");
+			X = std::stof(content[0]);
+			Y = std::stof(content[1]);
+			Z = std::stof(content[2]);
 		}
 
 		Vector3& operator+=(const Vector3& other) {

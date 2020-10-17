@@ -21,7 +21,8 @@ IOnclick::~IOnclick() {};
 
 void IOnclick::IOnClick() {};
 
-std::vector<app::Button*> AllGraphButtons;
+std::vector<GraphLabel*> AllGraphLabels;
+std::vector<GraphLabel*> AllDefaultGraphLabels;
 
 Graph::Graph()
 {
@@ -38,17 +39,24 @@ void Graph::Destroy()
 {
 }
 
-void Graph::CleanUp()
+void Graph::CleanUpStatic()
 {
 	Graph* temp = Graph::Instance;
-	for (auto& label : AllGraphButtons)
+	for (auto& graphLabel : AllDefaultGraphLabels)
 	{
-		GraphLabel* graphLabel = (GraphLabel*)TransformGetParent(app::Component_1_get_gameObject((app::Component_1*)label, NULL));
 		app::Object_1_Destroy_1((app::Object_1*)graphLabel->button, NULL);
 		graphLabel->button = nullptr;
 		app::Object_1_Destroy_1((app::Object_1*)graphLabel, NULL);
 	}
-	AllGraphButtons.clear();
+	AllDefaultGraphLabels.clear();
+
+	for (auto& graphLabel : AllGraphLabels)
+	{
+		app::Object_1_Destroy_1((app::Object_1*)graphLabel->button, NULL);
+		graphLabel->button = nullptr;
+		app::Object_1_Destroy_1((app::Object_1*)graphLabel, NULL);
+	}
+	AllDefaultGraphLabels.clear();
 
 	app::Object_1_Destroy_1((app::Object_1*)temp->graphColorTexture, NULL);
 	temp->graphColorTexture = nullptr;
@@ -79,9 +87,28 @@ void Graph::CleanUp()
 	Graph::Instance = nullptr;
 }
 
+void Graph::CloseGraph()
+{
+	ClearGraph(graphColorTexture, graphColors.Transparent);
+
+	if (masterCanvas != nullptr)
+		app::GameObject_SetActiveRecursively(masterCanvas, false, NULL);
+
+	for (auto& graphLabel : AllGraphLabels)
+	{
+		app::Object_1_Destroy_1((app::Object_1*)graphLabel->button, NULL);
+		graphLabel->button = nullptr;
+		app::Object_1_Destroy_1((app::Object_1*)graphLabel, NULL);
+	}
+	AllGraphLabels.clear();
+}
+
 void Graph::StartDrawing()
 {
-	SetupUI();
+	if (masterCanvas == nullptr)
+		SetupUI();
+	else
+		app::GameObject_SetActiveRecursively(masterCanvas, true, NULL);
 }
 
 void Graph::AddFloatData(std::vector<float> data, app::Color color, float yScale, float xScale, float inMin, float inMax)
@@ -101,34 +128,40 @@ void Graph::AddFloatData(std::vector<float> data, app::Color color, float yScale
 
 void Graph::DrawFloats(std::vector<float> data, app::Color color, float yScale, float xScale)
 {
-	int previousIndex = 0;
-	float previousData = std::max<float>(0, std::min<float>(data[0], GraphWidth));
-	float currentData = 0.0f;
-	for (int i = 1; i < data.size(); i++)
+	if (graphColorTexture != nullptr)
 	{
-		currentData = std::max<float>(0, std::min<float>(data[i], GraphWidth));
-		DrawLine(graphColorTexture, previousIndex, (previousData * yScale) + 5, i * xScale, (currentData * yScale) + 5, color);
-		previousData = currentData;
-		previousIndex = i * xScale;
+		int previousIndex = 0;
+		float previousData = std::max<float>(0, std::min<float>(data[0], GraphWidth));
+		float currentData = 0.0f;
+		for (int i = 1; i < data.size(); i++)
+		{
+			currentData = std::max<float>(0, std::min<float>(data[i], GraphWidth));
+			DrawLine(graphColorTexture, previousIndex, (previousData * yScale) + 5, i * (int)xScale, (int)(currentData * yScale) + 5, color);
+			previousData = currentData;
+			previousIndex = i * xScale;
+		}
+		app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 	}
-	app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 }
 
 void Graph::DrawFloatsMapRange(std::vector<float> data, app::Color color, float inMin, float inMax, float yScale, float xScale)
 {
-	int previousIndex = 0;
-	float previousData = std::max<float>(1, std::min<float>(data[0], GraphWidth));
-	float currentData = 0.0f;
-	previousData = MapRange(previousData, inMin, inMax, 16, GraphHeight - 16);
-	for (int i = 1; i < data.size(); i++)
+	if (graphColorTexture != nullptr)
 	{
-		currentData = std::max<float>(1, std::min<float>(data[i], GraphWidth));
-		currentData = MapRange(currentData, inMin, inMax, 16, GraphHeight - 16);
-		DrawLine(graphColorTexture, previousIndex, (previousData * yScale), i * xScale, (currentData * yScale), color);
-		previousData = currentData;
-		previousIndex = i * xScale;
+		int previousIndex = 0;
+		float previousData = std::max<float>(1, std::min<float>(data[0], GraphWidth));
+		float currentData = 0.0f;
+		previousData = MapRange(previousData, inMin, inMax, 16, GraphHeight - 16);
+		for (int i = 1; i < data.size(); i++)
+		{
+			currentData = std::max<float>(1, std::min<float>(data[i], GraphWidth));
+			currentData = MapRange(currentData, inMin, inMax, 16, GraphHeight - 16);
+			DrawLine(graphColorTexture, previousIndex, (previousData * yScale), i * xScale, (currentData * yScale), color);
+			previousData = currentData;
+			previousIndex = i * xScale;
+		}
+		app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 	}
-	app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 }
 
 void Graph::ClearGraph(app::Texture2D* texture, app::Color color)
@@ -173,6 +206,7 @@ void Graph::AddGraphLabel(const std::string& text, int fontSize, app::Color colo
 	graphLabelEvent->intValue = index;
 
 	TransformSetParent((app::GameObject*)graphLabelEvent, labelLayout);
+	AllGraphLabels.push_back(graphLabelEvent);
 }
 
 void Graph::ReDrawGraphLines(int index)
@@ -269,129 +303,148 @@ void Graph::SetupTextures()
 
 void Graph::SetupUI()
 {
-	app::String* testingCanvasName = string_new("RaceGraph");
-	app::Type* CanvasRendererType = GetType("UnityEngine", "CanvasRenderer");
-	app::Type* textType = GetType("UnityEngine.UI", "Text");
-	app::Type* imageType = GetType("UnityEngine.UI", "Image");
-	app::Type* buttonType = GetType("UnityEngine.UI", "Button");
+	if (masterCanvas == nullptr)
+	{
+		app::String* testingCanvasName = string_new("RaceGraph");
+		app::Type* CanvasRendererType = GetType("UnityEngine", "CanvasRenderer");
+		app::Type* textType = GetType("UnityEngine.UI", "Text");
+		app::Type* imageType = GetType("UnityEngine.UI", "Image");
+		app::Type* buttonType = GetType("UnityEngine.UI", "Button");
 
-	masterCanvas = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-	app::GameObject__ctor(masterCanvas, testingCanvasName, NULL);
+		masterCanvas = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject__ctor(masterCanvas, testingCanvasName, NULL);
 
-	app::CanvasRenderer* canvasRenderer = (app::CanvasRenderer*)app::GameObject_AddComponent((app::GameObject*)masterCanvas, CanvasRendererType, NULL);
+		app::CanvasRenderer* canvasRenderer = (app::CanvasRenderer*)app::GameObject_AddComponent((app::GameObject*)masterCanvas, CanvasRendererType, NULL);
 
-	newCanvas = CreateNewCanvas();
-	app::CanvasScaler* scaler = (app::CanvasScaler*)GetComponentByTypeInChildren(newCanvas, "UnityEngine.UI", "CanvasScaler");
-	app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::CanvasScaler_ScaleMode__Enum_ScaleWithScreenSize, NULL);
-	app::Vector2* screenResolution = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
-	screenResolution->x = 1920;
-	screenResolution->y = 1080;
-	app::CanvasScaler_set_referenceResolution(scaler, *screenResolution, NULL);
+		newCanvas = CreateNewCanvas();
+		app::CanvasScaler* scaler = (app::CanvasScaler*)GetComponentByTypeInChildren(newCanvas, "UnityEngine.UI", "CanvasScaler");
+		app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::CanvasScaler_ScaleMode__Enum_ScaleWithScreenSize, NULL);
+		app::Vector2* screenResolution = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+		screenResolution->x = 1920;
+		screenResolution->y = 1080;
+		app::CanvasScaler_set_referenceResolution(scaler, *screenResolution, NULL);
 
-	app::GameObject* eventSystem = DrawUI::EventSystem("EventSystem");
+		app::GameObject* eventSystem = DrawUI::EventSystem("EventSystem");
 
-	app::GameObject* rectMask2D = DrawUI::RectMask2D("CanvasMask", GraphWidth, GraphHeight, GraphWidth, GraphHeight);
+		app::GameObject* rectMask2D = DrawUI::RectMask2D("CanvasMask", GraphWidth, GraphHeight, GraphWidth, GraphHeight);
 
-	canvasGraphBackground = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-	app::String* canvasBackgroundImageName = string_new("CanvasBackgroundImage");
-	app::GameObject__ctor(canvasGraphBackground, canvasBackgroundImageName, NULL);
-	app::Image* canvasBackgroundImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphBackground, imageType, NULL);
-	app::Image_set_material(canvasBackgroundImage, RaceDataBlackMaterial, NULL);
+		canvasGraphBackground = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::String* canvasBackgroundImageName = string_new("CanvasBackgroundImage");
+		app::GameObject__ctor(canvasGraphBackground, canvasBackgroundImageName, NULL);
+		app::Image* canvasBackgroundImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphBackground, imageType, NULL);
+		app::Image_set_material(canvasBackgroundImage, RaceDataBlackMaterial, NULL);
 
-	canvasGraphData = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-	app::String* canvasImageName = string_new("CanvasDataImage");
-	app::GameObject__ctor(canvasGraphData, canvasImageName, NULL);
-	app::Image* canvasImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphData, imageType, NULL);
-	app::Image_set_material(canvasImage, RaceDataMaterial, NULL);
+		canvasGraphData = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::String* canvasImageName = string_new("CanvasDataImage");
+		app::GameObject__ctor(canvasGraphData, canvasImageName, NULL);
+		app::Image* canvasImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphData, imageType, NULL);
+		app::Image_set_material(canvasImage, RaceDataMaterial, NULL);
 
-	canvasVerticalLayout = DrawUI::VerticalLayoutGroup("canvasVerticalLayout", app::TextAnchor__Enum::TextAnchor__Enum_UpperCenter);
-	labelLayout = DrawUI::HorizontalLayoutGroup("LabelLayout", app::TextAnchor__Enum::TextAnchor__Enum_MiddleCenter);
+		canvasVerticalLayout = DrawUI::VerticalLayoutGroup("canvasVerticalLayout", app::TextAnchor__Enum::TextAnchor__Enum_UpperCenter);
+		labelLayout = DrawUI::HorizontalLayoutGroup("LabelLayout", app::TextAnchor__Enum::TextAnchor__Enum_MiddleCenter);
 
-	GraphLabel* zoomInButton = new GraphLabel();
-	auto class1 = GetClass<>("UnityEngine", "MonoBehaviour");
-	zoomInButton->app::MonoBehaviour::klass = (app::MonoBehaviour__Class*)class1;
+		GraphLabel* zoomInButton = new GraphLabel();
+		auto class1 = GetClass<>("UnityEngine", "MonoBehaviour");
+		zoomInButton->app::MonoBehaviour::klass = (app::MonoBehaviour__Class*)class1;
+		AllDefaultGraphLabels.push_back(zoomInButton);
 
-	app::Object__ctor((app::Object*)zoomInButton, NULL);
-	app::Component__ctor((app::Component*)zoomInButton, NULL);
-	app::MonoBehaviour__ctor((app::MonoBehaviour*)zoomInButton, NULL);
-	app::String* bloo = string_new("GraphZoomIn");
-	app::GameObject__ctor((app::GameObject*)zoomInButton, bloo, NULL);
-	zoomInButton->Awake("Zoom In", 24, graphColors.Green);
-	zoomInButton->floatValue = 0.25;
-	zoomInButton->onClickMethod = &ZoomGraphButton;
-	TransformSetParent((app::GameObject*)zoomInButton, labelLayout);
+		app::Object__ctor((app::Object*)zoomInButton, NULL);
+		app::Component__ctor((app::Component*)zoomInButton, NULL);
+		app::MonoBehaviour__ctor((app::MonoBehaviour*)zoomInButton, NULL);
+		app::String* bloo = string_new("GraphZoomIn");
+		app::GameObject__ctor((app::GameObject*)zoomInButton, bloo, NULL);
+		zoomInButton->Awake("Zoom In", 24, graphColors.Green);
+		zoomInButton->floatValue = 0.25;
+		zoomInButton->onClickMethod = &ZoomGraphButton;
+		TransformSetParent((app::GameObject*)zoomInButton, labelLayout);
 
-	GraphLabel* zoomOutButton = new GraphLabel();
-	zoomOutButton->app::MonoBehaviour::klass = (app::MonoBehaviour__Class*)class1;
+		GraphLabel* zoomOutButton = new GraphLabel();
+		zoomOutButton->app::MonoBehaviour::klass = (app::MonoBehaviour__Class*)class1;
+		AllDefaultGraphLabels.push_back(zoomOutButton);
 
-	app::Object__ctor((app::Object*)zoomOutButton, NULL);
-	app::Component__ctor((app::Component*)zoomOutButton, NULL);
-	app::MonoBehaviour__ctor((app::MonoBehaviour*)zoomOutButton, NULL);
-	bloo = string_new("GraphZoomOut");
-	app::GameObject__ctor((app::GameObject*)zoomOutButton, bloo, NULL);
-	zoomOutButton->Awake("Zoom Out", 24, graphColors.Green);
-	zoomOutButton->floatValue = -0.25;
-	zoomOutButton->onClickMethod = &ZoomGraphButton;
-	TransformSetParent((app::GameObject*)zoomOutButton, labelLayout);
+		app::Object__ctor((app::Object*)zoomOutButton, NULL);
+		app::Component__ctor((app::Component*)zoomOutButton, NULL);
+		app::MonoBehaviour__ctor((app::MonoBehaviour*)zoomOutButton, NULL);
+		bloo = string_new("GraphZoomOut");
+		app::GameObject__ctor((app::GameObject*)zoomOutButton, bloo, NULL);
+		zoomOutButton->Awake("Zoom Out", 24, graphColors.Green);
+		zoomOutButton->floatValue = -0.25;
+		zoomOutButton->onClickMethod = &ZoomGraphButton;
+		TransformSetParent((app::GameObject*)zoomOutButton, labelLayout);
 
-	TransformSetPosition(masterCanvas, tem::Vector3(0, 0, 0.0f));
+		GraphLabel* closeButton = new GraphLabel();
+		closeButton->app::MonoBehaviour::klass = (app::MonoBehaviour__Class*)class1;
+		AllDefaultGraphLabels.push_back(closeButton);
 
-	//TransformSetParent(canvasText, newCanvas);
-	TransformSetParent(canvasVerticalLayout, newCanvas);
-	TransformSetParent(rectMask2D, canvasVerticalLayout);
-	TransformSetParent(canvasGraphBackground, rectMask2D);
-	TransformSetParent(canvasGraphData, rectMask2D);
-	TransformSetParent(labelLayout, canvasVerticalLayout);
-	TransformSetParent(newCanvas, masterCanvas);
-	TransformSetParent(eventSystem, masterCanvas);
-	//TransformSetParent((GameObject*)graphLabelEvent, newCanvas);
+		app::Object__ctor((app::Object*)closeButton, NULL);
+		app::Component__ctor((app::Component*)closeButton, NULL);
+		app::MonoBehaviour__ctor((app::MonoBehaviour*)closeButton, NULL);
+		bloo = string_new("Close");
+		app::GameObject__ctor((app::GameObject*)closeButton, bloo, NULL);
+		closeButton->Awake("Close", 24, graphColors.Green);
+		closeButton->floatValue = -0.25;
+		closeButton->onClickMethod = &CleanUpGraphButton;
+		TransformSetParent((app::GameObject*)closeButton, labelLayout);
 
-	//TransformSetPosition(canvasText, tem::Vector3(0, 0, 0.0f));
-	//RectTransformSetSize(canvasText, tem::Vector3(200.0f, 400.0f, 0));
+		TransformSetPosition(masterCanvas, tem::Vector3(0, 0, 0.0f));
 
-	float newGraphWidth = GraphWidth / 2;
-	float newGraphHeight = GraphHeight / 2;
+		//TransformSetParent(canvasText, newCanvas);
+		TransformSetParent(canvasVerticalLayout, newCanvas);
+		TransformSetParent(rectMask2D, canvasVerticalLayout);
+		TransformSetParent(canvasGraphBackground, rectMask2D);
+		TransformSetParent(canvasGraphData, rectMask2D);
+		TransformSetParent(labelLayout, canvasVerticalLayout);
+		TransformSetParent(newCanvas, masterCanvas);
+		TransformSetParent(eventSystem, masterCanvas);
+		//TransformSetParent((GameObject*)graphLabelEvent, newCanvas);
 
-	RectTransformSetMinMax(newCanvas, tem::Vector3(0, 0, 0), tem::Vector3(0, 0, 0));
-	RectTransformSetPivot(newCanvas, tem::Vector3(0.5, 0.5, 0));
+		//TransformSetPosition(canvasText, tem::Vector3(0, 0, 0.0f));
+		//RectTransformSetSize(canvasText, tem::Vector3(200.0f, 400.0f, 0));
 
-	//RectTransformSetWidthHeight(rectMask2D, newGraphWidth, newGraphHeight);
-	RectTransformSetPivot(rectMask2D, tem::Vector3(0, 0, 0));
-	RectTransformSetMinMax(rectMask2D, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
-	TransformSetPosition(rectMask2D, tem::Vector3(TransformGetPosition(newCanvas)));
-	RectTransformSetSize(rectMask2D, tem::Vector3(GraphWidth, GraphHeight, 0));
-	TransformSetLocalPosition(rectMask2D, tem::Vector3(0, 0, 0)); //TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * -1, 0, 0));
-	//TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * - 1, newGraphHeight * -1, 0));
-	TransformSetScale(rectMask2D, tem::Vector3(1, 1, 1));
+		float newGraphWidth = GraphWidth / 2;
+		float newGraphHeight = GraphHeight / 2;
 
-	RectTransformSetPivot(canvasGraphBackground, tem::Vector3(0, 0, 0));
-	RectTransformSetMinMax(canvasGraphBackground, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
-	TransformSetPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
-	RectTransformSetSize(canvasGraphBackground, tem::Vector3(GraphWidth, GraphHeight, 0));
-	TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
-	//TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
-	TransformSetScale(canvasGraphBackground, tem::Vector3(1, 1, 1));
+		RectTransformSetMinMax(newCanvas, tem::Vector3(0, 0, 0), tem::Vector3(0, 0, 0));
+		RectTransformSetPivot(newCanvas, tem::Vector3(0.5, 0.5, 0));
 
-	RectTransformSetPivot(canvasGraphData, tem::Vector3(0, 0, 0));
-	RectTransformSetMinMax(canvasGraphData, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
-	TransformSetPosition(canvasGraphData, tem::Vector3(0,0, 0.0f));// tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
-	RectTransformSetSize(canvasGraphData, tem::Vector3(GraphWidth, GraphHeight, 0));
-	TransformSetLocalPosition(canvasGraphData, tem::Vector3(0, 0, 0.0f));
-	//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
-	//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
-	TransformSetScale(canvasGraphData, tem::Vector3(1, 1, 1));
+		//RectTransformSetWidthHeight(rectMask2D, newGraphWidth, newGraphHeight);
+		RectTransformSetPivot(rectMask2D, tem::Vector3(0, 0, 0));
+		RectTransformSetMinMax(rectMask2D, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		TransformSetPosition(rectMask2D, tem::Vector3(TransformGetPosition(newCanvas)));
+		RectTransformSetSize(rectMask2D, tem::Vector3(GraphWidth, GraphHeight, 0));
+		TransformSetLocalPosition(rectMask2D, tem::Vector3(0, 0, 0)); //TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * -1, 0, 0));
+		//TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * - 1, newGraphHeight * -1, 0));
+		TransformSetScale(rectMask2D, tem::Vector3(1, 1, 1));
 
-	TransformSetPosition(labelLayout, tem::Vector3(0, 0, 0.0f));
-	RectTransformSetSize(labelLayout, tem::Vector3(900, 32, 0));
-	TransformSetLocalPosition(labelLayout, tem::Vector3(0, 250, 0));
-	TransformSetScale(labelLayout, tem::Vector3(1, 1, 1));
+		RectTransformSetPivot(canvasGraphBackground, tem::Vector3(0, 0, 0));
+		RectTransformSetMinMax(canvasGraphBackground, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		TransformSetPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
+		RectTransformSetSize(canvasGraphBackground, tem::Vector3(GraphWidth, GraphHeight, 0));
+		TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
+		//TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
+		TransformSetScale(canvasGraphBackground, tem::Vector3(1, 1, 1));
 
-	RectTransformSetMinMax(canvasVerticalLayout, tem::Vector3(0.5, 1, 0), tem::Vector3(0.5, 1, 0));
-	RectTransformSetPivot(canvasVerticalLayout, tem::Vector3(0.5, 0, 0));
-	TransformSetPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0.0f));
-	//RectTransformSetAnchoredPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));
-	TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));// tem::Vector3(TransformGetPosition(newCanvas)));
-	RectTransformSetSize(canvasVerticalLayout, tem::Vector3(GraphWidth, GraphHeight + 400, 0));
+		RectTransformSetPivot(canvasGraphData, tem::Vector3(0, 0, 0));
+		RectTransformSetMinMax(canvasGraphData, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		TransformSetPosition(canvasGraphData, tem::Vector3(0, 0, 0.0f));// tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
+		RectTransformSetSize(canvasGraphData, tem::Vector3(GraphWidth, GraphHeight, 0));
+		TransformSetLocalPosition(canvasGraphData, tem::Vector3(0, 0, 0.0f));
+		//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
+		//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
+		TransformSetScale(canvasGraphData, tem::Vector3(1, 1, 1));
+
+		TransformSetPosition(labelLayout, tem::Vector3(0, 0, 0.0f));
+		RectTransformSetSize(labelLayout, tem::Vector3(900, 32, 0));
+		TransformSetLocalPosition(labelLayout, tem::Vector3(0, 250, 0));
+		TransformSetScale(labelLayout, tem::Vector3(1, 1, 1));
+
+		RectTransformSetMinMax(canvasVerticalLayout, tem::Vector3(0.5, 1, 0), tem::Vector3(0.5, 1, 0));
+		RectTransformSetPivot(canvasVerticalLayout, tem::Vector3(0.5, 0, 0));
+		TransformSetPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0.0f));
+		//RectTransformSetAnchoredPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));
+		TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));// tem::Vector3(TransformGetPosition(newCanvas)));
+		RectTransformSetSize(canvasVerticalLayout, tem::Vector3(GraphWidth, GraphHeight + 400, 0));
+	}
 }
 
 void Graph::GetShader()
@@ -431,16 +484,21 @@ void Graph::GetShader()
 
 void Graph::ClickEvent(void* __this)
 {
-	for (int i = 0; i < AllGraphButtons.size(); i++)
+	for (int i = 0; i < AllGraphLabels.size(); i++)
 	{
-		app::Button* button = AllGraphButtons[i];
-		if (button == __this)
+		GraphLabel* graphLabel = AllGraphLabels[i];
+		if (graphLabel != nullptr && graphLabel->onClickMethod != nullptr && graphLabel->button == __this)
 		{
-			GraphLabel* graphLabel = (GraphLabel*)app::Component_1_get_gameObject((app::Component_1*)button, NULL);
-			if (graphLabel != nullptr && graphLabel->onClickMethod != nullptr)
-			{
-				graphLabel->onClickMethod(graphLabel);
-			}
+			graphLabel->onClickMethod(graphLabel);
+		}
+	}
+
+	for (int i = 0; i < AllDefaultGraphLabels.size(); i++)
+	{
+		GraphLabel* graphLabel = AllDefaultGraphLabels[i];
+		if (graphLabel != nullptr && graphLabel->onClickMethod != nullptr && graphLabel->button == __this)
+		{
+			graphLabel->onClickMethod(graphLabel);
 		}
 	}
 }
@@ -471,8 +529,6 @@ void GraphLabel::Awake(const std::string& text, int fontSize, app::Color color)
 
 	app::GameObject_SetActive((app::GameObject*)this, true, NULL);
 	button = DrawUI::Button((app::GameObject*)this, text, fontSize, color);
-	intValue = AllGraphButtons.size();
-	AllGraphButtons.push_back(button);
 	textComponent = (app::Text*)app::GameObject_GetComponentInChildren_1((app::GameObject*)this, textType, NULL);
 	//textComponent = (Text*)GameObject_GetComponent((GameObject*)this, textType, NULL);
 	app::Button_ButtonClickedEvent* clickEvent = app::Button_get_onClick(button, NULL);
@@ -488,4 +544,10 @@ static void ZoomGraphButton(GraphLabel* __this)
 {
 	if (Graph::Instance != nullptr)
 		Graph::Instance->Zoom(__this->floatValue);
+}
+
+static void CleanUpGraphButton(GraphLabel* __this)
+{
+	if (Graph::Instance != nullptr)
+		Graph::Instance->CloseGraph();
 }

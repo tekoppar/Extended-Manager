@@ -3,6 +3,8 @@
 #include "il2cpp-appdata.h"
 #include "helpers.h"
 
+#include <filesystem>
+
 #include "FrameLogger.h"
 #include "DebugDrawer.h"
 
@@ -30,6 +32,9 @@ public:
 
 	void GetAttempts()
 	{
+		Attempts = std::vector<RaceAttempt>();
+		BestAttempt = RaceAttempt();
+
 		std::ifstream file(Filename);
 		if (file.is_open()) {
 			std::string line;
@@ -73,14 +78,19 @@ public:
 		raceAttempt.RaceTime = time;
 
 		raceAttempt.RaceName = RaceName;
-		raceAttempt.Attempt = Attempts[Attempts.size() - 1].Attempt + 1;
-		Attempts.push_back(raceAttempt);
-		WriteAttempt(raceAttempt);
+
+		if (Attempts.size() > 0)
+			raceAttempt.Attempt = Attempts[Attempts.size() - 1].Attempt + 1;
+		else
+			raceAttempt.Attempt = 0;
 
 		if (BestAttempt.RaceTime > raceAttempt.RaceTime)
 		{
 			BestAttempt = raceAttempt;
 		}
+
+		Attempts.push_back(raceAttempt);
+		WriteAttempt(raceAttempt);
 	}
 };
 
@@ -103,6 +113,7 @@ public:
 	app::RaceTimer* ghostRaceTimer = nullptr;
 	app::GhostManager* BaseGhostManager = nullptr;
 	app::SeinCharacter* Sein = nullptr;
+	app::Vector3 seinOldPosition;
 	app::SeinPlayAnimationController* seinPlayAnimationController = nullptr;
 
 	app::GhostRecorder* seinRecorder = nullptr;
@@ -120,6 +131,7 @@ public:
 	app::MoonAnimation* RaceLoopAnimation = nullptr;
 
 	app::GameObject* RaceGoalObject = nullptr;
+	app::PlayerInsideZoneChecker* raceFinishZone = nullptr;
 	app::GameObject* RaceBody = nullptr;
 	app::PlayerInsideZoneChecker* RaceGoal = nullptr;
 	app::PhysicMaterial* RaceGoalMaterial = nullptr;
@@ -127,28 +139,18 @@ public:
 	app::Vector3* StartPosition = nullptr;
 	app::Vector3* FinishPosition = nullptr;
 	std::string raceName = "";
+	std::string racePath = "";
 	std::vector<app::GameObject*> raceCheckpoints;
 	std::vector<app::PlayerInsideZoneChecker*> raceCheckpointsCollision;
+	std::vector<app::Rect*> raceCheckpointsRects;
 	std::vector<bool> raceCheckpointsHit;
 
 	app::String* raceTimerDivisorMinute = nullptr;
 	app::String* raceTimerDivisorSecond = nullptr;
 
-	app::Texture2D* myTexture = nullptr;
-
 	float RaceDuration = 60.0f;
 	bool CountdownHasStarted = false;
 	bool IsFinished = false;
-
-	/*void SetupManager();
-	void CheckTimer();
-	void CreateRecorder();
-	bool StartRecorder();
-	bool StopRecorder();
-	bool WriteRecorder();
-	bool CreateGhost(std::string path);
-	bool RunGhost();
-	void CheckIfGhostsFinished();*/
 
 	void SetupManager()
 	{
@@ -168,116 +170,127 @@ public:
 				raceTimerText = (app::UnityRaceTimerDisplay*)arr2222->vector[0];
 		}
 
+		if (std::filesystem::exists(racePath + "Default") == false)
+			std::filesystem::create_directory(racePath + "Default");
+
 		raceTimerDivisorMinute = string_new(":");
 		raceTimerDivisorSecond = string_new(".");
 
 		CreateRecorder();
 
-		std::string ghostPath = sutil::getexepath();
-		std::string frameDataPath = ghostPath;
-		sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\swamp1\\test.ghostdata");
-		AttemptManager.Filename = ghostPath;
+		AttemptManager.Filename = racePath + "Default\\default.ghostdata";
 		AttemptManager.GetAttempts();
-		sutil::ReplaceS(frameDataPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\swamp1\\test.framedata");
 
-		FrameLogger.filePath = frameDataPath;
+		FrameLogger.filePath = racePath + "Default\\default.framedata";
 		FrameLogger.Initialize();
 	}
 
 	void LoadRaceData(std::string path)
 	{
-		std::string contents = sutil::readFile(path);
-		auto lines = sutil::SplitTem(contents, "\",\"");
-
-		for (auto& line : lines)
+		if (racePath != path)
 		{
-			auto lines = sutil::SplitTem(line, "\":\"");
-			std::string type = lines[0];
-			sutil::ReplaceS(type, "\"", "");
-			sutil::ReplaceS(type, "{", "");
-			std::string value = lines[1];
-			sutil::ReplaceS(value, "\"", "");
-			sutil::ReplaceS(value, "{", "");
-			sutil::ReplaceS(value, "}", "");
+			DebugDrawer debugDrawer = DebugDrawer();
+			std::string contents = sutil::ReadFile(path);
+			auto lines = sutil::SplitTem(contents, "\",\"");
 
-			switch (sutil::hash(type.data()))
+			for (auto& line : lines)
 			{
-			case (sutil::hash("RaceName")):
-			{
-				raceName = value;
-			}
-			break;
+				auto lines = sutil::SplitTem(line, "\":\"");
+				std::string type = lines[0];
+				sutil::ReplaceS(type, "\"", "");
+				sutil::ReplaceS(type, "{", "");
+				std::string value = lines[1];
+				sutil::ReplaceS(value, "\"", "");
+				sutil::ReplaceS(value, "{", "");
+				sutil::ReplaceS(value, "}", "");
 
-			case (sutil::hash("RaceStart")):
-			{
-				auto values = sutil::SplitTem(value, "|");
-				tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
-				StartPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-				StartPosition->x = position.X;
-				StartPosition->y = position.Y - 0.5;
-				StartPosition->z = position.Z;
-			}
-			break;
-
-			case (sutil::hash("RaceFinish")):
-			{
-				auto values = sutil::SplitTem(value, "|");
-				tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
-				FinishPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-				FinishPosition->x = position.X;
-				FinishPosition->y = position.Y - 0.5;
-				FinishPosition->z = position.Z;
-			}
-			break;
-
-			case (sutil::hash("RaceCheckpoints")):
-			{
-				auto values = sutil::SplitTem(value, "!");
-
-				for (auto& sPosition : values)
+				switch (sutil::hash(type.data()))
 				{
-					if (sPosition.size() > 0)
-					{
-						auto values = sutil::SplitTem(sPosition, "|");
-						tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
-						position.Y -= 0.5;
+				case (sutil::hash("RaceName")):
+				{
+					raceName = value;
+					racePath = path;
+					sutil::ReplaceS(racePath, raceName + ".race", "");
 
-						raceCheckpoints.push_back(DebugDrawer::CreateDebugObject(graphColors.Pink, position));
+					app::String* MRecorderPath = string_new((racePath + "tempGhostRecording.ghost").c_str());
+					ghostC->fields.m_filePath = MRecorderPath;
+
+					AttemptManager.Filename = racePath + raceName + ".ghostdata";
+					AttemptManager.RaceName = raceName;
+					AttemptManager.GetAttempts();
+
+					FrameLogger.filePath = racePath + raceName + ".framedata";
+					FrameLogger.Initialize();
+				}
+				break;
+
+				case (sutil::hash("RaceStart")):
+				{
+					auto values = sutil::SplitTem(value, "|");
+					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
+					StartPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+					StartPosition->x = (float)position.X;
+					StartPosition->y = (float)position.Y - 0.5f;
+					StartPosition->z = (float)position.Z;
+				}
+				break;
+
+				case (sutil::hash("RaceFinish")):
+				{
+					auto values = sutil::SplitTem(value, "|");
+					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
+					FinishPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+					FinishPosition->x = position.X;
+					FinishPosition->y = position.Y - 0.5f;
+					FinishPosition->z = position.Z;
+				}
+				break;
+
+				case (sutil::hash("RaceCheckpoints")):
+				{
+					auto values = sutil::SplitTem(value, "!");
+
+					for (auto& sPosition : values)
+					{
+						if (sPosition.size() > 0)
+						{
+							auto values = sutil::SplitTem(sPosition, "|");
+							tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
+							position.Y -= 0.5;
+
+							raceCheckpoints.push_back(debugDrawer.CreateDebugObject(graphColors.Pink, position));
+						}
 					}
 				}
+				break;
+				}
 			}
-			break;
+
+			for (auto& point : raceCheckpoints)
+			{
+				app::Type* playerInsideZoneType = GetType("", "PlayerInsideZoneChecker");
+				app::PlayerInsideZoneChecker* playerInsideZone = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(point, playerInsideZoneType, NULL);
+
+				playerInsideZone->fields.OnlyTriggerIfGrounded = false;
+				app::Vector3 position = TransformGetPosition((app::GameObject*)point);
+				app::Vector2* size2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)Vector2__TypeInfo);
+				size2->x = 3;
+				size2->y = 15;
+				playerInsideZone->fields._.Size = *size2;
+				auto rectcc = GetClass<>("UnityEngine", "Rect");
+				app::Rect* rect2 = (app::Rect*)il2cpp_object_new((Il2CppClass*)rectcc);
+				rect2->m_Height = 15;
+				rect2->m_Width = 3;
+				rect2->m_XMin = position.x;
+				rect2->m_YMin = position.y - 0.5f;
+				playerInsideZone->fields._.m_bounds = *rect2;
+				raceCheckpointsRects.push_back(rect2);
+
+				raceCheckpointsCollision.push_back(playerInsideZone);
+				raceCheckpointsHit.push_back(false);
 			}
-		}
 
-		for (auto& point : raceCheckpoints)
-		{
-			app::Type* playerInsideZoneType = GetType("", "PlayerInsideZoneChecker");
-			app::PlayerInsideZoneChecker* playerInsideZone = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(point, playerInsideZoneType, NULL);
-			
-			//app::ObjectInsideZoneChecker__ctor((app::ObjectInsideZoneChecker*)playerInsideZone, NULL);
-			//app::PlayerInsideZoneChecker__ctor(playerInsideZone, NULL);
-
-			playerInsideZone->fields.OnlyTriggerIfGrounded = false;
-			app::Vector3 position = TransformGetPosition((app::GameObject*)point);
-			//app::Vector2* pos2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)Vector2__TypeInfo);
-			//pos2->x = position.x;
-			//pos2->y = position.y;
-			//playerInsideZone->fields._.Anchor = *pos2;
-			app::Vector2* size2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)Vector2__TypeInfo);
-			size2->x = 3;
-			size2->y = 15;
-			playerInsideZone->fields._.Size = *size2;
-			auto rectcc = GetClass<>("UnityEngine", "Rect");
-			app::Rect* rect2 = (app::Rect*)il2cpp_object_new((Il2CppClass*)rectcc);
-			rect2->m_Height = 15;
-			rect2->m_Width = 3;
-			rect2->m_XMin = position.x;
-			rect2->m_YMin = position.y - 0.5;
-			playerInsideZone->fields._.m_bounds = *rect2;
-
-			raceCheckpointsCollision.push_back(playerInsideZone);
-			raceCheckpointsHit.push_back(false);
+			CreateFinishLine();
 		}
 	}
 
@@ -290,6 +303,7 @@ public:
 		RaceFinishAnimation = nullptr;
 		RaceNewPBAnimation = nullptr;
 		RaceTopScoreAnimation = nullptr;
+		RaceLoopAnimation = nullptr;
 
 		app::Object_1_Destroy_1((app::Object_1*)RaceGoal, NULL);
 		RaceGoal = nullptr;
@@ -305,11 +319,18 @@ public:
 		ghostGEP = nullptr;
 		ghostMDP = nullptr;
 
+		ghostC = nullptr;
+		raceSC = nullptr;
+		ghostRaceTimer = nullptr;
+		BaseGhostManager = nullptr;
+
 		StartPosition = nullptr;
 		FinishPosition = nullptr;
+		raceFinishZone = nullptr;
 
 		raceTimerDivisorMinute = nullptr;
 		raceTimerDivisorSecond = nullptr;
+		raceTimerText = nullptr;
 
 		for (auto& object : raceCheckpoints)
 		{
@@ -317,7 +338,43 @@ public:
 		}
 		raceCheckpoints.clear();
 
+		for (auto& object : raceCheckpointsCollision)
+		{
+			app::Object_1_Destroy_1((app::Object_1*)object, NULL);
+		}
+		raceCheckpointsCollision.clear();
+		raceCheckpointsHit.clear();
+
+		seinRecorder = nullptr;
+		newSeinMimicGhost = nullptr;
+
 		FrameLogger.CleanUp();
+	}
+
+	void RemoveCheckpoint(int index)
+	{
+		std::vector<app::GameObject*> newCheckpoints;
+
+		for (int i = 0; i < raceCheckpoints.size(); i++)
+		{
+			if (i != index)
+			{
+				newCheckpoints.push_back(raceCheckpoints[i]);
+			}
+			else
+			{
+				app::Object_1_Destroy_1((app::Object_1*)raceCheckpoints[i], NULL);
+			}
+		}
+		raceCheckpoints = newCheckpoints;
+	}
+
+	void SetCheckpointPosition(tem::Vector3 position, int index)
+	{
+		if (raceCheckpoints.size() > index)
+		{
+			TransformSetPosition(raceCheckpoints[index], position);
+		}
 	}
 
 	bool CheckIfHitAllCheckpoints()
@@ -333,28 +390,36 @@ public:
 		return count >= raceCheckpointsHit.size();
 	}
 
+	void CheckIfInsideCheckpoint(tem::Vector3 previousPosition, tem::Vector3 currentPosition)
+	{
+		for (int i = 0; i < raceCheckpointsRects.size(); i++)
+		{
+			app::Rect* rect = raceCheckpointsRects[i];
+			bool wasInside = IsPositionInsideRect(rect, previousPosition);
+			bool currentlyInside = IsPositionInsideRect(rect, currentPosition);
+			bool wasBetween = IsRectBetweenPositions(rect, previousPosition, currentPosition);
+			if (wasInside || currentlyInside || wasBetween)
+			{
+ 				raceCheckpointsHit[i] = true;
+			}
+		}
+	}
+
+	bool IsPositionInsideRect(app::Rect* rect, tem::Vector3 position)
+	{
+		return rect->m_YMin < position.Y&& rect->m_YMin + rect->m_Height > position.Y && rect->m_XMin - (rect->m_Width / 2) < position.X && position.X < rect->m_XMin + (rect->m_Width / 2);
+	}
+
+	bool IsRectBetweenPositions(app::Rect* rect, tem::Vector3 start, tem::Vector3 end)
+	{
+		return (start.X < rect->m_XMin && rect->m_XMin < end.X || start.X > rect->m_XMin && rect->m_XMin > end.X) && (start.Y < rect->m_YMin && rect->m_YMin < end.Y || start.Y > rect->m_YMin && rect->m_YMin > end.Y);
+	}
+
 	void CheckTimer()
 	{
 		if (ghostRaceTimer != nullptr && (ghostRaceTimer->fields.m_startedRace == true || CountdownHasStarted == true))
 		{
 			float raceFloat = ghostRaceTimer->fields._ElapsedTime_k__BackingField;
-
-			for (int i = 0; i < raceCheckpointsCollision.size(); i++)
-			{
-				auto zone = raceCheckpointsCollision[i];
-				bool inside = app::PlayerInsideZoneChecker_get_IsInside(zone, NULL);
-
-				if (inside == true)
-					raceCheckpointsHit[i] = true;
-			}
-
-			if (CountdownHasStarted == false)
-				FrameLogger.LoggFrame();
-
-			if (raceFloat >= RaceDuration + 60.0f)
-			{
-				app::RaceTimer_Stop(ghostRaceTimer, NULL);
-			}
 
 			if (CountdownHasStarted == true && playingAnimation == true && totalFrames >= startedWeRacing + (1000 / 16.6666f * 3))
 			{
@@ -364,69 +429,96 @@ public:
 
 				RunGhost();
 			}
-
-			app::Vector3 seinPosition = app::SeinCharacter_get_Position(Sein, NULL);
-			if (RaceGoal != nullptr)
-				IsFinished = app::ObjectInsideZoneChecker_IsPositionInside((app::ObjectInsideZoneChecker*)RaceGoal, seinPosition, NULL);
-
-			if (IsFinished == true && CheckIfHitAllCheckpoints() == true)
+			else
 			{
-				app::RaceTimer_Stop(ghostRaceTimer, NULL);
-				app::SeinCharacter_PlaceOnGround(Sein, NULL);
+				CheckIfInsideCheckpoint(seinOldPosition, Sein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);
+				seinOldPosition = Sein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition;
 
-				if (seinPlayAnimationController != nullptr && RaceFinishAnimation != nullptr)
+				if (CountdownHasStarted == false)
+					FrameLogger.LoggFrame();
+
+				if (raceFloat >= RaceDuration + 60.0f)
 				{
-					if (AttemptManager.BestAttempt.RaceTime > ghostRaceTimer->fields._ElapsedTime_k__BackingField)
-					{
-						app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceTopScoreAnimation, NULL);
-					}
-					else if (AttemptManager.BestAttempt.RaceTime > ghostRaceTimer->fields._PersonalBestTime_k__BackingField)
-					{
-						app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceNewPBAnimation, NULL);
-					}
-					else
-					{
-						app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceFinishAnimation, NULL);
-					}
+					app::RaceTimer_Stop(ghostRaceTimer, NULL);
 				}
 
-				AttemptManager.AddAttempt(raceFloat);
+				app::Vector3 seinPosition = app::SeinCharacter_get_Position(Sein, NULL);
+				if (raceFinishZone != nullptr)
+					IsFinished = app::PlayerInsideZoneChecker_get_IsInside(raceFinishZone, NULL);
 
-				CleanupGhosts();
-
-				FrameLogger.DisplayData(tem::Vector3(FinishPosition->x, FinishPosition->y, FinishPosition->z));
+				if (IsFinished == true && CheckIfHitAllCheckpoints() == true)
+				{
+					FinishedRace(raceFloat);
+				}
 			}
 
 			if (CountdownHasStarted == true)
 				raceFloat = 3.0f - raceFloat;
-
-			double minutes = std::floor(std::fmod(raceFloat * 1000.0f / (1000.0f * 60.0f), 60));// std::floor(raceFloat / (1000.0f * 60.0f) % 60);
-			double seconds = std::floor(std::fmod(raceFloat * 1000.0f / 1000.0f, 60));// std::floor(raceFloat / 1000.0f % 60);
-			double milliseconds = std::floor(std::fmod(raceFloat * 1000.0f, 1000));
-
-			std::string raceTimerMinute = sutil::DoubleToStr(minutes);
-			app::String* raceTimerMinuteS = string_new(raceTimerMinute.data());
-
-			std::string raceTimerSeconds = sutil::DoubleToStr(seconds);
-			raceTimerSeconds = raceTimerSeconds.length() == 2 ? raceTimerSeconds : "0" + raceTimerSeconds;
-			std::string raceTimerSecondsOne = raceTimerSeconds.substr(1, 1);
-			std::string raceTimerSecondsTen = raceTimerSeconds.substr(0, 1);
-			app::String* raceTimerSecondsTenS = string_new(raceTimerSecondsTen.data());
-			app::String* raceTimerSecondsOneS = string_new(raceTimerSecondsOne.data());
-
-			std::string raceTimerMilliseconds = sutil::DoubleToStr(milliseconds);
-			raceTimerMilliseconds = raceTimerMilliseconds.length() == 3 ? raceTimerMilliseconds : (raceTimerMilliseconds.length() == 2 ? "0" + raceTimerMilliseconds : "00" + raceTimerMilliseconds);
-			std::string raceTimerMillisecondsOne = raceTimerMilliseconds.substr(2, 1);
-			std::string raceTimerMillisecondsTen = raceTimerMilliseconds.substr(1, 1);
-			std::string raceTimerMillisecondsHundred = raceTimerMilliseconds.substr(0, 1);
-			app::String* raceTimerMillisecondsOneS = string_new(raceTimerMillisecondsOne.data());
-			app::String* raceTimerMillisecondsTenS = string_new(raceTimerMillisecondsTen.data());
-			app::String* raceTimerMillisecondsHundredS = string_new(raceTimerMillisecondsHundred.data());
-
-			SetTimer(raceTimerMinuteS, raceTimerSecondsTenS, raceTimerSecondsOneS, raceTimerMillisecondsOneS, raceTimerMillisecondsTenS, raceTimerMillisecondsHundredS);
-
+			
+			UpdateTimer(raceFloat);
 			CheckIfGhostsFinished();
 		}
+	}
+
+	void FinishedRace(float time)
+	{
+		app::RaceTimer_Stop(ghostRaceTimer, NULL);
+		app::SeinCharacter_PlaceOnGround(Sein, NULL);
+		app::Vector3* zeroSpeed = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+		zeroSpeed->z = zeroSpeed->y = zeroSpeed->x = 0;
+		app::SeinCharacter_set_Speed(Sein, *zeroSpeed, NULL);
+
+		if (seinPlayAnimationController != nullptr && RaceFinishAnimation != nullptr)
+		{
+			if (AttemptManager.BestAttempt.RaceTime > ghostRaceTimer->fields._ElapsedTime_k__BackingField)
+			{
+				WriteRecorder();
+				app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceTopScoreAnimation, NULL);
+			}
+			else if (AttemptManager.BestAttempt.RaceTime > ghostRaceTimer->fields._PersonalBestTime_k__BackingField)
+			{
+				WriteRecorder();
+				app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceNewPBAnimation, NULL);
+			}
+			else
+			{
+				app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceFinishAnimation, NULL);
+			}
+		}
+
+		AttemptManager.AddAttempt(time);
+		FrameLogger.DisplayData(tem::Vector3(FinishPosition->x, FinishPosition->y, FinishPosition->z));
+		CleanupGhosts();
+		app::RaceTimer_Stop(ghostRaceTimer, NULL);
+		StopRecorder();
+	}
+
+	void UpdateTimer(float time)
+	{
+		double minutes = std::floor(std::fmod(time * 1000.0f / (1000.0f * 60.0f), 60));// std::floor(raceFloat / (1000.0f * 60.0f) % 60);
+		double seconds = std::floor(std::fmod(time * 1000.0f / 1000.0f, 60));// std::floor(raceFloat / 1000.0f % 60);
+		double milliseconds = std::floor(std::fmod(time * 1000.0f, 1000));
+
+		std::string raceTimerMinute = sutil::DoubleToStr(minutes);
+		app::String* raceTimerMinuteS = string_new(raceTimerMinute.data());
+
+		std::string raceTimerSeconds = sutil::DoubleToStr(seconds);
+		raceTimerSeconds = raceTimerSeconds.length() == 2 ? raceTimerSeconds : "0" + raceTimerSeconds;
+		std::string raceTimerSecondsOne = raceTimerSeconds.substr(1, 1);
+		std::string raceTimerSecondsTen = raceTimerSeconds.substr(0, 1);
+		app::String* raceTimerSecondsTenS = string_new(raceTimerSecondsTen.data());
+		app::String* raceTimerSecondsOneS = string_new(raceTimerSecondsOne.data());
+
+		std::string raceTimerMilliseconds = sutil::DoubleToStr(milliseconds);
+		raceTimerMilliseconds = raceTimerMilliseconds.length() == 3 ? raceTimerMilliseconds : (raceTimerMilliseconds.length() == 2 ? "0" + raceTimerMilliseconds : "00" + raceTimerMilliseconds);
+		std::string raceTimerMillisecondsOne = raceTimerMilliseconds.substr(2, 1);
+		std::string raceTimerMillisecondsTen = raceTimerMilliseconds.substr(1, 1);
+		std::string raceTimerMillisecondsHundred = raceTimerMilliseconds.substr(0, 1);
+		app::String* raceTimerMillisecondsOneS = string_new(raceTimerMillisecondsOne.data());
+		app::String* raceTimerMillisecondsTenS = string_new(raceTimerMillisecondsTen.data());
+		app::String* raceTimerMillisecondsHundredS = string_new(raceTimerMillisecondsHundred.data());
+
+		SetTimer(raceTimerMinuteS, raceTimerSecondsTenS, raceTimerSecondsOneS, raceTimerMillisecondsOneS, raceTimerMillisecondsTenS, raceTimerMillisecondsHundredS);
 	}
 
 	void SetTimer(app::String* Minute, app::String* SecondsTen, app::String* SecondsOne, app::String* MillisecondsHundred, app::String* MillisecondsTen, app::String* MillisecondsOne)
@@ -532,9 +624,7 @@ public:
 
 			if (ghostC->fields.m_filePath == nullptr)
 			{
-				std::string ghostPath = sutil::getexepath();
-				sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\swamp1\\test.ghost");
-				app::String* MRecorderPath = string_new(ghostPath.c_str());
+				app::String* MRecorderPath = string_new((racePath + "Default").c_str());
 
 				app::GhostRecorder_InitializeRecorder(ghostC, MRecorderPath, NULL);
 			}
@@ -568,7 +658,7 @@ public:
 
 			app::String* raceFile = app::GhostRecorder_get_FilePath(ghostC, NULL);
 			std::string raceFileS = sutil::convert_csstring(raceFile);
-			sutil::ConvertGhostRecordingToBase64(raceFileS);
+			sutil::ConvertGhostRecordingToBase64(raceFileS, racePath + raceName + ".ghost");
 			return true;
 		}
 		return false;
@@ -584,9 +674,7 @@ public:
 	{
 		if (BaseGhostManager != nullptr)
 		{
-			std::string ghostPath = sutil::getexepath();
-			sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost");
-			std::string contents = sutil::readFile(ghostPath);
+			std::string contents = sutil::readFile(path);
 			const char* gP = contents.data();
 			app::String* gPath = string_new(gP);
 			const char* gPN = "SPOOOOOKKKYYY";
@@ -609,7 +697,7 @@ public:
 					lastGhostFrame--;
 				}
 
-				for (int i = 0; i < firstFrame->fields.FrameData->fields._size; i++)
+				/*for (int i = 0; i < firstFrame->fields.FrameData->fields._size; i++)
 				{
 					app::GhostTransformData* data = (app::GhostTransformData*)firstFrame->fields.FrameData->fields._items->vector[i];
 					if (data != nullptr && data->fields.m_position.x != 0.0f && data->fields.m_position.y != 0.0f)
@@ -621,10 +709,10 @@ public:
 					app::GhostTransformData* data = (app::GhostTransformData*)lastFrame->fields.FrameData->fields._items->vector[i];
 					if (data != nullptr && data->fields.m_position.x != 0.0f && data->fields.m_position.y != 0.0f)
 						FinishPosition = &data->fields.m_position;
-				}
+				}*/
 
-				if (StartPosition != nullptr)
-					app::SeinCharacter_set_Position(Sein, *StartPosition, NULL);
+				/*if (StartPosition != nullptr)
+					app::SeinCharacter_set_Position(Sein, *StartPosition, NULL);*/
 
 				if (ghostC->fields.GhostRecorderData != nullptr)
 					RaceDuration = ghostC->fields.GhostRecorderData->fields.Duration;
@@ -640,10 +728,6 @@ public:
 				CountdownHasStarted = true;
 				app::RaceTimer_StartTimer(ghostRaceTimer, NULL);
 
-				CreateFinishLine();
-
-				FrameLogger.ResetData();
-
 				app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceLoopAnimation, NULL);
 				startedWeRacing = totalFrames;
 				playingAnimation = true;
@@ -656,160 +740,152 @@ public:
 
 	void CreateFinishLine()
 	{
-		app::String* raceFinishName = string_new("RaceFinish");
-		RaceGoalObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-		app::GameObject__ctor(RaceGoalObject, raceFinishName, NULL);
-
-		app::Type* zoneType = GetType("", "PlayerInsideZoneChecker");
-
-		RaceGoal = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(RaceGoalObject, zoneType, NULL);
-		RaceGoal->fields._.Anchor.x = 7.0f;//FinishPosition->x;
-		RaceGoal->fields._.Anchor.y = 0.0f;// FinishPosition->y;
-		RaceGoal->fields._.Size.x = 15.0f;
-		RaceGoal->fields._.Size.y = -3.0f;
-		RaceGoal->fields._.m_bounds.m_Height = 15.0f;
-		RaceGoal->fields._.m_bounds.m_Width = -3.0f;
-		RaceGoal->fields._.m_bounds.m_XMin = 0.0f;// FinishPosition->x;
-		RaceGoal->fields._.m_bounds.m_YMin = 0.0f;// FinishPosition->y;
-		RaceGoal->fields._.EditorColor.r = 1.0f;
-		RaceGoal->fields._.EditorColor.a = 0.0f;
-		app::ObjectInsideZoneChecker_Awake((app::ObjectInsideZoneChecker*)RaceGoal, NULL);
-		app::ObjectInsideZoneChecker_UpdateBounds((app::ObjectInsideZoneChecker*)RaceGoal, NULL);
-
-		app::Transform* transform = app::GameObject_get_transform(RaceGoalObject, NULL);
-		app::Transform_set_position(transform, *FinishPosition, NULL);
-		app::Vector3* localScale = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-		localScale->x = 1.0f;
-		localScale->y = 1.0f;
-		localScale->z = 1.0f;
-		app::Transform_set_localScale(transform, *localScale, NULL);
-
-		zoneType = GetType("UnityEngine", "BoxCollider");
-
-		app::BoxCollider* boxCollider = (app::BoxCollider*)app::GameObject_AddComponent(RaceGoalObject, zoneType, NULL);
-		app::Vector3* centerPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-		app::Vector3* boxSize = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-		centerPosition->x = 0.0f;
-		centerPosition->y = 0.0f;
-		boxSize->x = 15.0f;
-		boxSize->y = -3.0f;
-		app::BoxCollider_set_center(boxCollider, *centerPosition, NULL);
-		app::BoxCollider_set_size(boxCollider, *boxSize, NULL);
-		app::Collider_set_isTrigger((Collider*)boxCollider, true, NULL);
-		//Collider_set_material((Collider*)boxCollider, RaceGoalMaterial, NULL);
-
-		std::vector<std::string> scenePath = { "raceData", "raceStop", "art", "guideStoneSetup", "raceMarkerEnd", "body" };
-		app::GameObject* foundObject = GetComponentByScenePath("inkwaterMarshRaceSetups", scenePath);
-
-		app::Type* type45 = GetType("UnityEngine", "MeshFilter");
-		app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(foundObject, type45, true, NULL);
-
-		type45 = GetType("UnityEngine", "MeshRenderer");
-		app::Component_1__Array* componentsRenderers = app::GameObject_GetComponentsInChildren_1(foundObject, type45, true, NULL);
-
-		std::vector<std::string> objectNames;
-		std::vector< app::MeshFilter*> meshFilters;
-		for (int i = 0; i < components->max_length; i++)
+		if (RaceGoalObject == nullptr)
 		{
-			app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
-			app::String* name = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
-			std::string nameS = sutil::convert_csstring(name);
-			objectNames.push_back(nameS);
-			meshFilters.push_back((app::MeshFilter*)components->vector[i]);
-		}
+			app::String* raceFinishName = string_new("RaceFinish");
+			RaceGoalObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+			app::GameObject__ctor(RaceGoalObject, raceFinishName, NULL);
 
-		std::vector<app::MeshRenderer*> meshRenderers;
-		for (int i = 0; i < componentsRenderers->max_length; i++)
+			DebugDrawer debugDrawer = DebugDrawer();
+			app::GameObject* raceFinishDebug = debugDrawer.CreateDebugObject(graphColors.Pink, FinishPosition);
+
+			app::Type* playerInsideZoneType = GetType("", "PlayerInsideZoneChecker");
+			raceFinishZone = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(raceFinishDebug, playerInsideZoneType, NULL);
+
+			raceFinishZone->fields.OnlyTriggerIfGrounded = false;
+			app::Vector2* size2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)Vector2__TypeInfo);
+			size2->x = 3.0f;
+			size2->y = 15.0f;
+			raceFinishZone->fields._.Size = *size2;
+			auto rectcc = GetClass<>("UnityEngine", "Rect");
+			app::Rect* rect2 = (app::Rect*)il2cpp_object_new((Il2CppClass*)rectcc);
+			rect2->m_Height = 15.0f;
+			rect2->m_Width = 3.0f;
+			rect2->m_XMin = FinishPosition->x;
+			rect2->m_YMin = FinishPosition->y - 0.5f;
+			raceFinishZone->fields._.m_bounds = *rect2;
+
+			TransformSetParent(raceFinishDebug, RaceGoalObject);
+			TransformSetPosition(raceFinishDebug, tem::Vector3(0, 0, 0));
+
+			app::Transform* transform = app::GameObject_get_transform(RaceGoalObject, NULL);
+			std::vector<std::string> scenePath = { "raceData", "raceStop", "art", "guideStoneSetup", "raceMarkerEnd", "body" };
+			app::GameObject* foundObject = GetComponentByScenePath("inkwaterMarshRaceSetups", scenePath);
+
+			app::Type* type45 = GetType("UnityEngine", "MeshFilter");
+			app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(foundObject, type45, true, NULL);
+
+			type45 = GetType("UnityEngine", "MeshRenderer");
+			app::Component_1__Array* componentsRenderers = app::GameObject_GetComponentsInChildren_1(foundObject, type45, true, NULL);
+
+			std::vector<std::string> objectNames;
+			std::vector< app::MeshFilter*> meshFilters;
+			for (int i = 0; i < components->max_length; i++)
+			{
+				app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+				app::String* name = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+				std::string nameS = sutil::convert_csstring(name);
+				objectNames.push_back(nameS);
+				meshFilters.push_back((app::MeshFilter*)components->vector[i]);
+			}
+
+			std::vector<app::MeshRenderer*> meshRenderers;
+			for (int i = 0; i < componentsRenderers->max_length; i++)
+			{
+				app::GameObject* gamyobj = app::Component_1_get_gameObject(componentsRenderers->vector[i], NULL);
+				app::String* name = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+				std::string nameS = sutil::convert_csstring(name);
+				objectNames.push_back(nameS);
+				meshRenderers.push_back((app::MeshRenderer*)componentsRenderers->vector[i]);
+			}
+
+			app::String* raceBodyName = string_new("RaceBase");
+			app::GameObject* RaceBodyA = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+			app::GameObject__ctor(RaceBodyA, raceBodyName, NULL);
+			app::Transform* transformRaceBodyA = app::GameObject_get_transform(RaceBodyA, NULL);
+
+			raceBodyName = string_new("RaceCenter");
+			app::GameObject* RaceBodyB = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+			app::GameObject__ctor(RaceBodyB, raceBodyName, NULL);
+			app::Transform* transformRaceBodyB = app::GameObject_get_transform(RaceBodyB, NULL);
+
+			raceBodyName = string_new("RaceCollar");
+			app::GameObject* RaceBodyC = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+			app::GameObject__ctor(RaceBodyC, raceBodyName, NULL);
+			app::Transform* transformRaceBodyC = app::GameObject_get_transform(RaceBodyC, NULL);
+
+			raceBodyName = string_new("RaceCollarGlow");
+			app::GameObject* RaceBodyD = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+			app::GameObject__ctor(RaceBodyD, raceBodyName, NULL);
+			app::Transform* transformRaceBodyD = app::GameObject_get_transform(RaceBodyD, NULL);
+
+			TransformSetScale(RaceBodyA, tem::Vector3(3.0f, 1.0f, 0.0f));
+			TransformSetScale(RaceBodyB, tem::Vector3(2.0f, 2.0f, 0.0f));
+			TransformSetScale(RaceBodyC, tem::Vector3(5.0f, 5.0f, 0.0f));
+			TransformSetScale(RaceBodyD, tem::Vector3(4.0f, 4.2f, 0.0f));
+
+			TransformSetLocalPosition(RaceBodyA, tem::Vector3(0.0f, -0.4f, 0.0f));
+			TransformSetLocalPosition(RaceBodyB, tem::Vector3(-0.1f, 0.7f, 0.0f));
+			TransformSetLocalPosition(RaceBodyC, tem::Vector3(-0.1f, 1.6f, 0.0f));
+			TransformSetLocalPosition(RaceBodyD, tem::Vector3(0.0f, 1.5f, 0.0f));
+
+			app::Transform_SetParent(transformRaceBodyA, transform, NULL);
+			app::Transform_SetParent(transformRaceBodyD, transform, NULL);
+			app::Transform_SetParent(transformRaceBodyB, transform, NULL);
+			app::Transform_SetParent(transformRaceBodyC, transform, NULL);
+
+			app::Type* meshRendererType = GetType("UnityEngine", "MeshRenderer");
+			app::Type* meshFilterType = GetType("UnityEngine", "MeshFilter");
+			std::vector<int> sortingOrder = { 32428, 30185, -1858, 14537 };
+			std::vector<GameObject*> BodyParts = { RaceBodyA, RaceBodyB, RaceBodyC, RaceBodyD };
+			for (int i = 0; i < meshFilters.size(); i++)
+			{
+				app::MeshRenderer* meshRenderer = (app::MeshRenderer*)app::GameObject_AddComponent(BodyParts[i], meshRendererType, NULL);
+				app::Material* meshMat = app::Renderer_GetMaterial((app::Renderer*)meshRenderers[i], NULL);
+				app::Renderer_SetMaterial((app::Renderer*)meshRenderer, meshMat, NULL);
+				app::Renderer_set_sortingOrder((app::Renderer*)meshRenderer, sortingOrder[i], NULL);
+
+				app::MeshFilter* meshFilter = (app::MeshFilter*)app::GameObject_AddComponent(BodyParts[i], meshFilterType, NULL);
+				app::Mesh* mesh = app::MeshFilter_get_mesh(meshFilters[i], NULL);
+				app::MeshFilter_set_mesh(meshFilter, mesh, NULL);
+
+				app::GameObject_set_active(BodyParts[i], true, NULL);
+			}
+			//Renderer_set_sortingOrder((Renderer*)cubeMeshRenderer, 14000, NULL);
+			//Renderer_SetMaterial((Renderer*)cubeMeshRenderer, RaceDataMaterial, NULL);
+			//GameObject_set_active(cube, true, NULL);
+			TransformSetPosition(RaceGoalObject, FinishPosition);
+
+			app::GameObject_set_active(RaceGoalObject, true, NULL);
+		}
+		/*else
 		{
-			app::GameObject* gamyobj = app::Component_1_get_gameObject(componentsRenderers->vector[i], NULL);
-			app::String* name = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
-			std::string nameS = sutil::convert_csstring(name);
-			objectNames.push_back(nameS);
-			meshRenderers.push_back((app::MeshRenderer*)componentsRenderers->vector[i]);
-		}
-
-		app::String* raceBodyName = string_new("RaceBodyA");
-		app::GameObject* RaceBodyA = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-		app::GameObject__ctor(RaceBodyA, raceBodyName, NULL);
-		app::Transform* transformRaceBodyA = app::GameObject_get_transform(RaceBodyA, NULL);
-
-		raceBodyName = string_new("RaceBodyB");
-		app::GameObject* RaceBodyB = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-		app::GameObject__ctor(RaceBodyB, raceBodyName, NULL);
-		app::Transform* transformRaceBodyB = app::GameObject_get_transform(RaceBodyB, NULL);
-
-		raceBodyName = string_new("RaceBodyC");
-		app::GameObject* RaceBodyC = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-		app::GameObject__ctor(RaceBodyC, raceBodyName, NULL);
-		app::Transform* transformRaceBodyC = app::GameObject_get_transform(RaceBodyC, NULL);
-
-		raceBodyName = string_new("RaceBodyD");
-		app::GameObject* RaceBodyD = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
-		app::GameObject__ctor(RaceBodyD, raceBodyName, NULL);
-		app::Transform* transformRaceBodyD = app::GameObject_get_transform(RaceBodyD, NULL);
-
-		app::Vector3* bodyPartsScale = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-		bodyPartsScale->x = 3.0f;
-		bodyPartsScale->y = 1.0;
-		app::Transform_set_localScale(transformRaceBodyA, *bodyPartsScale, NULL);
-		bodyPartsScale->y = bodyPartsScale->x = 2.0f;
-		app::Transform_set_localScale(transformRaceBodyB, *bodyPartsScale, NULL);
-		bodyPartsScale->y = bodyPartsScale->x = 5.0f;
-		app::Transform_set_localScale(transformRaceBodyC, *bodyPartsScale, NULL);
-		bodyPartsScale->x = 4.0f;
-		bodyPartsScale->y = 4.2;
-		app::Transform_set_localScale(transformRaceBodyD, *bodyPartsScale, NULL);
-
-		app::Vector3* bodyPartsPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-		bodyPartsPosition->x = FinishPosition->x;
-		bodyPartsPosition->y = FinishPosition->y;
-		bodyPartsPosition->z = FinishPosition->z;
-		bodyPartsPosition->y = FinishPosition->y + -0.4f;
-		app::Transform_set_position(transformRaceBodyA, *bodyPartsPosition, NULL);
-		bodyPartsPosition->y = FinishPosition->y + 0.6f;
-		app::Transform_set_position(transformRaceBodyB, *bodyPartsPosition, NULL);
-		bodyPartsPosition->z = FinishPosition->z + -0.1;
-		bodyPartsPosition->y = FinishPosition->y + 1.6f;
-		app::Transform_set_position(transformRaceBodyC, *bodyPartsPosition, NULL);
-		bodyPartsPosition->z = FinishPosition->z + -0.2;
-		bodyPartsPosition->y = FinishPosition->y + 1.4f;
-		app::Transform_set_position(transformRaceBodyD, *bodyPartsPosition, NULL);
-
-		app::Transform_SetParent(transformRaceBodyA, transform, NULL);
-		app::Transform_SetParent(transformRaceBodyD, transform, NULL);
-		app::Transform_SetParent(transformRaceBodyB, transform, NULL);
-		app::Transform_SetParent(transformRaceBodyC, transform, NULL);
-
-		app::Type* meshRendererType = GetType("UnityEngine", "MeshRenderer");
-		app::Type* meshFilterType = GetType("UnityEngine", "MeshFilter");
-		std::vector<int> sortingOrder = { 30000, 30000, -1858, 14580 };
-		std::vector<GameObject*> BodyParts = { RaceBodyA , RaceBodyB , RaceBodyC , RaceBodyD };
-		for (int i = 0; i < meshFilters.size(); i++)
-		{
-			app::MeshRenderer* meshRenderer = (app::MeshRenderer*)app::GameObject_AddComponent(BodyParts[i], meshRendererType, NULL);
-			app::Material* meshMat = app::Renderer_GetMaterial((app::Renderer*)meshRenderers[i], NULL);
-			app::Renderer_SetMaterial((app::Renderer*)meshRenderer, meshMat, NULL);
-			app::Renderer_set_sortingOrder((app::Renderer*)meshRenderer, sortingOrder[i], NULL);
-
-			app::MeshFilter* meshFilter = (app::MeshFilter*)app::GameObject_AddComponent(BodyParts[i], meshFilterType, NULL);
-			app::Mesh* mesh = app::MeshFilter_get_mesh(meshFilters[i], NULL);
-			app::MeshFilter_set_mesh(meshFilter, mesh, NULL);
-
-			app::GameObject_set_active(BodyParts[i], true, NULL);
-		}
-		//Renderer_set_sortingOrder((Renderer*)cubeMeshRenderer, 14000, NULL);
-		//Renderer_SetMaterial((Renderer*)cubeMeshRenderer, RaceDataMaterial, NULL);
-		//GameObject_set_active(cube, true, NULL);
-
-		app::GameObject_set_active(RaceGoalObject, true, NULL);
+			TransformSetPosition(RaceGoalObject, FinishPosition);
+		}*/
 	}
 
 	void SetupRace(float raceDuration = 60.0f)
 	{
+		FrameLogger.CleanUpData();
+
+		if (ghostC->fields.GhostRecorderData == nullptr)
+		{
+			auto Class1 = GetClass<>("", "GhostRecorderData");
+			app::GhostRecorderData* ghostRecorderData = (app::GhostRecorderData*)il2cpp_object_new((Il2CppClass*)Class1);
+			app::GhostRecorderData__ctor(ghostRecorderData, NULL);
+			ghostC->fields.GhostRecorderData = ghostRecorderData;
+		}
+
 		if (StartPosition != nullptr)
 			app::SeinCharacter_set_Position(Sein, *StartPosition, NULL);
 
 		RaceDuration = raceDuration;
+		CreateFinishLine();
+
+		if (std::filesystem::exists(racePath + raceName + ".ghost") == true)
+		{
+			CreateGhost(racePath + raceName + ".ghost");
+		}
 
 		CountdownHasStarted = true;
 		app::RaceTimer_StartTimer(ghostRaceTimer, NULL);
@@ -817,14 +893,18 @@ public:
 		app::SeinPlayAnimationController_PlayAnimation_1(seinPlayAnimationController, RaceLoopAnimation, NULL);
 		startedWeRacing = totalFrames;
 		playingAnimation = true;
-
-		CreateFinishLine();
 	}
 
 	void StartRaceTimer()
 	{
 		if (ghostRaceTimer != nullptr)
 		{
+			if (ghostC == nullptr)
+				CreateRecorder();
+
+			StopRecorder();
+			StartRecorder();
+
 			CountdownHasStarted = false;
 			app::RaceTimer_Reset(ghostRaceTimer, NULL);
 			ghostRaceTimer->fields._TimeLimit_k__BackingField = RaceDuration + 60.0f;
@@ -854,6 +934,7 @@ public:
 	void CheckIfGhostsFinished()
 	{
 		std::vector<app::GhostPlayer*> ghostsStillRunning;
+		std::vector< app::GameObject*> activeGhostIconsRunning;
 		for (int i = 0; i < ActiveGhostPlayers.size(); i++)
 		{
 			app::GhostPlayer* ghost = ActiveGhostPlayers[i];
@@ -861,25 +942,33 @@ public:
 
 			if (ghost->fields._IsFinished_k__BackingField)
 			{
+				auto ghostIcon = ActiveGhostIcons[i];
 				app::GhostPlayer_Stop(ghost, NULL);
 				app::Object_1_Destroy_1((app::Object_1*)ghost, NULL);
+				app::Object_1_Destroy_1((app::Object_1*)ghostIcon, NULL);
 			}
 			else
 			{
 				ghostsStillRunning.push_back(ghost);
+				activeGhostIconsRunning.push_back(ActiveGhostIcons[i]);
 			}
 		}
 		ActiveGhostPlayers = ghostsStillRunning;
+		ActiveGhostIcons = activeGhostIconsRunning;
 	}
 
 	void CleanupGhosts()
 	{
-		for (auto& ghost : ActiveGhostPlayers)
+		for (int i = 0; i < ActiveGhostPlayers.size(); i++)
 		{
+			auto ghost = ActiveGhostPlayers[i];
+			auto ghostIcon = ActiveGhostIcons[i];
 			app::GhostPlayer_Stop(ghost, NULL);
 			app::Object_1_Destroy_1((app::Object_1*)ghost, NULL);
+			app::Object_1_Destroy_1((app::Object_1*)ghostIcon, NULL);
 		}
 		ActiveGhostPlayers.clear();
+		ActiveGhostIcons.clear();
 	}
 
 	/*if (totalFrames >= 200 && raceManager.newSeinMimicGhost == nullptr)

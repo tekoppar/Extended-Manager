@@ -38,6 +38,46 @@ app::GameObject* GetSceneByName(std::string sceneToFind)
     return foundScene;
 }
 
+app::MoonGuid* GetSceneMoonGuidAll(std::string sceneToFind)
+{
+    app::GameObject* foundScene = nullptr;
+    if (sceneManager != nullptr)
+    {
+        for (int i = 0; i < sceneManager->fields.AllScenes->fields._size; i++)
+        {
+            app::RuntimeSceneMetaData* metaDataTop = sceneManager->fields.AllScenes->fields._items->vector[i];
+            std::string sceneNameTop = sutil::convert_csstring(metaDataTop->fields.Scene);
+            if (sceneNameTop == sceneToFind)
+            {
+                app::SceneManagerScene* managerScene = app::ScenesManager_GetFromCurrentScenes(sceneManager, metaDataTop, NULL);
+
+                if (managerScene == nullptr)
+                    managerScene = app::ScenesManager_GetSceneManagerScene(sceneManager, string_new(sceneToFind.data()), NULL);
+
+                if (managerScene != nullptr)
+                {
+                    app::SceneRoot* rootScene = managerScene->fields.SceneRoot;
+                    app::RuntimeSceneMetaData* metaData = managerScene->fields.MetaData;
+                    std::string sceneName = sutil::convert_csstring(metaData->fields.Scene);
+
+                    if (sceneName == sceneToFind)
+                    {
+                        return metaData->fields.SceneMoonGuid;
+                    }
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+bool IsSceneLoadedByName(std::string sceneToFind)
+{
+    app::MoonGuid* guid = GetSceneMoonGuidAll(sceneToFind);
+    return app::ScenesManager_SceneIsLoaded(sceneManager, guid, NULL);
+}
+
 app::GameObject* GetSceneByNameAll(std::string sceneToFind)
 {
     app::GameObject* foundScene = nullptr;
@@ -174,7 +214,7 @@ void DrawLine(app::Texture2D* tex, int x0, int y0, int x1, int y1, app::Color co
 
     app::Texture2D_SetPixel(tex, x0, y0, color, NULL);
     if (dx > dy) {
-        fraction = dy - (dx >> 1);
+        fraction = (float)dy - (dx >> 1);
         while (std::abs(x0 - x1) > 1) {
             if (fraction >= 0) {
                 y0 += stepy;
@@ -186,7 +226,7 @@ void DrawLine(app::Texture2D* tex, int x0, int y0, int x1, int y1, app::Color co
         }
     }
     else {
-        fraction = dx - (dy >> 1);
+        fraction = (float)dx - (dy >> 1);
         while (std::abs(y0 - y1) > 1) {
             if (fraction >= 0) {
                 x0 += stepx;

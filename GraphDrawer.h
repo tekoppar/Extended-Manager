@@ -109,7 +109,8 @@ public:
 	Graph();
 	void Destroy();
 	void Initialize();
-	static void CleanUp();
+	static void CleanUpStatic();
+	void CloseGraph();
 	void StartDrawing();
 	void AddFloatData(std::vector<float> data, app::Color color, float yScale = 8, float xScale = 1, float inMin = 0, float inMax = 0);
 	void DrawFloats(std::vector<float> data, app::Color color, float yScale = 8, float xScale = 1);
@@ -150,6 +151,7 @@ public:
 
 static void DrawGraphLinesButton(GraphLabel* __this);
 static void ZoomGraphButton(GraphLabel* __this);
+static void CleanUpGraphButton(GraphLabel* __this);
 
 static const int GraphWidth = 1024;
 static const int GraphHeight = 256;

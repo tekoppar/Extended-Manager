@@ -1,6 +1,4 @@
-﻿  DebugDrawer.cpp
-C:\Users\Tekoppar\source\repos\injectdll\injectdll\StringUtils.h(118,84): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\Tekoppar\source\repos\injectdll\injectdll\StringUtils.h(162,40): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Tekoppar\source\repos\injectdll\injectdll\StringUtils.h(214,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+﻿  Manager.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\StringUtils.h(181,48): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 Adresses.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   injectdll.vcxproj -> C:\Users\Tekoppar\source\repos\injectdll\injectdll\..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\injectdll.dll

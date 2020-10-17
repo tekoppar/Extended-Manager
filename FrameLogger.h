@@ -222,7 +222,6 @@ public:
 
 class FrameLogger {
 public:
-
 	app::DroppedFrameMonitor* droppedFrameMonitor = nullptr;
 	app::FPSMonitor* fpsMonitor = nullptr;
 	app::SeinCharacter* sein = nullptr;
@@ -252,6 +251,10 @@ public:
 	{
 		if (fpsMonitor != nullptr)
 			app::FPSMonitor_Reset(fpsMonitor, NULL);
+
+		FrameData = std::vector<std::string>();
+		AllFrames = std::vector<FrameLoggerSingleFrame>();
+		oldSeinPosition = app::Vector3();
 	}
 
 	void LoggFrame()
@@ -274,7 +277,7 @@ public:
 
 		AllFrames.push_back(singleFrame);
 		FrameData.push_back(frameData);
-		sutil::Append(filePath, frameData + "\n");
+		sutil::Write(filePath, frameData + "\n");
 	}
 
 	std::string GetDroppedFrameData()
@@ -424,6 +427,12 @@ public:
 		graphDrawer.AddGraphLabel("Calculated Speed", 16, graphColors.Green, 2);
 	}
 
+	void CleanUpData()
+	{
+		Graph::Instance->CloseGraph();
+		ResetData();
+	}
+
 	void CleanUp()
 	{
 		droppedFrameMonitor = nullptr;
@@ -431,7 +440,7 @@ public:
 		sein = nullptr;
 		nanoProfiler = nullptr;
 
-		Graph::CleanUp();
+		Graph::CleanUpStatic();
 	}
 };
 

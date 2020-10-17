@@ -22,7 +22,13 @@ enum class MessageType
 	NextAnimation = 11,
 	GetShriekData = 12,
 	CreateRaceCheckpoint = 13,
-	RunRace = 14
+	RunRace = 14,
+	RemoveCheckpoint = 15,
+	LoadRace = 16,
+	KuDash = 17,
+	UpdateRaceCheckpointPosition = 18,
+	SetManagerPath = 19,
+	ToggleDebugObjects = 20
 };
 
 class Message {

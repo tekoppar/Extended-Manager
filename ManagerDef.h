@@ -15,6 +15,8 @@ app::GameObject* GetSceneByName(std::string sceneToFind);
 
 app::GameObject* GetSceneByNameAll(std::string sceneToFind);
 
+bool IsSceneLoadedByName(std::string sceneToFind);
+
 app::GameObject* PreloadSceneByName(std::string sceneToPreload);
 
 app::GameObject* EnableSceneByName(std::string sceneToPreload);

@@ -16,6 +16,7 @@
 #include <cmath>
 #include <random>
 #include <functional>
+#include <psapi.h>
 
 #define IL2CPP true
 
@@ -36,7 +37,7 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
 Graph graphDrawerDebug;
-DebugDrawer debugDrawer;
+DebugDrawer* debugDrawer = nullptr;
 RaceManager raceManager = RaceManager();
 
 std::vector<Moon::InvisibleCheckpoint> InvisibleCheckpoints;
@@ -72,6 +73,7 @@ app::UnityRaceTimerDisplay* raceTimerText;
 app::RaceTimer* ghostRaceTimer;
 app::PetrifiedOwlBossEntity* petrifiedOwlBossEntity = nullptr;
 app::SeinUI* seinUI = nullptr;
+app::Ku* kuRide = nullptr;
 
 app::MoonGuid* willowPowlBackgroundGUID = nullptr;
 std::string ShriekData = "";
@@ -83,8 +85,10 @@ bool copySein = false;
 
 std::thread pipeThread;
 HANDLE fileHandle;
+HANDLE fileHandleWrite;
 DWORD pid;
 HANDLE hProcess;
+std::string managerPath = "";
 
 Moon::Object objectM = Moon::Object();
 
@@ -279,16 +283,75 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			position.X = std::stof(sPosition[0]);
 			position.Y = std::stof(sPosition[1]);
 			position.Z = 0;
-			debugDrawer.SetupTexture(graphColors.Orange, position);
+			debugDrawer->SetupTexture(graphColors.Orange, position);
 		}
 		break;
 
 		case MessageType::RunRace:
 		{
-			raceManager.LoadRaceData(message.Content);
-			raceManager.SetupRace();
+			if (IsSceneLoadedByName("inkwaterMarshRaceSetups"))
+			{
+				raceManager.LoadRaceData(message.Content);
+				raceManager.SetupRace();
+			}
+			else 
+			{
+				PreloadSceneByName("inkwaterMarshRaceSetups");
+			}
 		}
 		break;
+
+		case MessageType::RemoveCheckpoint:
+		{
+			raceManager.RemoveCheckpoint(std::stoi(message.Content));
+		}
+		break;
+
+		case MessageType::LoadRace:
+		{
+			if (IsSceneLoadedByName("inkwaterMarshRaceSetups"))
+			{
+				auto splitContent = sutil::SplitTem(message.Content, "|");
+				DebugDrawer::toggleDebugObjects = splitContent[1] == "False" ? false : true;
+				raceManager.LoadRaceData(splitContent[0]);
+			}
+			else
+			{
+				PreloadSceneByName("inkwaterMarshRaceSetups");
+			}
+		}
+		break;
+
+		case MessageType::KuDash:
+		{
+			if (kuRide != nullptr && kuRide->fields.Abilities->fields.Dash != nullptr)
+				app::KuDash_TryPerformDash(kuRide->fields.Abilities->fields.Dash, NULL);
+		}
+		break;
+
+		case MessageType::UpdateRaceCheckpointPosition:
+		{
+			auto splitContent = sutil::SplitTem(message.Content, "|");
+			tem::Vector3 position = splitContent[0];
+			int index = std::stoi(splitContent[1]);
+			raceManager.SetCheckpointPosition(position, index);
+		}
+		break;
+
+		case MessageType::SetManagerPath:
+		{
+			managerPath = message.Content;
+			raceManager.racePath = managerPath + "\\RaceSettings\\";
+		}
+		break;
+
+		case MessageType::ToggleDebugObjects:
+		{
+			DebugDrawer::toggleDebugObjects = !DebugDrawer::toggleDebugObjects;
+			DebugDrawer::ToggleDebugObjects();
+		}
+		break;
+
 		}
 	}
 	MessagesManager.Messages = std::vector<Message>();
@@ -472,7 +535,19 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 
 	app::GameMapObjectiveIcons* gameMapObjectives = (app::GameMapObjectiveIcons*)arrAGameMapObjectiveIcons->vector[0];
 
+	DebugDrawer::Initialize();
 	areaMapManager.Initialize();
+	debugDrawer = &DebugDrawer();
+
+	/*app::Type* kuType = GetType("", "Ku");
+	app::Object_1__Array* kuArr = app::Object_1_FindObjectsOfTypeAll(kuType, NULL);
+
+	if (kuArr != nullptr && kuArr->vector[0] != nullptr && kuRide->fields.Abilities != nullptr)
+	{
+		kuRide = (app::Ku*)kuArr->vector[0];
+		kuRide->fields.Abilities->fields.Dash->fields._.m_isActive = true;
+		kuRide->fields.Abilities->fields.MeditateSpell->fields._.m_isActive = true;
+	}*/
 
 	//to create icons
 	/*app::Type* type51 = GetType("", "GameWorldArea");
@@ -490,11 +565,17 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 
 #endif
 
-	fileHandle = CreateFileA("\\\\.\\pipe\\wotw-manager-pipe", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	fileHandle = CreateFileA("\\\\.\\pipe\\wotw-manager-pipe", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	fileHandleWrite = CreateFileA("\\\\.\\pipe\\injectdll-manager-pipe", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	
+	std::string managerExeName = "LiveSplit.OriWotW.exe";
+	DWORD proccessID = FindProcessId(managerExeName);
+	char* buffer = new char[512];
 
-	while (loopBool) {
-		char* buffer = new char[100];
-		memset(buffer, 0, 100);
+	while (loopBool && IsProcessRunning(proccessID)) {
+
+		buffer[512];
+		memset(buffer, 0, 512);
 		ReadString(buffer);
 
 		if ((buffer != NULL) && (buffer[0] == '\0')) {
@@ -560,15 +641,15 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 
 				returnMessage += "GAMECOMPLETION:" + std::to_string(Moon::gameCompletionHooked * 100) + "||" + "SHRIEKDATA:" + GetShriekData() + "||";
 			}
+		}
 
-			if (returnMessage.length() > 0) {
-				returnMessage += "\r\n";
-				WriteFile(fileHandle, returnMessage.c_str(), (DWORD)strlen(returnMessage.c_str()), nullptr, 0);
-			}
-			else {
-				const char* msg = "\r\n";
-				WriteFile(fileHandle, msg, (DWORD)strlen(msg), nullptr, 0);
-			}
+		if (returnMessage.length() > 0) {
+			returnMessage += "\r\n";
+			WriteFile(fileHandleWrite, returnMessage.c_str(), (DWORD)strlen(returnMessage.c_str()), nullptr, 0);
+		}
+		else {
+			const char* msg = "\r\n";
+			WriteFile(fileHandleWrite, msg, (DWORD)strlen(msg), nullptr, 0);
 		}
 	}
 	frameStep.State = FrameStepping::FrameSteppingDisabled;
@@ -580,7 +661,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	Sleep(25);
 
 	graphDrawer.Destroy();
-	debugDrawer.CleanUp();
+	debugDrawer->CleanUp();
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -596,6 +677,8 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	DetourTransactionCommit();
 
 	raceManager.CleanupManager();
+	CloseHandle(fileHandle);
+	CloseHandle(fileHandleWrite);
 
 	//sleep again to let the game cleanly return to it's own loops
 	Sleep(25);

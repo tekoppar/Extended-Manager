@@ -49,6 +49,24 @@ namespace sutil {
 		return std::string(bytes.data(), fileSize);
 	}
 
+	static std::string ReadFile(const std::string& fileName)
+	{
+		std::string returnValue = "";
+		std::string line;
+		std::ifstream myfile(fileName);
+		
+		if (myfile.is_open())
+		{
+			while (getline(myfile, line))
+			{
+				returnValue += line;
+			}
+			myfile.close();
+		}
+
+		return returnValue;
+	}
+
 	static void Write(std::string const& fileName, std::string const& data)
 	{
 		std::ofstream binFile(fileName, std::ios::out | std::ios::binary);
@@ -112,13 +130,14 @@ namespace sutil {
 		return std::tuple<const char*, size_t >{bytes.data(), fileSize};
 	}
 
-	static void ConvertGhostRecordingToBase64(const std::string& fileName)
+	static void ConvertGhostRecordingToBase64(const std::string& fileName, std::string newFileName)
 	{
 		std::string fileContents = readFile(fileName);
-		std::string raceContent = base64Encode(fileContents.data(), fileContents.length());
+		std::string raceContent = base64Encode(fileContents.data(), (unsigned int)fileContents.length());
 		raceContent += {"\0\0", 2};
 		raceContent += 0x0B;
-		Write(fileName, raceContent);
+		Write(newFileName, raceContent);
+		std::remove(fileName.c_str());
 	}
 
 	static std::vector<std::string> SplitSs(const std::string& s, const std::string& delim)
@@ -159,7 +178,7 @@ namespace sutil {
 				results.push_back(temp);
 			}
 
-			position = found + delimiters.size();
+			position = (size_t)found + delimiters.size();
 			found = s.find(delimiters, position);
 		}
 
@@ -211,7 +230,7 @@ namespace futil {
 
 	static std::string TrimLeadingZeroes(std::string string)
 	{
-		int position = string.find_last_of('0');
+		int position = (int)string.find_last_of('0');
 		if (position == -1 || position < string.size() - 1)
 			return string;
 
