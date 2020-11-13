@@ -1,6 +1,7 @@
 #include "pch-il2cpp.h"
 
 #include <Windows.h>
+#undef MessageBox 
 #include <string>
 #include <vector>
 #include <iostream>
@@ -17,6 +18,9 @@
 #include <random>
 #include <functional>
 #include <psapi.h>
+#include <future>
+#include <chrono>
+#include <unordered_map>
 
 #define IL2CPP true
 
@@ -33,34 +37,35 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "AreaMapManager.h"
 #include "GraphDrawer.h"
 #include "DebugDrawer.h"
+#include "CreateUI.h"
+#include "SeinCharacterHelper.h"
+#include "TemSceneHelper.h"
+#include "MessageHelper.h"
+#include "MoonAnimationHelper.h"
+#include "TemSocket.h"
+#include "GhostHandler.h"
+#include "TemRecorder.h"
+#include "UberStateManager.h"
+#include "SavesHelper.h"
+
+static bool MANAGER_INITIALIZED = false;
 
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
 Graph graphDrawerDebug;
-DebugDrawer* debugDrawer = nullptr;
+DebugDrawer debugDrawer;
 RaceManager raceManager = RaceManager();
 
-std::vector<Moon::InvisibleCheckpoint> InvisibleCheckpoints;
 std::vector<app::GhostPlayer*> ActiveGhostPlayers;
 std::vector<app::MoonAnimation*> allAnimations;
 
-app::SeinPlayAnimationController* seinPlayAnimationController = nullptr;
-
 app::GameObject* randotest = nullptr;
 bool stopLoop1 = false;
-
-int animationIndex = 874;
-int seinRaceBowDown = 630;
-int seinRaceBowDown1 = 686;
-int seinRaceBowDown2 = 1033;
-int seinRaceBowDown3 = 1553;
-int seinSlopedWallDownTouch = 471;
-int seinVerticalWallTouch = 693;
-int seinRunLookingReady = 1280;
-int seinBreakdanceVictory = 1609;
 int framesPlayed = 0;
-
 unsigned long long totalFrames = 0;
+
+std::chrono::high_resolution_clock::time_point ProgramStart = std::chrono::high_resolution_clock::now();
+std::chrono::high_resolution_clock::time_point LastTime;
 
 app::GhostCharacterAbilitiesPlugin* ghostAP;
 app::GhostCharacterPlugin* ghostCP;
@@ -78,10 +83,12 @@ app::Ku* kuRide = nullptr;
 app::MoonGuid* willowPowlBackgroundGUID = nullptr;
 std::string ShriekData = "";
 
+app::GameObject* HitboxDebug = nullptr;
+
 FrameStep frameStep;
 bool loopBool = true;
-bool IsUsingMessages = false;
 bool copySein = false;
+bool IsWritingToMessageString = false;
 
 std::thread pipeThread;
 HANDLE fileHandle;
@@ -89,275 +96,635 @@ HANDLE fileHandleWrite;
 DWORD pid;
 HANDLE hProcess;
 std::string managerPath = "";
+//std::string MessageToWrite = "";
 
-Moon::Object objectM = Moon::Object();
+std::future<bool> HasLoadedScenes;
+bool SetupsAreDone = false;
+std::chrono::milliseconds span(1);
+
+app::Canvas* canvas123 = nullptr;
 
 app::String* string_new(const char* str)
 {
 	return RealIl2cpp_string_new_wrapper(str);
 }
 
-void __fastcall Mine_CClassFunction(void* __this, int edx)
+void InitializeDLL()
 {
-	totalFrames++;
-	raceManager.totalFrames = totalFrames;
+	app::Type* scenesManagerType = GetType("", "ScenesManager");
+	app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(scenesManagerType, NULL);
 
-	if (totalFrames >= 100 && raceManager.RaceLoopAnimation == nullptr)
+	sceneManager = (app::ScenesManager*)arr22->vector[0];
+	TemSceneHelper::SceneManager = sceneManager;
+	GraphColors::Initialize();
+
+	for (int i = 0; i < sceneManager->fields.AllScenes->fields._size; i++)
 	{
-		raceManager.SetupManager();
-
-		if (raceManager.BaseGhostManager == nullptr)
+		std::string sceneName = sutil::convert_csstring(sceneManager->fields.AllScenes->fields._items->vector[i]->fields.Scene);
+		if (sceneName == "willowPowlBackground")
 		{
-			uintptr_t GhostManagerBaseAdress = Assembly_BaseAddr + 0x0445EB38;
-			GetAddressOffset(hProcess, GhostManagerBaseAdress, { 0xB8, 0x0, 0x10, 0x28, 0x0 });
-			if (GhostManagerBaseAdress != NULL)
-				raceManager.BaseGhostManager = (app::GhostManager*)(GhostManagerBaseAdress);
-
-			raceManager.Sein = GetSeinCharacter(hProcess);
-			raceManager.seinPlayAnimationController = seinPlayAnimationController;
+			willowPowlBackgroundGUID = sceneManager->fields.AllScenes->fields._items->vector[i]->fields.SceneMoonGuid;
 		}
+	}
 
-		app::Type* type3 = GetType("Moon", "MoonAnimation");
-		app::Object_1__Array* arrA = app::Object_1_FindObjectsOfTypeAll(type3, NULL);
+	app::Type* type5111 = GetType("", "AreaMapIcon");
+	app::Object_1__Array* arrAIcons = app::Object_1_FindObjectsOfTypeAll(type5111, NULL);
 
-		for (int i = 0; i < arrA->max_length; i++)
+	std::vector<app::AreaMapIcon*> allAreaMapIcons;
+	for (int i = 0; i < arrAIcons->max_length; i++)
+	{
+		if (arrAIcons->vector[i] != nullptr)
 		{
-			if (arrA->vector[i] != NULL && arrA->vector[i] != nullptr)
-			{
-				app::MoonAnimation* tempANI = (app::MoonAnimation*)arrA->vector[i];
-				if (tempANI != nullptr) {
-					app::String* aniName = app::MoonAnimation_get_Name(tempANI, NULL);
-					std::string aniNameS = sutil::convert_csstring(aniName);
+			app::AreaMapIcon* icon = (app::AreaMapIcon*)arrAIcons->vector[i];
 
-					if (aniNameS == "oriStartRaceLoop")
-					{
-						raceManager.RaceLoopAnimation = tempANI;
-					}
-					else if (aniNameS == "oriFinishRace")
-					{
-						raceManager.RaceFinishAnimation = tempANI;
-					}
-					else if (aniNameS == "oriNewPBRace")
-					{
-						raceManager.RaceNewPBAnimation = tempANI;
-					}
-					else if (aniNameS == "oriTopScore")
-					{
-						raceManager.RaceTopScoreAnimation = tempANI;
-					}
+			if (icon != nullptr)
+			{
+				allAreaMapIcons.push_back(icon);
+			}
+		}
+	}
+
+	//RuntimeWorldMapIcon
+	app::Type* tGameMapObjectiveIcons = GetType("", "GameMapObjectiveIcons");
+	app::Object_1__Array* arrAGameMapObjectiveIcons = app::Object_1_FindObjectsOfTypeAll(tGameMapObjectiveIcons, NULL);
+
+	app::GameMapObjectiveIcons* gameMapObjectives = (app::GameMapObjectiveIcons*)arrAGameMapObjectiveIcons->vector[0];
+
+	DebugDrawer::Initialize();
+	debugDrawer = DebugDrawer();
+
+	app::Type* Texture2DType = GetType("UnityEngine", "Texture2D");
+	app::Object_1__Array* Texture2DArr = app::Object_1_FindObjectsOfTypeAll(Texture2DType, NULL);
+
+	for (int i = 0; i < Texture2DArr->max_length; i++)
+	{
+		if (Texture2DArr->vector[i] != nullptr)
+		{
+			app::Texture2D* texture2D = (app::Texture2D*)Texture2DArr->vector[i];
+
+			if (texture2D != nullptr)
+			{
+				app::String* name = app::Object_1_get_name((app::Object_1*)texture2D, NULL);
+				std::string nameS = sutil::convert_csstring(name);
+
+				if (nameS != "" && nameS.find("lightCanvas") == std::string::npos)
+				{
+					DrawUI::AllTexture2DNames.push_back(nameS);
+					DrawUI::AllTexture2D.push_back(texture2D);
 				}
 			}
 		}
-
-		/*graphDrawerDebug.Initialize();
-		Graph::Instance = &graphDrawerDebug;
-
-		std::vector<float> debugFloatData(100);
-		std::uniform_real_distribution<float> distribution(0.0f, 32.0f); //Values between 0 and 2
-		std::mt19937 engine; // Mersenne twister MT19937
-		engine.seed(1);
-		auto generator = std::bind(distribution, engine);
-		std::generate_n(debugFloatData.begin(), 100, generator);
-
-		std::vector<float> debugFloatData1(100);
-		std::uniform_real_distribution<float> distribution1(0.0f, 32.0f); //Values between 0 and 2
-		std::mt19937 engine1; // Mersenne twister MT19937
-		engine1.seed(2);
-		auto generator1 = std::bind(distribution1, engine1);
-		std::generate_n(debugFloatData1.begin(), 100, generator1);
-
-		graphDrawerDebug.StartDrawing();
-
-		graphDrawerDebug.AddFloatData(debugFloatData, graphColors.Green, 2, 6);
-		graphDrawerDebug.AddGraphLabel("Debug Float", 16, graphColors.Green, 0);
-		graphDrawerDebug.AddFloatData(debugFloatData1, graphColors.Orange, 2, 6);
-		graphDrawerDebug.AddGraphLabel("Debug Int", 16, graphColors.Orange, 1);*/
 	}
 
-	if (sceneManager != nullptr && willowPowlBackgroundGUID != nullptr && petrifiedOwlBossEntity == nullptr)
-	{
-		bool willowPowlBackgroundIsLoaded = app::ScenesManager_SceneIsEnabled_1(sceneManager, willowPowlBackgroundGUID, NULL);
-		if (willowPowlBackgroundIsLoaded == true && petrifiedOwlBossEntity == nullptr)
-		{
-			app::Type* type45 = GetType("", "PetrifiedOwlBossEntity");
-			app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(type45, NULL);
+	TemSceneHelper::InitializeSceneNodes();
+	TemSceneHelper::FillUberPoolGroups();
 
-			if (arr22 != nullptr && arr22->vector[0] != nullptr)
-				petrifiedOwlBossEntity = (app::PetrifiedOwlBossEntity*)arr22->vector[0];
-		}
+	app::Vector3__Boxed* myVector3 = (app::Vector3__Boxed*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3__ctor(myVector3, -612.0f, -4318.0f, 0.0f, NULL);
+
+	auto scenes = TemSceneHelper::GetScenesAtPosition(myVector3->fields);
+	app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
+	scenes.push_back(raceScene);
+	TemSceneHelper::LoadScenes(scenes);
+	HasLoadedScenes = std::async(TemSceneHelper::IsScenesLoaded, scenes, false);
+	MDV::User.Initialize();
+
+	app::SimpleFPS* simpleFPS = app::SimpleFPS__TypeInfo->static_fields->Instance;
+	//simpleFPS->fields.ComplicatedMode = false;
+	//simpleFPS->fields.ReallySimpleMode = false;
+	//simpleFPS->fields.TrailerMode = false;
+	//app::Behaviour_set_moonReady((app::Behaviour*)simpleFPS, false, NULL);
+	app::Behaviour_set_enabled((app::Behaviour*)simpleFPS, false, NULL);
+
+	MANAGER_INITIALIZED = true;
+}
+
+void __fastcall Mine_CClassFunction(void* __this, int edx)
+{
+	if (MANAGER_INITIALIZED == false)
+	{
+		InitializeDLL();
+
 	}
-
-	IsUsingMessages = true;
-
-	raceManager.CheckTimer();
-
-	for (auto& message : MessagesManager.Messages) 
+	else
 	{
-		switch (message.Type) {
+		MDV::CanCallMethods = true;
+		TemSceneHelper::CanCallMethods = true;
+		MDV::ValidatePointers();
 
-		case MessageType::GameCompletion:
+		totalFrames++;
+		raceManager.totalFrames = totalFrames;
+
+		if (MANAGER_INITIALIZED == true && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
 		{
-			tGetGameCompletion oGetGameCompletion = tGetGameCompletion(Assembly_BaseAddr + 0x3e45d0);
-			Moon::GameWorld* pGameWorld = GetGameWorld(hProcess);
-			if (pGameWorld != nullptr && oGetGameCompletion != nullptr)
-				Moon::gameCompletionHooked = oGetGameCompletion(pGameWorld);
+			AnimationHelper::GetAnimations();
+			raceManager.SetupManager();
+			SetupsAreDone = true;
 		}
-		break;
 
-		case MessageType::CreateCheckpoint:
+		/*if (sceneManager != nullptr && willowPowlBackgroundGUID != nullptr && petrifiedOwlBossEntity == nullptr)
 		{
-			tCreateCheckpoint oCreateCheckpoint = tCreateCheckpoint(Assembly_BaseAddr + 0x997230);
-			if (oCreateCheckpoint != nullptr) {
-				Moon::GameController* pGameController = GetGameController(hProcess);
-
-				if (pGameController != nullptr)
-					oCreateCheckpoint(pGameController);
-			}
-		}
-		break;
-
-		case MessageType::CreateObject:
-		{
-			raceManager.CreateRecorder();
-			raceManager.StartRecorder();
-
-			copySein = true;
-		}
-		break;
-
-		case MessageType::StopRecorder:
-		{
-			raceManager.StopRecorder();
-		}
-		break;
-
-		case MessageType::WriteRecorder:
-		{
-			raceManager.WriteRecorder();
-		}
-		break;
-
-		case MessageType::GhostPlayerRun:
-		{
-			std::string ghostPath = sutil::getexepath();
-			sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost");
-			bool wasSuccess = raceManager.CreateGhost(ghostPath);
-
-			if (wasSuccess)
+			bool willowPowlBackgroundIsLoaded = app::ScenesManager_SceneIsEnabled_1(sceneManager, willowPowlBackgroundGUID, NULL);
+			if (willowPowlBackgroundIsLoaded == true && petrifiedOwlBossEntity == nullptr)
 			{
+				app::Type* type45 = GetType("", "PetrifiedOwlBossEntity");
+				app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(type45, NULL);
+
+				if (arr22 != nullptr && arr22->vector[0] != nullptr)
+					petrifiedOwlBossEntity = (app::PetrifiedOwlBossEntity*)arr22->vector[0];
+			}
+		}*/
+
+		if (MDV::MoonGameWorld != nullptr)
+		{
+			MDV::PreviousGameCompletion = MDV::GameCompletion;
+			MDV::GameCompletion = app::GameWorld_get_CompletionAmount(MDV::MoonGameWorld, NULL);
+
+			if (MDV::GameCompletion != MDV::PreviousGameCompletion)
+				MDV::MessageToWrite.push_back("GAMECOMPLETION:" + std::to_string(MDV::GameCompletion * 100));
+		}
+		/*if (petrifiedOwlBossEntity != nullptr && petrifiedOwlBossEntity->fields._._.m_vitals != nullptr && petrifiedOwlBossEntity->fields._._.m_sensor != nullptr)
+		{
+			std::string shriekData = "HP: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_health) + "/" + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_maxHealth);
+			shriekData += "POSITION: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.x);
+			shriekData += ", " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.y);
+			MDV::MessageToWrite.push_back("SHRIEKDATA:" + shriekData);
+		}*/
+
+		for (auto& object : MDV::AllObjectsToCallUpdate)
+		{
+			object->Update();
+		}
+
+		//send data to the manager
+		if (MDV::MoonSein != nullptr && MDV::MoonSein->fields.PlatformBehaviour != nullptr && MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement != nullptr)
+		{
+			tem::Vector3 oldSeinPosition = tem::Vector3(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);
+			MDV::MessageToWrite.push_back("SEINPOSITION:" + oldSeinPosition.ToString());
+			unsigned long long seinPtr = (unsigned long long)(MDV::MoonSein);
+			MDV::MessageToWrite.push_back("SEINPTR:" + std::to_string(seinPtr));
+		}
+
+		LastTime = std::chrono::high_resolution_clock::now();
+		std::chrono::milliseconds timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
+		ProgramStart = LastTime;
+
+		std::unordered_map<MessageType, Message> messages = MessagesManager.GetMessages();
+		for (auto& message : messages)
+		{
+			bool futureIsReady = false;
+			bool futureExists = false;
+
+			MessagesManager.DecrementTimeout(timeSpan.count(), message.second.Type);
+			message.second.Timeout -= timeSpan.count();
+			if (message.second.Timeout < 0)
+			{
+				MessagesManager.RemoveMessage(message.second.Type);
+				//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
+				//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
+				//i--;
+				continue;
+			}
+
+			if (MessagesManager.MessagesFutures.find(message.second.Type) != MessagesManager.MessagesFutures.end())
+			{
+				futureExists = true;
+				if (MessagesManager.MessagesFutures[message.second.Type].wait_for(span) != std::future_status::ready)
+				{
+					continue;
+				}
+				else
+				{
+					futureIsReady = true;
+				}
+			}
+
+			switch (message.second.Type)
+			{
+
+			case MessageType::GameCompletion:
+			{
+				if (MDV::MoonGameWorld != nullptr)
+					MDV::GameCompletion = app::GameWorld_get_CompletionAmount(MDV::MoonGameWorld, NULL);// oGetGameCompletion(pGameWorld);
+			}
+			break;
+
+			case MessageType::CreateCheckpoint:
+			{
+				tCreateCheckpoint oCreateCheckpoint = tCreateCheckpoint(Assembly_BaseAddr + 0x997230);
+				if (oCreateCheckpoint != nullptr) {
+
+					if (MDV::MoonGameController != nullptr)
+						app::GameController_CreateCheckpointWithSave(MDV::MoonGameController, NULL); // oCreateCheckpoint(pGameController);
+				}
+			}
+			break;
+
+			case MessageType::CreateObject:
+			{
+				raceManager.TemGhostRecorder.CreateRecorder();
+				raceManager.TemGhostRecorder.StartRecorder();
+
+				copySein = true;
+			}
+			break;
+
+			case MessageType::StopRecorder:
+			{
+				raceManager.TemGhostRecorder.StopRecorder();
+			}
+			break;
+
+			case MessageType::WriteRecorder:
+			{
+				std::string ghostPath = sutil::getexepath();
+				sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost");
+				raceManager.TemGhostRecorder.WriteRecorder(ghostPath);
+			}
+			break;
+
+			case MessageType::GhostPlayerRun:
+			{
+				std::string ghostPath = sutil::getexepath();
+				sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost");
+				//app::GameObject* ghost = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)GhostHandler::BaseGhostManager->fields.GhostPrefab, NULL);
+				GhostHandler::CreateGhostPublic(ghostPath);
 				raceManager.startedWeRacing = totalFrames;
 			}
-		}
-		break;
+			break;
 
-		case MessageType::EndThread:
-		{
-			loopBool = false;
-		}
-		break;
-
-		case MessageType::GetQuestByName:
-		{
-			BaseQuestsController = GetQuestsController(hProcess);
-
-			if (BaseQuestsController != nullptr) {
-				const char* qN = "Fallen Friend";
-				app::String* qName = string_new(qN);
-				Moon::HString* qName1 = new Moon::HString(L"Fallen Friend", 1);
-				Moon::Quest quest1 = BaseQuestsController->GetQuestByName(qName);
-				bool works = true;
-			}
-		}
-		break;
-
-		case MessageType::FrameStep:
-		{
-			frameStep.State = FrameStepping::FrameSteppingEnabled;
-		}
-		break;
-
-		case MessageType::CreateRaceCheckpoint:
-		{
-			tem::Vector3 position;
-			auto sPosition = sutil::SplitTem(message.Content, ";");
-			position.X = std::stof(sPosition[0]);
-			position.Y = std::stof(sPosition[1]);
-			position.Z = 0;
-			debugDrawer->SetupTexture(graphColors.Orange, position);
-		}
-		break;
-
-		case MessageType::RunRace:
-		{
-			if (IsSceneLoadedByName("inkwaterMarshRaceSetups"))
+			case MessageType::EndThread:
 			{
-				raceManager.LoadRaceData(message.Content);
-				raceManager.SetupRace();
+#ifdef _DEBUG
+
+				::IsConnected = false;
+#endif
+				SeinCharacterHelper::RestoreSeinAbilities();
+				GhostHandler::Cleanup();
+				loopBool = false;
 			}
-			else 
+			break;
+
+			case MessageType::GetQuestByName:
 			{
-				PreloadSceneByName("inkwaterMarshRaceSetups");
+				/*BaseQuestsController = GetQuestsController(hProcess);
+
+				if (BaseQuestsController != nullptr) {
+					const char* qN = "Fallen Friend";
+					app::String* qName = string_new(qN);
+					Moon::HString* qName1 = new Moon::HString(L"Fallen Friend", 1);
+					Moon::Quest quest1 = BaseQuestsController->GetQuestByName(qName);
+					bool works = true;
+				}*/
 			}
-		}
-		break;
+			break;
 
-		case MessageType::RemoveCheckpoint:
-		{
-			raceManager.RemoveCheckpoint(std::stoi(message.Content));
-		}
-		break;
-
-		case MessageType::LoadRace:
-		{
-			if (IsSceneLoadedByName("inkwaterMarshRaceSetups"))
+			case MessageType::FrameStep:
 			{
-				auto splitContent = sutil::SplitTem(message.Content, "|");
-				DebugDrawer::toggleDebugObjects = splitContent[1] == "False" ? false : true;
-				raceManager.LoadRaceData(splitContent[0]);
+				frameStep.State = FrameStepping::FrameSteppingEnabled;
 			}
-			else
+			break;
+
+			case MessageType::CreateRaceCheckpoint:
 			{
-				PreloadSceneByName("inkwaterMarshRaceSetups");
+				tem::Vector3 position;
+				auto sPosition = sutil::SplitTem(message.second.Content, ";");
+				position.X = std::stof(sPosition[0]);
+				position.Y = std::stof(sPosition[1]);
+				position.Z = 0;
+				debugDrawer.SetupTexture(GraphColors::Orange, position);
+			}
+			break;
+
+			case MessageType::RunRace:
+			{
+				raceManager.CheckHash();
+				if (raceManager.IsRaceLoaded == true)
+				{
+					raceManager.SetupRace(raceManager.RaceDuration);
+				}
+				else if (futureIsReady == false)
+				{
+					raceManager.LoadRaceData(message.second.Content);
+					message.second.Content = "";
+
+					if (raceManager.StartPosition.IsSet() && raceManager.FinishPosition.IsSet())
+					{
+#ifdef _DEBUG
+						TemSocket::SendSocketMessage("GETGHOSTS" + TemSocket::MD + raceManager.raceName);
+#endif
+
+						auto scenes = TemSceneHelper::GetScenesAtPosition(raceManager.StartPosition);
+						auto scenes1 = TemSceneHelper::GetScenesAtPosition(raceManager.FinishPosition);
+
+						if (scenes.size() > 0 && scenes1.size() > 0)
+						{
+							std::vector<TemSceneNode> scenesFound = TemSceneHelper::GetScenePathByName(sutil::convert_csstring(scenes[0]->fields.Scene), sutil::convert_csstring(scenes1[0]->fields.Scene));
+							std::vector<app::RuntimeSceneMetaData*> scenesToLoad = TemSceneHelper::GetScenesByTemSceneNode(scenesFound);
+
+							app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
+							TemSceneHelper::LoadScenes(std::vector<app::RuntimeSceneMetaData*> {raceScene});
+
+							TemSceneHelper::LoadScenes(scenesToLoad);
+							MessagesManager.MessagesFutures[message.second.Type] = std::async(TemSceneHelper::IsScenesLoaded, scenesToLoad, true);
+							MessagesManager.SetTimeout(15 * 1000, message.second.Type);
+							message.second.Timeout = 15 * 1000;
+							//MessagesManager.Messages[i].Timeout = 15 * 1000;
+							futureExists = true;
+						}
+					}
+					else
+					{
+						MessagesManager.RemoveMessage(message.second.Type);
+						//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
+						//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
+						//i--;
+						continue;
+					}
+				}
+				else
+				{
+					auto value = MessagesManager.MessagesFutures[message.second.Type].get();
+
+					if (value == true)
+					{
+						MessagesManager.RemoveMessage(message.second.Type);
+						MessagesManager.MessagesFutures.erase(message.second.Type);
+						futureExists = false;
+						raceManager.SetupRace(raceManager.RaceDuration);
+					}
+				}
+			}
+			break;
+
+			case MessageType::RemoveCheckpoint:
+			{
+				raceManager.RemoveCheckpoint(std::stoi(message.second.Content));
+			}
+			break;
+
+			case MessageType::LoadRace:
+			{
+				if (futureIsReady == false)
+				{
+					auto splitContent = sutil::SplitTem(message.second.Content, "|");
+					DebugDrawer::toggleDebugObjects = splitContent[1] == "False" ? false : true;
+					raceManager.LoadRaceData(splitContent[0]);
+#ifdef _DEBUG
+					TemSocket::SendSocketMessage("GETGHOSTS" + TemSocket::MD + raceManager.raceName);
+#endif
+					if (raceManager.StartPosition.IsSet() && raceManager.FinishPosition.IsSet())
+					{
+						auto scenes = TemSceneHelper::GetScenesAtPosition(raceManager.StartPosition);
+						auto scenes1 = TemSceneHelper::GetScenesAtPosition(raceManager.FinishPosition);
+
+						if (scenes.size() > 0 && scenes1.size() > 0)
+						{
+							std::vector<TemSceneNode> scenesFound = TemSceneHelper::GetScenePathByName(sutil::convert_csstring(scenes[0]->fields.Scene), sutil::convert_csstring(scenes1[0]->fields.Scene));
+							std::vector<app::RuntimeSceneMetaData*> scenesToLoad = TemSceneHelper::GetScenesByTemSceneNode(scenesFound);
+
+							app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
+							TemSceneHelper::LoadScenes(std::vector<app::RuntimeSceneMetaData*> {raceScene});
+
+							TemSceneHelper::LoadScenes(scenesToLoad);
+							MessagesManager.MessagesFutures[message.second.Type] = std::async(TemSceneHelper::IsScenesLoaded, scenesToLoad, true);
+							MessagesManager.SetTimeout(15 * 1000, message.second.Type);
+							message.second.Timeout = 15 * 1000;
+							//MessagesManager.Messages[i].Timeout = 15 * 1000;
+							futureExists = true;
+						}
+					}
+					else
+					{
+						MessagesManager.RemoveMessage(message.second.Type);
+						//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
+						//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
+						//i--;
+						continue;
+					}
+				}
+				else
+				{
+					auto value = MessagesManager.MessagesFutures[message.second.Type].get();
+
+					if (value == true)
+					{
+						MessagesManager.RemoveMessage(message.second.Type);
+						MessagesManager.MessagesFutures.erase(message.second.Type);
+						futureExists = false;
+						raceManager.IsRaceLoaded = true;
+					}
+				}
+			}
+			break;
+
+			case MessageType::KuDash:
+			{
+				if (kuRide != nullptr && kuRide->fields.Abilities->fields.Dash != nullptr)
+					app::KuDash_TryPerformDash(kuRide->fields.Abilities->fields.Dash, NULL);
+			}
+			break;
+
+			case MessageType::UpdateRaceCheckpoint:
+			{
+				if (message.second.Content.size() > 3)
+				{
+					auto splitContent = sutil::SplitTem(message.second.Content, "|");
+					tem::Vector3 position = splitContent[0];
+					tem::Vector3 scale = splitContent[1];
+					scale.Z = 1.0f;
+					position.X = position.X - (scale.X * -1);
+					position.Y = position.Y;// -scale.Y;
+					int index = std::stoi(splitContent[2]);
+					raceManager.UpdateCheckpoint(position, scale, index);
+				}
+			}
+			break;
+
+			case MessageType::SetManagerPath:
+			{
+				managerPath = message.second.Content;
+				ManagerPath = managerPath;
+				raceManager.racePath = managerPath + "\\RaceSettings\\";
+			}
+			break;
+
+			case MessageType::ToggleDebugObjects:
+			{
+				DebugDrawer::toggleDebugObjects = !DebugDrawer::toggleDebugObjects;
+				DebugDrawer::ToggleDebugObjects();
+			}
+			break;
+
+			case MessageType::UpdateHitbox:
+			{
+				auto splitContent = sutil::SplitTem(message.second.Content, "|");
+				tem::Vector3 position = splitContent[0];
+				tem::Vector3 scale = splitContent[1];
+				position.X = position.X - (scale.X * -1);
+				position.Y = position.Y - scale.Y;
+
+				if (HitboxDebug == nullptr)
+				{
+					HitboxDebug = debugDrawer.CreateDebugObjectDetached(GraphColors::Blue, position, scale);
+					TransformSetScale(HitboxDebug, tem::Vector3(scale.X, scale.Y, 1));
+					TransformSetLocalPosition(HitboxDebug, tem::Vector3(scale.X / 2 * -1, scale.Y / 2, 0));
+					TransformSetPosition(HitboxDebug, position);
+				}
+				else
+				{
+					TransformSetScale(HitboxDebug, tem::Vector3(scale.X, scale.Y, 1));
+					TransformSetPosition(HitboxDebug, position);
+				}
+			}
+			break;
+
+			case MessageType::RemoveHitbox:
+			{
+				if (HitboxDebug != nullptr)
+				{
+					app::Object_1_Destroy_1((app::Object_1*)HitboxDebug, NULL);
+					HitboxDebug = nullptr;
+				}
+			}
+			break;
+
+			case MessageType::RestartRace:
+			{
+				raceManager.RestartRace();
+			}
+			break;
+
+			case MessageType::StopRace:
+			{
+				if (futureIsReady == false)
+				{
+					auto scenes = TemSceneHelper::GetScenesAtPosition(raceManager.StartPosition);
+					auto scenes1 = TemSceneHelper::GetScenesAtPosition(raceManager.FinishPosition);
+
+					if (scenes.size() > 0 && scenes1.size() > 0) {
+						std::vector<TemSceneNode> scenesFound = TemSceneHelper::GetScenePathByName(sutil::convert_csstring(scenes[0]->fields.Scene), sutil::convert_csstring(scenes1[0]->fields.Scene));
+						std::vector<app::RuntimeSceneMetaData*> scenesToLoad = TemSceneHelper::GetScenesByTemSceneNode(scenesFound);
+					}
+
+					raceManager.StopRace();
+
+					MessagesManager.MessagesFutures[message.second.Type] = std::async(RaceManager::HasRaceStopped);
+					MessagesManager.SetTimeout(15 * 1000, message.second.Type);
+					message.second.Timeout = 15 * 1000;
+					//MessagesManager.Messages[i].Timeout = 15 * 1000;
+					futureExists = true;
+				}
+				else
+				{
+					auto value = MessagesManager.MessagesFutures[message.second.Type].get();
+
+					if (value == true)
+					{
+						MDV::MessageToWrite.push_back("STOPPEDRACE");
+						MessagesManager.RemoveMessage(message.second.Type);
+						MessagesManager.MessagesFutures.erase(message.second.Type);
+						//MessagesManager.MessagesFutures.erase(i);
+						futureExists = false;
+						raceManager.IsRaceLoaded = true;
+					}
+				}
+			}
+			break;
+
+			case MessageType::SaveUberStates:
+			{
+				UberStateManager::SaveUberStates(raceManager.racePath + raceManager.raceName + ".uberstates");
+			}
+			break;
+
+			case MessageType::LoadUberStates:
+			{
+				UberStateManager::LoadUberStates(raceManager.racePath + raceManager.raceName + ".uberstates");
+			}
+			break;
+
+			case MessageType::SetSeinPosition:
+			{
+				tem::Vector3 position = message.second.Content;
+				app::CharacterPlatformMovement_TeleportAndPlaceOnGround(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, position.ToMoon(), 0.01f, 0.01f, NULL);
+				app::GameplayCamera_MoveCameraToTargetInstantly(MDV::SeinGameplayCamera, true, NULL);
+			}
+			break;
+
+			case MessageType::CreateBackupSave:
+			{
+				app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
+				int saveIndex = std::max<int>(0, std::min<int>(9, std::stoi(message.second.Content)));
+				app::SaveGameController_SaveToFile(MDV::MoonGameController->fields.SaveGameController, saveInfo->fields.m_slotIndex, saveIndex, app::UberStateController_get_CurrentStateValueStore(NULL), true, true, NULL);
+			}
+			break;
+
+			case MessageType::GetSaveInfo:
+			{
+				if (futureIsReady == false)
+				{
+					app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
+					app::SaveSlotBackup* backupSaves = app::SaveSlotBackupsManager_SaveSlotBackupAtIndex(saveInfo->fields.m_slotIndex, NULL);
+
+					int count = backupSaves->fields.Count;// app::SaveSlotBackupsManager__TypeInfo->static_fields->m_instance->fields.m_saveSlotBackups->fields._size;
+					app::SaveSlotBackupsManager_ClearCache(app::SaveSlotBackupsManager__TypeInfo->static_fields->m_instance, NULL);
+					app::SaveSlotBackupsManager_RequestReadBackups(saveInfo->fields.m_slotIndex, NULL);
+					MessagesManager.MessagesFutures[message.second.Type] = std::async(SavesHelper::IsBackupsLoaded, count, saveInfo->fields.m_slotIndex);
+					MessagesManager.SetTimeout(15 * 1000, message.second.Type);
+					message.second.Timeout = 15 * 1000;
+					futureExists = true;
+				}
+				else
+				{
+					auto value = MessagesManager.MessagesFutures[message.second.Type].get();
+
+					if (value == true)
+					{
+						MessagesManager.RemoveMessage(message.second.Type);
+						MessagesManager.MessagesFutures.erase(message.second.Type);
+						futureExists = false;
+						raceManager.IsRaceLoaded = true;
+
+						app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
+						app::SaveSlotBackup* backupSaves = app::SaveSlotBackupsManager_SaveSlotBackupAtIndex(saveInfo->fields.m_slotIndex, NULL);
+						std::vector<app::SaveSlotBackupInfo*> backupsaves;
+						std::string backupsaveInfo = "SAVEINFO";
+
+						for (int i = 0; i < backupSaves->fields.Count; i++)
+						{
+							app::SaveSlotBackupInfo* backupsave = backupSaves->fields.SaveSlotInfos->vector[i];
+							backupsaveInfo += sutil::convert_csstring(backupsave->fields.SaveSlotInfo->fields.AreaName) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Completion) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Health) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxHealth) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Energy) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxEnergy) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Order) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Difficulty) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Hours) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Minutes) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Seconds) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.DebugOn) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.WasKilled) + ";" + std::to_string(backupsave->fields.Index) + ";";
+
+							backupsaves.push_back(backupsave);
+						}
+
+						MDV::MessageToWrite.push_back(backupsaveInfo);
+					}
+				}
+			}
+			break;
+
+			}
+
+			if (futureExists == false)
+			{
+				MessagesManager.RemoveMessage(message.second.Type);
+				//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
+				//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
+				//i--;
 			}
 		}
-		break;
-
-		case MessageType::KuDash:
-		{
-			if (kuRide != nullptr && kuRide->fields.Abilities->fields.Dash != nullptr)
-				app::KuDash_TryPerformDash(kuRide->fields.Abilities->fields.Dash, NULL);
-		}
-		break;
-
-		case MessageType::UpdateRaceCheckpointPosition:
-		{
-			auto splitContent = sutil::SplitTem(message.Content, "|");
-			tem::Vector3 position = splitContent[0];
-			int index = std::stoi(splitContent[1]);
-			raceManager.SetCheckpointPosition(position, index);
-		}
-		break;
-
-		case MessageType::SetManagerPath:
-		{
-			managerPath = message.Content;
-			raceManager.racePath = managerPath + "\\RaceSettings\\";
-		}
-		break;
-
-		case MessageType::ToggleDebugObjects:
-		{
-			DebugDrawer::toggleDebugObjects = !DebugDrawer::toggleDebugObjects;
-			DebugDrawer::ToggleDebugObjects();
-		}
-		break;
-
-		}
+		MessagesManager.PullMessages();
 	}
-	MessagesManager.Messages = std::vector<Message>();
-	MessagesManager.CurrentMessagesType = std::vector<int>();
-	IsUsingMessages = false;
 
+	MDV::CanCallMethods = false;
+	TemSceneHelper::CanCallMethods = false;
 	Real_CClassFunction(__this);
 }
 
@@ -406,17 +773,17 @@ void __fastcall My_OnPointerClick(void* __this, int edx)
 	}
 }
 
-std::string GetShriekData()
+void __fastcall My_SeinOnKill(void* __this, int edx)
 {
-	std::string shriekData = "";
-	if (petrifiedOwlBossEntity != nullptr && petrifiedOwlBossEntity->fields._._.m_vitals != nullptr && petrifiedOwlBossEntity->fields._._.m_sensor != nullptr)
+	if (raceManager.IsRacing == false)
 	{
-		shriekData = "HP: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_health) + "/" + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_maxHealth);
-		shriekData += "POSITION: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.x);
-		shriekData += ", " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.y);
+		Real_SeinOnKill(__this);
+	}
+	else
+	{
+		raceManager.RestartRace();
 	}
 
-	return shriekData;
 }
 
 void ReadString(char* output) {
@@ -436,26 +803,35 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	Assembly_BaseAddr = (unsigned long long)GetModuleHandleA("GameAssembly.dll");
 	UnityPlayer_BaseAddress = (unsigned long long)GetModuleHandleA("UnityPlayer.dll");
 
-	//initialize functions
-	tCreateCheckpoint oCreateCheckpoint = tCreateCheckpoint(Assembly_BaseAddr + 0x7DE210);
-	tGetGameCompletion oGetGameCompletion = tGetGameCompletion(Assembly_BaseAddr + 0x3e45d0);
-
-
-	void* pGameWorld2 = (void**)(Assembly_BaseAddr + 71715792);
-
-	Moon::GameWorld* pGameWorld = GetGameWorld(hProcess);
-	Moon::GameController* pGameController = GetGameController(hProcess);
-
-	std::string returnMessage = "";
+	MDV::MoonGameWorld = app::GameWorld__TypeInfo->static_fields->Instance;// GetGameWorld(hProcess);
+	MDV::MoonGameController = app::GameController__TypeInfo->static_fields->Instance; // GetGameController(hProcess);
+	MDV::SeinGameplayCamera = (app::GameplayCamera*)GetComponentByTypeInChildren(MDV::MoonGameController->fields.m_systemsGameObject, "", "GameplayCamera");
+	MDV::MoonSein = app::Characters_get_Sein(NULL);// GetSeinCharacter(hProcess);
+	MDV::SeinPlayAnimationController = MDV::MoonSein->fields.Controller->fields.m_playAnimationController;
+	MDV::AreaMapUI = app::AreaMapUI__TypeInfo->static_fields->Instance;
 	std::vector<std::string> messages;
 
 	//initalize detours
-	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x994520);
+	/* For finding CClassFunction
+	mov qword ptr [r11-38],FFFFFFFFFFFFFFFE
+	mov [r11+08],rbx
+	mov [r11+10],rsi
+	movaps [rsp+40],xmm6
+	mov rbx,rcx
+	xor esi,esi
+	*/
+	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x6920c0);// +0x994520);
 	Real_MoonDriverSystem = tMoonDriverSystem(Assembly_BaseAddr + 0xE463C0);
-	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x263B50);
-	//oSystem_String__ToCharArray = tSystem_String__ToCharArray(Assembly_BaseAddr + 0x1CD17A0);
+	/* For finding GameAssembly.il2cpp_string_new <- goto adress subtract gameassembly.dll location
+	mov rdx,FFFFFFFFFFFFFFFF
+	inc rdx
+	cmp byte ptr [rcx+rdx],00
+	jne 7FFD7B303B57
+	*/
+	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x279570);// 0x263B50);
+	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x01F2B430);
 	Real_GameControllerUpdate = tGameControllerUpdate(UnityPlayer_BaseAddress + 0x5f0350); //0x994040 gc -  0xA77FA0 sein
-	Real_OnPointerClick = tOnPointerClick(Assembly_BaseAddr + 0x1E1A5C0);
+	Real_OnPointerClick = tOnPointerClick(Assembly_BaseAddr + 0x1F2B430);
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -465,79 +841,15 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	DetourAttach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
 	DetourAttach(&(PVOID&)RealIl2cpp_string_new_wrapper, string_new);
 	DetourAttach(&(PVOID&)Real_OnPointerClick, My_OnPointerClick);
+	DetourAttach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
-	DetourAttach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
+	//DetourAttach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
 	LONG lError = DetourTransactionCommit();
 
-	//find base invis to use for cloning
-	uintptr_t InvisibleCheckpointBaseAdress = UnityPlayer_BaseAddress + 0x0148FDA0;
-	GetAddressOffset(hProcess, InvisibleCheckpointBaseAdress, { 0x60, 0x30, 0xE8, 0xE0, 0x60, 0x0 });
-	if (InvisibleCheckpointBaseAdress != NULL)
-		BaseInvisibleCheckpoint = (Moon::InvisibleCheckpoint*)(InvisibleCheckpointBaseAdress);
+	ProgramStart = std::chrono::high_resolution_clock::now();
 
 #if defined(IL2CPP)
-	// Setup for the race animation.
-	app::Vector3__Boxed* myVector3 = (app::Vector3__Boxed*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
-	app::Vector3__ctor(myVector3, -612.0f, -4318.0f, 0.0f, NULL);
-
-	app::Type* scenesManagerType = GetType("", "ScenesManager");
-	app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(scenesManagerType, NULL);
-
-	sceneManager = (app::ScenesManager*)arr22->vector[0];
-	app::String* sceneToLoad = string_new("inkwaterMarshRaceSetups");
-	app::List_1_RuntimeSceneMetaData_* allScenes = app::ScenesManager_ListAllScenesAtPosition(sceneManager, myVector3->fields, NULL);
-
-	if (allScenes->fields._size > 0) {
-		for (int i = 0; i < allScenes->fields._items->max_length; i++) {
-			app::RuntimeSceneMetaData* inkMeta = allScenes->fields._items->vector[i];
-			if (inkMeta != nullptr) {
-				std::string aniNameS = sutil::convert_csstring(inkMeta->fields.Scene);
-				if (aniNameS == "swampSpringIntroductionB")
-					app::ScenesManager_PreloadScene(sceneManager, inkMeta, NULL);
-			}
-		}
-	}
-
-	for (int i = 0; i < sceneManager->fields.AllScenes->fields._size; i++)
-	{
-		std::string sceneName = sutil::convert_csstring(sceneManager->fields.AllScenes->fields._items->vector[i]->fields.Scene);
-		if (sceneName == "willowPowlBackground")
-		{
-			willowPowlBackgroundGUID = sceneManager->fields.AllScenes->fields._items->vector[i]->fields.SceneMoonGuid;
-		}
-	}
-
-	app::SeinCharacter* seinC = GetSeinCharacter(hProcess);
-	app::SeinController* seinCC = seinC->fields.Controller;
-	seinPlayAnimationController = seinCC->fields.m_playAnimationController;
-
-	app::Type* type5111 = GetType("", "AreaMapIcon");
-	app::Object_1__Array* arrAIcons = app::Object_1_FindObjectsOfTypeAll(type5111, NULL);
-
-	std::vector<app::AreaMapIcon*> allAreaMapIcons;
-	for (int i = 0; i < arrAIcons->max_length; i++)
-	{
-		if (arrAIcons->vector[i] != nullptr)
-		{
-			app::AreaMapIcon* icon = (app::AreaMapIcon*)arrAIcons->vector[i];
-
-			if (icon != nullptr)
-			{
-				allAreaMapIcons.push_back(icon);
-			}
-		}
-	}
-
-	//RuntimeWorldMapIcon
-	app::Type* tGameMapObjectiveIcons = GetType("", "GameMapObjectiveIcons");
-	app::Object_1__Array* arrAGameMapObjectiveIcons = app::Object_1_FindObjectsOfTypeAll(tGameMapObjectiveIcons, NULL);
-
-	app::GameMapObjectiveIcons* gameMapObjectives = (app::GameMapObjectiveIcons*)arrAGameMapObjectiveIcons->vector[0];
-
-	DebugDrawer::Initialize();
-	areaMapManager.Initialize();
-	debugDrawer = &DebugDrawer();
 
 	/*app::Type* kuType = GetType("", "Ku");
 	app::Object_1__Array* kuArr = app::Object_1_FindObjectsOfTypeAll(kuType, NULL);
@@ -549,119 +861,120 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 		kuRide->fields.Abilities->fields.MeditateSpell->fields._.m_isActive = true;
 	}*/
 
-	//to create icons
-	/*app::Type* type51 = GetType("", "GameWorldArea");
-	app::Object_1__Array* arrA61 = app::Object_1_FindObjectsOfTypeAll(type51, NULL);
-
-	app::GameWorldArea* gameWorldArea = nullptr;
-	if (arrA61 != nullptr && arrA61->max_length > 0)
-		gameWorldArea = (app::GameWorldArea*)arrA61->vector[0];
-	
-	app::GameWorldArea_WorldMapIcon* newWorldMapIcon2 = (app::GameWorldArea_WorldMapIcon*)il2cpp_object_new((Il2CppClass*)gameWorldArea->fields.Icons->fields._items->vector[0]->klass);
-	newWorldMapIcon2->fields.Position.x = -730.0f;
-	newWorldMapIcon2->fields.Position.y = -4300.0f;
-	newWorldMapIcon2->fields.Icon = app::WorldMapIconType__Enum::WorldMapIconType__Enum_CreepHeart;
-	app::CollectionBase_System_Collections_IList_Add((app::CollectionBase*)gameWorldArea->fields.Icons->fields._items, (app::Object*)newWorldMapIcon2, NULL);*/
-
 #endif
-
 	fileHandle = CreateFileA("\\\\.\\pipe\\wotw-manager-pipe", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	fileHandleWrite = CreateFileA("\\\\.\\pipe\\injectdll-manager-pipe", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-	
+	const char* msg = "\r\n";
+	WriteFile(fileHandle, msg, (DWORD)strlen(msg), nullptr, 0);
+
 	std::string managerExeName = "LiveSplit.OriWotW.exe";
 	DWORD proccessID = FindProcessId(managerExeName);
 	char* buffer = new char[512];
 
-	while (loopBool && IsProcessRunning(proccessID)) {
+#ifdef _DEBUG
+	TemSocket::ConnectToServer("HELLO SERVER");
+	TemSocket::SendSocketMessage("HELLO AGAIN");
+#endif
+
+	while (loopBool && IsProcessRunning(proccessID))
+	{
 
 		buffer[512];
 		memset(buffer, 0, 512);
 		ReadString(buffer);
 
-		if ((buffer != NULL) && (buffer[0] == '\0')) {
+		if ((buffer != NULL) && (buffer[0] == '\0'))
+		{
 
 		}
-		else {
+		else
+		{
+			IsWritingToMessageString = true;
 			std::string message(buffer);
-			returnMessage = "";
 
-			if (message.find("CALL") != std::string::npos) {
+			if (message.find("CALL") != std::string::npos)
+			{
 				messages.clear();
 
-				if (message.find("||") != std::string::npos) {
+				if (message.find("||") != std::string::npos)
+				{
 					auto tempMM = sutil::SplitTem(message, "||");
 					messages.insert(messages.end(), tempMM.begin(), tempMM.end());
 				}
-				else {
+				else
+				{
 					messages.push_back(message);
 				}
 
-				if (IsUsingMessages == false) {
-					for (auto& message : messages) {
-						sutil::ReplaceS(message, "CALL", "");
-						if (message != "") {
-							Message newMessage;
+				for (auto& message : messages)
+				{
+					sutil::ReplaceS(message, "CALL", "");
+					if (message != "")
+					{
+						Message newMessage;
 
-							if (message.find("PAR") != std::string::npos)
+						if (message.find("PAR") != std::string::npos)
+						{
+							auto paramSplit = sutil::SplitTem(message, "PAR");
+							if (paramSplit.size() > 1)
 							{
-								auto paramSplit = sutil::SplitTem(message, "PAR");
-								if (paramSplit.size() > 0)
-								{
-									newMessage.Content = paramSplit[1];
-									newMessage.Type = MessageType(std::stoi(paramSplit[0]));
-									newMessage.TypeInt = std::stoi(paramSplit[0]);
-								}
+								newMessage.Content = paramSplit[1];
+								newMessage.Type = MessageType(std::stoi(paramSplit[0]));
+								newMessage.TypeInt = std::stoi(paramSplit[0]);
 							}
-							else
-							{
-								newMessage.Type = MessageType(std::stoi(message));
-								newMessage.TypeInt = std::stoi(message);
-							}
-
-							if (newMessage.Type == MessageType::FrameStep) {
-								frameStep.ShouldFrameStep = true;
-							}
-							if (newMessage.Type == MessageType::FrameStepStop) {
-								frameStep.State = FrameStepping::FrameSteppingDisabled;
-								frameStep.ShouldFrameStep = false;
-							}
-							if (newMessage.Type == MessageType::NextAnimation)
-							{
-								app::SeinCharacter* seinC = GetSeinCharacter(hProcess);
-								app::SeinController* seinCC = seinC->fields.Controller;
-								app::SeinPlayAnimationController* seinCCA = seinCC->fields.m_playAnimationController;
-								app::SeinPlayAnimationController_StopAnimation(seinCCA, NULL);
-								animationIndex++;
-							}
-
-							MessagesManager.AddMessage(newMessage);
 						}
+						else
+						{
+							newMessage.Type = MessageType(std::stoi(message));
+							newMessage.TypeInt = std::stoi(message);
+						}
+
+						if (newMessage.Type == MessageType::FrameStep)
+						{
+							frameStep.ShouldFrameStep = true;
+						}
+						if (newMessage.Type == MessageType::FrameStepStop)
+						{
+							frameStep.State = FrameStepping::FrameSteppingDisabled;
+							frameStep.ShouldFrameStep = false;
+						}
+						if (newMessage.Type == MessageType::NextAnimation)
+						{
+							if (MANAGER_INITIALIZED == true)
+								app::SeinPlayAnimationController_StopAnimation(MDV::SeinPlayAnimationController, NULL);
+						}
+						if (newMessage.Type == MessageType::GetSeinFaces)
+						{
+							if (MANAGER_INITIALIZED == true)
+							{
+								int faces = app::SeinCharacter_get_FacingDirection(MDV::MoonSein, NULL);
+								MDV::MessageToWrite.push_back("SEINFACES:" + std::to_string(faces));
+							}
+						}
+
+						MessagesManager.AddMessage(newMessage);
 					}
 				}
-
-				returnMessage += "GAMECOMPLETION:" + std::to_string(Moon::gameCompletionHooked * 100) + "||" + "SHRIEKDATA:" + GetShriekData() + "||";
 			}
 		}
-
-		if (returnMessage.length() > 0) {
-			returnMessage += "\r\n";
-			WriteFile(fileHandleWrite, returnMessage.c_str(), (DWORD)strlen(returnMessage.c_str()), nullptr, 0);
-		}
-		else {
-			const char* msg = "\r\n";
-			WriteFile(fileHandleWrite, msg, (DWORD)strlen(msg), nullptr, 0);
-		}
+		IsWritingToMessageString = false;
 	}
 	frameStep.State = FrameStepping::FrameSteppingDisabled;
 	frameStep.ShouldFrameStep = false;
 
+	while (MessagesManager.Messages.size() > 0)
+	{
+		Sleep(16);
+	}
 	MessagesManager.Messages.clear();
 
 	//sleep to let game finish and then dettach all the detours
 	Sleep(25);
-
+#ifdef _DEBUG
+	TemSocket::Exit();
+#endif
 	graphDrawer.Destroy();
-	debugDrawer->CleanUp();
+	debugDrawer.CleanUp();
+	raceManager.CleanupManager();
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -671,17 +984,53 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	DetourDetach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
 	DetourDetach(&(PVOID&)RealIl2cpp_string_new_wrapper, string_new);
 	DetourDetach(&(PVOID&)Real_OnPointerClick, My_OnPointerClick);
+	DetourDetach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
-	DetourDetach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
+	//DetourDetach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
 	DetourTransactionCommit();
 
-	raceManager.CleanupManager();
 	CloseHandle(fileHandle);
 	CloseHandle(fileHandleWrite);
 
 	//sleep again to let the game cleanly return to it's own loops
 	Sleep(25);
 	FreeLibraryAndExitThread(hIns, 0);
+	return 0;
+}
+
+DWORD WINAPI ThreadWrite(HMODULE hIns)
+{
+	pid = GetCurrentProcessId();
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pid);
+
+	fileHandleWrite = CreateFileA("\\\\.\\pipe\\injectdll-manager-pipe", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+
+	std::string managerExeName = "LiveSplit.OriWotW.exe";
+	std::string messageToSend = "";
+	DWORD proccessID = FindProcessId(managerExeName);
+
+	while (loopBool && IsProcessRunning(proccessID))
+	{
+		if (IsWritingToMessageString == false && MDV::MessageToWrite.size() > 0)
+		{
+			messageToSend = "";
+			while (MDV::MessageToWrite.size() > 0)
+			{
+				messageToSend += MDV::MessageToWrite[0] + "||";
+				MDV::MessageToWrite.erase(MDV::MessageToWrite.begin());
+			}
+			messageToSend += "\r\n";
+
+			WriteFile(fileHandleWrite, messageToSend.c_str(), (DWORD)strlen(messageToSend.c_str()), nullptr, 0);
+		}
+		else
+		{
+			const char* msg = "\r\n";
+			WriteFile(fileHandleWrite, msg, (DWORD)strlen(msg), nullptr, 0);
+		}
+		Sleep(7);
+	}
+
 	return 0;
 }

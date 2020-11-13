@@ -1,0 +1,245 @@
+#include "pch-il2cpp.h"
+
+#include "il2cpp-appdata.h"
+#include "helpers.h"
+
+#include <unordered_map>
+#include <filesystem>
+
+#include "StringUtils.h"
+#include "ManagerDef.h"
+
+#include "UberStateManager.h"
+
+std::string UberGroup::ToString() 
+{
+	std::string s = std::to_string(UberGroupID) + "||:";
+
+	if (UberInts.size() > 0)
+	{
+		for (auto& v : UberInts)
+		{
+			s += std::to_string(v.first) + "|" + std::to_string(v.second) + "|";
+		}
+	}
+	else
+		s += "EMPTY";
+
+	s += "||:";
+
+	if (UberFloats.size() > 0)
+	{
+		for (auto& v : UberFloats)
+		{
+			s += std::to_string(v.first) + "|" + std::to_string(v.second) + "|";
+		}
+	}
+	else
+		s += "EMPTY";
+
+	s += "||:";
+
+	if (UberBools.size() > 0)
+	{
+		for (auto& v : UberBools)
+		{
+			s += std::to_string(v.first) + "|" + std::to_string(v.second) + "|";
+		}
+	}
+	else
+		s += "EMPTY";
+
+	s += "||:";
+
+	if (UberBools.size() > 0)
+	{
+		for (auto& v : UberBytes)
+		{
+			s += std::to_string(v.first) + "|" + std::to_string(v.second) + '|';
+		}
+	}
+	else
+		s += "EMPTY";
+
+	return s;
+}
+
+void UberGroup::LoadData(std::string data)
+{
+	std::vector<std::string> maps = sutil::SplitTem(data, "||:");
+	UberGroupID = std::stoi(maps[0]);
+
+	for (int i = 1; i < maps.size(); i++)
+	{
+		if (maps[i] != "EMPTY")
+		{
+			std::string ss = maps[i];
+			std::vector<std::string> values = sutil::SplitTem(ss, "|");
+
+			for (int x = 0; x < values.size(); x += 2)
+			{
+				switch (i)
+				{
+				case 1:
+				{
+					UberInts[std::stoi(values[x])] = std::stoi(values[x + 1]);
+				}
+				break;
+
+				case 2:
+				{
+					UberFloats[std::stoi(values[x])] = std::stof(values[x + 1]);
+				}
+				break;
+
+				case 3:
+				{
+					UberBools[std::stoi(values[x])] = std::stoi(values[x + 1]);
+				}
+				break;
+
+				case 4:
+				{
+					UberBytes[std::stoi(values[x])] = (std::uint8_t)std::stoi(values[x + 1]);
+				}
+				break;
+				}
+			}
+		}
+	}
+}
+
+void UberStateManager::SaveUberStates(std::string path) 
+{
+	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+	std::unordered_map<int, UberGroup> ubergroups;
+	std::string textFile = "";
+	for (int i = 0; i < uberStates->fields.m_groupMap->fields.count; i++)
+	{
+		app::UberStateValueGroup* group = uberStates->fields.m_groupMap->fields.entries->vector[i].value;
+		UberGroup ubergroup = UberGroup();
+		ubergroup.UberGroupID = group->fields.m_id->fields.m_id;
+		UberStateManager::SaveBools(group, ubergroup.UberBools);
+		UberStateManager::SaveBytes(group, ubergroup.UberBytes);
+		UberStateManager::SaveFloats(group, ubergroup.UberFloats);
+		UberStateManager::SaveIntegers(group, ubergroup.UberInts);
+		ubergroups[group->fields.m_id->fields.m_id] = ubergroup;
+		textFile += ubergroup.ToString() + "|;?;|";
+	}
+
+	sutil::Write(path, textFile);
+}
+
+void UberStateManager::LoadUberStates(std::string path)
+{
+	app::UberStateController_ApplyPendingChanges(NULL);
+	app::UberStateController_ApplyChanges(app::UberStateController_get_Instance(NULL), NULL);
+
+	if (std::filesystem::exists(path) == true && std::filesystem::is_regular_file(path) == true)
+	{
+		app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+		std::string s = sutil::readFile(path);
+		std::vector<std::string> maps = sutil::SplitTem(s, "|;?;|");
+		std::unordered_map<int, UberGroup> ubergroups;
+
+		for (auto& map : maps)
+		{
+			UberGroup ubergroup = UberGroup();
+			ubergroup.LoadData(map);
+			ubergroups[ubergroup.UberGroupID] = ubergroup;
+		}
+
+		for (int i = 0; i < uberStates->fields.m_groupMap->fields.count; i++)
+		{
+			app::UberStateValueGroup* group = uberStates->fields.m_groupMap->fields.entries->vector[i].value;
+
+			if (group->fields.m_id->fields.m_id != 3440 && ubergroups.find(group->fields.m_id->fields.m_id) != ubergroups.end())
+			{
+				UberGroup ugroup = ubergroups[group->fields.m_id->fields.m_id];
+				UberStateManager::LoadBools(group, ugroup.UberBools);
+				UberStateManager::LoadBytes(group, ugroup.UberBytes);
+				UberStateManager::LoadFloats(group, ugroup.UberFloats);
+				UberStateManager::LoadIntegers(group, ugroup.UberInts);
+			}
+		}
+
+		app::UberStateController_SetState(uberStates, NULL);
+		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::UberStateApplyContext__Enum_ValueChanged, NULL);
+	}
+}
+
+void UberStateManager::SaveIntegers(app::UberStateValueGroup* group, std::unordered_map<int, int>& uberids)
+{
+	for (int i = 0; i < group->fields.m_intStateMap->fields.count; i++)
+	{
+		uberids[group->fields.m_intStateMap->fields.entries->vector[i].key->fields.m_id] = group->fields.m_intStateMap->fields.entries->vector[i].value;
+	}
+}
+
+void UberStateManager::SaveBools(app::UberStateValueGroup* group, std::unordered_map<int, bool>& uberids)
+{
+	for (int i = 0; i < group->fields.m_boolStateMap->fields.count; i++)
+	{
+		uberids[group->fields.m_boolStateMap->fields.entries->vector[i].key->fields.m_id] = group->fields.m_boolStateMap->fields.entries->vector[i].value;
+	}
+}
+
+void UberStateManager::SaveFloats(app::UberStateValueGroup* group, std::unordered_map<int, float>& uberids)
+{
+	for (int i = 0; i < group->fields.m_floatStateMap->fields.count; i++)
+	{
+		uberids[group->fields.m_floatStateMap->fields.entries->vector[i].key->fields.m_id] = group->fields.m_floatStateMap->fields.entries->vector[i].value;
+	}
+}
+
+void UberStateManager::SaveBytes(app::UberStateValueGroup* group, std::unordered_map<int, std::uint8_t>& uberids)
+{
+	for (int i = 0; i < group->fields.m_byteStateMap->fields.count; i++)
+	{
+		uberids[group->fields.m_byteStateMap->fields.entries->vector[i].key->fields.m_id] = group->fields.m_byteStateMap->fields.entries->vector[i].value;
+	}
+}
+
+void UberStateManager::LoadIntegers(app::UberStateValueGroup* group, std::unordered_map<int, int>& uberids)
+{
+	for (int i = 0; i < group->fields.m_intStateMap->fields.count; i++)
+	{
+		if (uberids.find(group->fields.m_intStateMap->fields.entries->vector[i].key->fields.m_id) != uberids.end())
+		{
+			group->fields.m_intStateMap->fields.entries->vector[i].value = uberids[group->fields.m_intStateMap->fields.entries->vector[i].key->fields.m_id];
+		}
+	}
+}
+
+void UberStateManager::LoadBools(app::UberStateValueGroup* group, std::unordered_map<int, bool>& uberids)
+{
+	for (int i = 0; i < group->fields.m_boolStateMap->fields.count; i++)
+	{
+		if (uberids.find(group->fields.m_boolStateMap->fields.entries->vector[i].key->fields.m_id) != uberids.end())
+		{
+			group->fields.m_boolStateMap->fields.entries->vector[i].value = uberids[group->fields.m_boolStateMap->fields.entries->vector[i].key->fields.m_id];
+		}
+	}
+}
+
+void UberStateManager::LoadFloats(app::UberStateValueGroup* group, std::unordered_map<int, float>& uberids)
+{
+	for (int i = 0; i < group->fields.m_floatStateMap->fields.count; i++)
+	{
+		if (uberids.find(group->fields.m_floatStateMap->fields.entries->vector[i].key->fields.m_id) != uberids.end())
+		{
+			group->fields.m_floatStateMap->fields.entries->vector[i].value = uberids[group->fields.m_floatStateMap->fields.entries->vector[i].key->fields.m_id];
+		}
+	}
+}
+
+void UberStateManager::LoadBytes(app::UberStateValueGroup* group, std::unordered_map<int, std::uint8_t>& uberids)
+{
+	for (int i = 0; i < group->fields.m_byteStateMap->fields.count; i++)
+	{
+		if (uberids.find(group->fields.m_byteStateMap->fields.entries->vector[i].key->fields.m_id) != uberids.end())
+		{
+			group->fields.m_byteStateMap->fields.entries->vector[i].value = uberids[group->fields.m_byteStateMap->fields.entries->vector[i].key->fields.m_id];
+		}
+	}
+}

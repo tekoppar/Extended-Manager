@@ -1,0 +1,69 @@
+﻿  pch-il2cpp.cpp
+  CreateUI.cpp
+  DebugDrawer.cpp
+  GraphDrawer.cpp
+  MD5.cpp
+  TemRecorder.cpp
+  Adresses.cpp
+  Base64.cpp
+  Global.cpp
+  ManagerDef.cpp
+  helpers.cpp
+  il2cpp-init.cpp
+  Manager.cpp
+  SimpleJson.cpp
+  MessageHelper.cpp
+  TemSocket.cpp
+  TemUser.cpp
+  MoonAnimationHelper.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Base64.cpp(58,39): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Base64.cpp(69,69): warning C4267: '=': conversion from 'size_t' to 'BYTE', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Base64.cpp(86,65): warning C4267: '=': conversion from 'size_t' to 'BYTE', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\MD5.cpp(94,39): warning C4267: 'argument': conversion from 'size_t' to 'MD5::size_type', possible loss of data
+  AreaMapManager.cpp
+  GameWorldHelper.cpp
+  TemSceneHelper.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\CreateUI.cpp(75,75): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  SeinCharacterHelper.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\CreateUI.cpp(192,89): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(264,71): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(266,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(284,97): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(284,74): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(284,61): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(286,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(303,23): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(313,23): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(584,54): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(611,54): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\GraphDrawer.cpp(615,82): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\SimpleJson.cpp(259,23): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\SimpleJson.cpp(274,21): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\SimpleJson.cpp(308,18): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  GhostHandler.cpp
+  FrameLogger.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(157,32): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(192,35): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(226,63): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(239,63): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(261,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\TemSocket.cpp(348,89): warning C4267: 'argument': conversion from 'size_t' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+  FrameLoggerSingleFrame.cpp
+  RaceManager.cpp
+  RaceTime.cpp
+  UberStateManager.cpp
+  SavesHelper.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\TemSceneHelper.cpp(302,175): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\TemSceneHelper.cpp(302,83): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\TemSceneHelper.cpp(317,172): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\TemSceneHelper.cpp(317,86): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger\FrameLogger.cpp(271,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger\FrameLogger.cpp(293,43): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\GhostHandler.cpp(506,84): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+  inject.cpp
+CreateUI.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  injectdll.vcxproj -> C:\Users\Tekoppar\Desktop\LiveSplit.OriWotW-master\bin\injectdll.dll

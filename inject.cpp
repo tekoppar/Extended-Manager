@@ -12,6 +12,7 @@ BOOL __stdcall DllMain(HMODULE hIns, DWORD dwReason, LPVOID lpReserved)
 		//DisableThreadLibraryCalls(hIns);
 		init_il2cpp();
 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ThreadMain, hIns, 0, 0);
+		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ThreadWrite, hIns, 0, 0);
 	}
 	break;
 	case DLL_THREAD_ATTACH:

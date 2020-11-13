@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugRelease|Win32">
+      <Configuration>DebugRelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugRelease|x64">
+      <Configuration>DebugRelease</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -31,6 +39,12 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -41,6 +55,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v142</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v142</PlatformToolset>
@@ -61,10 +83,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -77,8 +105,27 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\</OutDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
+    <OutDir>..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -100,7 +147,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>C:\Users\Tekoppar\source\repos\injectdll\injectdll\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\appdata;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
@@ -111,7 +158,32 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
-      <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CompileAsManaged>false</CompileAsManaged>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RemoveUnreferencedCodeData>
+      </RemoveUnreferencedCodeData>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
+      <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -157,108 +229,108 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Adresses.cpp" />
-    <ClCompile Include="AreaMapManager.cpp" />
-    <ClCompile Include="Base64.cpp" />
-    <ClCompile Include="DebugDrawer.cpp" />
-    <ClCompile Include="FindClass.cpp" />
-    <ClCompile Include="framework\helpers.cpp" />
-    <ClCompile Include="framework\il2cpp-init.cpp" />
-    <ClCompile Include="framework\pch-il2cpp.cpp">
+    <ClCompile Include="DrawerClasses\CreateUI.cpp" />
+    <ClCompile Include="DrawerClasses\DebugDrawer.cpp" />
+    <ClCompile Include="DrawerClasses\GraphDrawer.cpp" />
+    <ClCompile Include="Helper Classes\MD5.cpp" />
+    <ClCompile Include="RaceClasses\TemRecorder.cpp" />
+    <ClCompile Include="Helper Classes\Adresses.cpp" />
+    <ClCompile Include="Helper Classes\Base64.cpp" />
+    <ClCompile Include="Helper Classes\Global.cpp" />
+    <ClCompile Include="Helper Classes\ManagerDef.cpp" />
+    <ClCompile Include="Il2Cpp\framework\helpers.cpp" />
+    <ClCompile Include="Il2Cpp\framework\il2cpp-init.cpp" />
+    <ClCompile Include="Il2Cpp\framework\pch-il2cpp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GraphDrawer.cpp" />
     <ClCompile Include="inject.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Manager.cpp" />
-    <ClCompile Include="ManagerDef.cpp" />
+    <ClCompile Include="MessageClasses\MessageHelper.cpp" />
+    <ClCompile Include="MessageClasses\SimpleJson.cpp" />
+    <ClCompile Include="MessageClasses\TemSocket.cpp" />
+    <ClCompile Include="MessageClasses\TemUser.cpp" />
+    <ClCompile Include="Moon Helpers\Animation\MoonAnimationHelper.cpp" />
+    <ClCompile Include="Moon Helpers\GameWorld\AreaMapManager.cpp" />
+    <ClCompile Include="Moon Helpers\GameWorld\GameWorldHelper.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\TemSceneHelper.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinCharacterHelper.cpp" />
+    <ClCompile Include="RaceClasses\GhostHandler.cpp" />
+    <ClCompile Include="RaceClasses\Logger\FrameLogger.cpp" />
+    <ClCompile Include="RaceClasses\Logger\FrameLoggerSingleFrame.cpp" />
+    <ClCompile Include="RaceClasses\RaceManager.cpp" />
+    <ClCompile Include="RaceClasses\RaceTime.cpp" />
+    <ClCompile Include="Moon Helpers\GameWorld\UberStateManager.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SavesHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Adresses.h" />
-    <ClInclude Include="appdata\il2cpp-api-functions-ptr.h" />
-    <ClInclude Include="appdata\il2cpp-api-functions.h" />
-    <ClInclude Include="appdata\il2cpp-functions.h" />
-    <ClInclude Include="appdata\il2cpp-functions1.h" />
-    <ClInclude Include="appdata\il2cpp-functions2.h" />
-    <ClInclude Include="appdata\il2cpp-functions3.h" />
-    <ClInclude Include="appdata\il2cpp-functions4.h" />
-    <ClInclude Include="appdata\il2cpp-types-ptr.h" />
-    <ClInclude Include="appdata\il2cpp-types1.h" />
-    <ClInclude Include="appdata\il2cpp-types10.h" />
-    <ClInclude Include="appdata\il2cpp-types11.h" />
-    <ClInclude Include="appdata\il2cpp-types12.h" />
-    <ClInclude Include="appdata\il2cpp-types13.h" />
-    <ClInclude Include="appdata\il2cpp-types2.h" />
-    <ClInclude Include="appdata\il2cpp-types3.h" />
-    <ClInclude Include="appdata\il2cpp-types4.h" />
-    <ClInclude Include="appdata\il2cpp-types5.h" />
-    <ClInclude Include="appdata\il2cpp-types6.h" />
-    <ClInclude Include="appdata\il2cpp-types7.h" />
-    <ClInclude Include="appdata\il2cpp-types8.h" />
-    <ClInclude Include="appdata\il2cpp-types9.h" />
-    <ClInclude Include="AreaMapManager.h" />
-    <ClInclude Include="Base64.h" />
-    <ClInclude Include="Behaviour.h" />
-    <ClInclude Include="Component.h" />
-    <ClInclude Include="AkLogger.h" />
-    <ClInclude Include="CPPBeDumb.h" />
-    <ClInclude Include="CreateUI.h" />
-    <ClInclude Include="DebugDrawer.h" />
-    <ClInclude Include="FindObjectsWrapper.h" />
-    <ClInclude Include="FrameLogger.h" />
-    <ClInclude Include="framework\helpers.h" />
-    <ClInclude Include="framework\il2cpp-appdata.h" />
-    <ClInclude Include="framework\il2cpp-init.h" />
-    <ClInclude Include="framework\pch-il2cpp.h" />
-    <ClInclude Include="GameController.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GameParameters.h" />
-    <ClInclude Include="GameUI.h" />
-    <ClInclude Include="GameWorld.h" />
-    <ClInclude Include="GetClasses.h" />
-    <ClInclude Include="GettingAnimations.h" />
-    <ClInclude Include="GhostCharacterData.h" />
-    <ClInclude Include="GhostFrame.h" />
-    <ClInclude Include="GhostManager.h" />
-    <ClInclude Include="GhostPlayer.h" />
-    <ClInclude Include="GhostRecorder.h" />
-    <ClInclude Include="GhostRecorderData.h" />
-    <ClInclude Include="GhostRecorderPlugins.h" />
-    <ClInclude Include="GhostService.h" />
-    <ClInclude Include="GraphDrawer.h" />
-    <ClInclude Include="HelperClasses.h" />
+    <ClInclude Include="Custom Types\Rect.h" />
+    <ClInclude Include="Custom Types\Tem.h" />
+    <ClInclude Include="Custom Types\Vector3.h" />
+    <ClInclude Include="DrawerClasses\CreateUI.h" />
+    <ClInclude Include="DrawerClasses\DebugDrawer.h" />
+    <ClInclude Include="DrawerClasses\GraphDrawer.h" />
+    <ClInclude Include="Helper Classes\MD5.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions5.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions6.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions7.h" />
+    <ClInclude Include="RaceClasses\RaceEnums.h" />
+    <ClInclude Include="RaceClasses\TemRecorder.h" />
+    <ClInclude Include="Helper Classes\Adresses.h" />
+    <ClInclude Include="Helper Classes\Base64.h" />
+    <ClInclude Include="Helper Classes\CPPBeDumb.h" />
+    <ClInclude Include="Helper Classes\Detour\detours.h" />
+    <ClInclude Include="Helper Classes\Detour\detver.h" />
+    <ClInclude Include="Helper Classes\Detour\syelog.h" />
+    <ClInclude Include="Helper Classes\Global.h" />
+    <ClInclude Include="Helper Classes\ManagerDef.h" />
+    <ClInclude Include="Helper Classes\StringUtils.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-api-functions-ptr.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-api-functions.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions1.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions2.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions3.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions4.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-types-ptr.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types1.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types10.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types11.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types12.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types13.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types2.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types3.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types4.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types5.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types6.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types7.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types8.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types9.h" />
+    <ClInclude Include="Il2Cpp\framework\helpers.h" />
+    <ClInclude Include="Il2Cpp\framework\il2cpp-appdata.h" />
+    <ClInclude Include="Il2Cpp\framework\il2cpp-init.h" />
+    <ClInclude Include="Il2Cpp\framework\pch-il2cpp.h" />
     <ClInclude Include="inject.h" />
-    <ClInclude Include="InvisibleCheckpoint.h" />
     <ClInclude Include="Manager.h" />
-    <ClInclude Include="ManagerDef.h" />
-    <ClInclude Include="MoonMessageBox.h" />
-    <ClInclude Include="MessageClass.h" />
-    <ClInclude Include="MessageControllerB.h" />
-    <ClInclude Include="MessageProvider.h" />
-    <ClInclude Include="MonoBehaviour.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Quaternion.h" />
-    <ClInclude Include="Quest.h" />
-    <ClInclude Include="QuestsController.h" />
-    <ClInclude Include="RaceManager.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="RaceSystem.h" />
-    <ClInclude Include="Rect.h" />
-    <ClInclude Include="SaveGameController.h" />
-    <ClInclude Include="ScenariosRecorder.h" />
-    <ClInclude Include="ScenesManager.h" />
-    <ClInclude Include="SeinCharacter.h" />
-    <ClInclude Include="MoonDriverSystem.h" />
-    <ClInclude Include="HString.h" />
-    <ClInclude Include="StringUtils.h" />
-    <ClInclude Include="SystemString3.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="Vector2.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="MessageClasses\MessageClass.h" />
+    <ClInclude Include="MessageClasses\MessageHelper.h" />
+    <ClInclude Include="MessageClasses\SimpleJson.h" />
+    <ClInclude Include="MessageClasses\TemSocket.h" />
+    <ClInclude Include="MessageClasses\TemUser.h" />
+    <ClInclude Include="Moon Helpers\Animation\MoonAnimationHelper.h" />
+    <ClInclude Include="Moon Helpers\GameWorld\AreaMapManager.h" />
+    <ClInclude Include="Moon Helpers\GameWorld\GameWorldHelper.h" />
+    <ClInclude Include="Moon Helpers\Scenes\TemSceneHelper.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinCharacterHelper.h" />
+    <ClInclude Include="RaceClasses\GhostHandler.h" />
+    <ClInclude Include="RaceClasses\Logger\FrameLogger.h" />
+    <ClInclude Include="RaceClasses\Logger\FrameLoggerSingleFrame.h" />
+    <ClInclude Include="RaceClasses\RaceManager.h" />
+    <ClInclude Include="RaceClasses\RaceTime.h" />
+    <ClInclude Include="Moon Helpers\GameWorld\UberStateManager.h" />
+    <ClInclude Include="Moon Helpers\Sein\SavesHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
