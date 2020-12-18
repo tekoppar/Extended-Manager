@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Tem.h"
 struct SeinStateUpdate {
 	app::AbilityType__Enum AbilityType;
 	bool Active;
@@ -220,6 +221,19 @@ static const std::unordered_map<int, std::string> AbilityTypeToString = {
 	{119,"WeaponCharge"},
 	{120,"DamageUpgradeA"},
 	{121,"DamageUpgradeB"},
+	{256,"BlazeUpgrade" },
+	{257,"ChakramUpgrade" },
+	{258,"Shockwave" },
+	{259,"SpiritSentryUpgrade" },
+	{260,"SpiritSpearUpgrade" }
+};
+
+static const std::unordered_map<int, int> AbilityUpgradeToByte = {
+	{256,61898},
+	{257,10776},
+	{258,46488},
+	{259,57376 },
+	{260,24142 }
 };
 
 static const std::unordered_map< app::AbilityType__Enum, app::EquipmentType__Enum> AbilityTypeToEquipmentType = {
@@ -382,7 +396,6 @@ static const std::vector< app::AbilityType__Enum> AbilityTypeList = std::vector<
 	app::AbilityType__Enum::AbilityType__Enum_WeaponCharge
 };
 
-
 class SeinShard {
 public:
 	bool Active = false;
@@ -394,6 +407,7 @@ public:
 class SeinCharacterHelper
 {
 public:
+	static std::vector<SeinStateUpdate> SeinAbilitiesUpgrades;
 	static std::vector<SeinStateUpdate> SeinAbilitiesStates;
 	static SeinRestoreState CurrentState;
 	static SeinRestoreState CurrentBoundAbilitiesState;
@@ -410,6 +424,9 @@ public:
 	static void SetSeinState(SeinStateUpdate newState);
 	static void StoreSeinAbilities();
 	static void RestoreSeinAbilities();
+	static void UpdateSeinAbilitiesUpgradesStates(std::unordered_map<int, SeinStateUpdate> newStates);
+	static void StoreSeinAbilitiesUpgrades();
+	static void RestoreSeinAbilitiesUpgrades();
 	static void StoreBoundAbilities();
 	static void SetBoundAbility(int index, std::string ability);
 	static void RestoreBoundAbilities();

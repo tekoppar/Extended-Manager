@@ -20,7 +20,7 @@ app::GameObject* AreaMapManager::CreateNewIconPlayerIcon(tem::Vector3 position, 
 	{
 		newPlayerPositionMarker = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)MDV::AreaMapUI->fields.PlayerPositionMarkerPrefab, NULL);
 
-		app::Vector3* newPlayerIconPos = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+		app::Vector3* newPlayerIconPos = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 		newPlayerIconPos->x = position.X;
 		newPlayerIconPos->y = position.Y;
 		newPlayerIconPos->z = position.Z;

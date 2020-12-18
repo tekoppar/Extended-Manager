@@ -2,3 +2,5 @@
 *.tlog
 *.db
 *.pch
+*.idb
+*.obj

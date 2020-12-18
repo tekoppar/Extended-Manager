@@ -3,11 +3,15 @@
 #include "il2cpp-appdata.h"
 #include "helpers.h"
 
+#include <filesystem>
+
 #include "StringUtils.h"
 #include "ManagerDef.h"
+#include "UberStateManager.h"
 
 #include "SeinCharacterHelper.h"
 
+std::vector<SeinStateUpdate> SeinCharacterHelper::SeinAbilitiesUpgrades;
 std::vector<SeinStateUpdate> SeinCharacterHelper::SeinAbilitiesStates;
 app::AbilityType__Enum SeinCharacterHelper::BoundAbility1 = app::AbilityType__Enum::AbilityType__Enum_None;
 app::AbilityType__Enum SeinCharacterHelper::BoundAbility2 = app::AbilityType__Enum::AbilityType__Enum_None;
@@ -579,6 +583,51 @@ void SeinCharacterHelper::RestoreSeinAbilities()
 	}
 }
 
+void SeinCharacterHelper::UpdateSeinAbilitiesUpgradesStates(std::unordered_map<int, SeinStateUpdate> newStates)
+{
+	for (auto state : newStates)
+	{
+		if (AbilityUpgradeToByte.find(state.second.AbilityType) != AbilityUpgradeToByte.end())
+		{
+			char active = state.second.Active == true ? 0x1 : 0x0;
+			int value = AbilityUpgradeToByte.at(state.second.AbilityType);
+			UberStateManager::SetUberState(3440, value, active);
+		}
+	}
+}
+
+void SeinCharacterHelper::StoreSeinAbilitiesUpgrades()
+{
+	SeinAbilitiesUpgrades = std::vector<SeinStateUpdate>();
+
+	for (auto type : AbilityUpgradeToByte)
+	{
+		SeinStateUpdate seinStateUpdate;
+		seinStateUpdate.AbilityType = (app::AbilityType__Enum)type.first;
+		std::uint8_t value = UberStateManager::GetUberState(3440, type.second);
+
+		if (value > 0)
+			seinStateUpdate.Active = true;
+		else
+			seinStateUpdate.Active = false;
+
+		SeinAbilitiesUpgrades.push_back(seinStateUpdate);
+	}
+}
+
+void SeinCharacterHelper::RestoreSeinAbilitiesUpgrades()
+{
+	for (auto state : SeinAbilitiesUpgrades)
+	{
+		if (AbilityUpgradeToByte.find(state.AbilityType) != AbilityUpgradeToByte.end())
+		{
+			char active = state.Active == true ? 0x1 : 0x0;
+			int value = AbilityUpgradeToByte.at(state.AbilityType);
+			UberStateManager::SetUberState(3440, value, active);
+		}
+	}
+}
+
 app::AbilityType__Enum SeinCharacterHelper::StringToAbilityType(std::string ability)
 {
 	switch (sutil::hash(ability.data()))
@@ -748,9 +797,10 @@ void SeinCharacterHelper::RestoreBoundAbilities()
 	{
 		app::EquipmentType__Enum boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonX, NULL);
 		app::AbilityType__Enum boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability1, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
 		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility1) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility1 != app::AbilityType__Enum::AbilityType__Enum_None)
 		{
-			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility1))
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility1) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
 				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonX, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility1), NULL);
 		}
 
@@ -760,9 +810,10 @@ void SeinCharacterHelper::RestoreBoundAbilities()
 
 		boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonY, NULL);
 		boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability2, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
 		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility2) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility2 != app::AbilityType__Enum::AbilityType__Enum_None)
 		{
-			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility2))
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility2) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
 				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonY, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility2), NULL);
 		}
 
@@ -772,9 +823,10 @@ void SeinCharacterHelper::RestoreBoundAbilities()
 
 		boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonB, NULL);
 		boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability3, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
 		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility3) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility3 != app::AbilityType__Enum::AbilityType__Enum_None)
 		{
-			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility3))
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility3) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
 				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonB, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility3), NULL);
 		}
 

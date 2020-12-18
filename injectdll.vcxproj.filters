@@ -165,6 +165,36 @@
     <ClCompile Include="Moon Helpers\Sein\SavesHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisualEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\BowVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\OriVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom Types\Tem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inject.h">
@@ -357,6 +387,42 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Moon Helpers\Sein\SavesHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-metadata-version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisualEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\Vector4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\BowVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\OriVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

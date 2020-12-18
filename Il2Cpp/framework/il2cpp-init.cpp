@@ -15,18 +15,18 @@
 // Application-specific functions
 #define DO_APP_FUNC(a, r, n, p) r (*n) p
 namespace app {
-#include "il2cpp-functions1.h"
-#include "il2cpp-functions2.h"
-#include "il2cpp-functions3.h"
-#include "il2cpp-functions4.h"
-#include "il2cpp-functions5.h"
-#include "il2cpp-functions6.h"
-#include "il2cpp-functions7.h"
+	#include "il2cpp-functions1.h"
+	#include "il2cpp-functions2.h"
+	#include "il2cpp-functions3.h"
+	#include "il2cpp-functions4.h"
+	#include "il2cpp-functions5.h"
+	#include "il2cpp-functions6.h"
+	#include "il2cpp-functions7.h"
 }
 #undef DO_APP_FUNC
 
 // TypeInfo pointers
-#define DO_TYPEDEF(a, n) n ## __Class* n ## __TypeInfo
+#define DO_TYPEDEF(a, n) n ## __Class** n ## __TypeInfo
 namespace app {
 #include "il2cpp-types-ptr.h"
 }
@@ -36,7 +36,7 @@ namespace app {
 void init_il2cpp()
 {
 	// Get base address of IL2CPP module
-	uintptr_t baseAddress = GetBaseAddress();
+	uintptr_t baseAddress = il2cppi_get_base_address();
 
 	using namespace app;
 
@@ -47,17 +47,17 @@ void init_il2cpp()
 
 	// Define function addresses
 	#define DO_APP_FUNC(a, r, n, p) n = (r (*) p)(baseAddress + a)
-#include "il2cpp-functions1.h"
-#include "il2cpp-functions2.h"
-#include "il2cpp-functions3.h"
-#include "il2cpp-functions4.h"
-#include "il2cpp-functions5.h"
-#include "il2cpp-functions6.h"
-#include "il2cpp-functions7.h"
+		#include "il2cpp-functions1.h"
+	#include "il2cpp-functions2.h"
+	#include "il2cpp-functions3.h"
+	#include "il2cpp-functions4.h"
+	#include "il2cpp-functions5.h"
+	#include "il2cpp-functions6.h"
+	#include "il2cpp-functions7.h"
 	#undef DO_APP_FUNC
 
 	// Define TypeInfo variables
-	#define DO_TYPEDEF(a, n) n ## __TypeInfo = *(n ## __Class**) (baseAddress + a);
+	#define DO_TYPEDEF(a, n) n ## __TypeInfo = (n ## __Class**) (baseAddress + a);
 	#include "il2cpp-types-ptr.h"
 	#undef DO_TYPEDEF
 }

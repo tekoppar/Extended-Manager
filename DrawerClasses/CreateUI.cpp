@@ -26,7 +26,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	{
 		app::Type* type = GetType("UnityEngine.EventSystems", "EventSystem");
 		app::Type* typeInput = GetType("UnityEngine.EventSystems", "StandaloneInputModule");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::EventSystem* newObject = (app::EventSystem*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -38,7 +38,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	app::GameObject* DrawUI::Image(const std::string& name, app::Material* material)
 	{
 		app::Type* type = GetType("UnityEngine.UI", "Image");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::Image* newObject = (app::Image*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -51,7 +51,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	{
 		app::Type* type = GetType("UnityEngine.UI", "Button");
 		app::Type* typeImage = GetType("UnityEngine.UI", "Image");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::Image* newObjectImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)gameObject, typeImage, NULL);
@@ -109,7 +109,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	{
 		app::Type* type = GetType("UnityEngine.UI", "VerticalLayoutGroup");
 		app::Type* typeContentSizeFitter = GetType("UnityEngine.UI", "ContentSizeFitter");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::VerticalLayoutGroup* newObject = (app::VerticalLayoutGroup*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -131,7 +131,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	{
 		app::Type* type = GetType("UnityEngine.UI", "HorizontalLayoutGroup");
 		app::Type* typeContentSizeFitter = GetType("UnityEngine.UI", "ContentSizeFitter");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::HorizontalLayoutGroup* newObject = (app::HorizontalLayoutGroup*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -152,7 +152,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 	{
 		app::Type* type = GetType("UnityEngine.UI", "RectMask2D");
 		app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::RectMask2D* newObject = (app::RectMask2D*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -171,7 +171,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::Type* type = GetType("UnityEngine.UI", "Text");
 		app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
 		app::Type* typeContentSizeFitter = GetType("UnityEngine.UI", "ContentSizeFitter");
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 		app::Text* newObject = (app::Text*)app::GameObject_AddComponent((app::GameObject*)gameObject, type, NULL);
@@ -207,7 +207,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::String* TextureName = string_new("_MainTex");
 		app::String* TextureName1 = string_new("_Color");
 
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 
@@ -236,7 +236,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::LayoutElement_set_minHeight(newLayoutElement, 32.0f, NULL);
 		app::LayoutElement_set_minWidth(newLayoutElement, 256.0f + 128.0f, NULL);
 
-		app::GameObject* slidingAreaObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* slidingAreaObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* slidingAreaObjectName = string_new("SlidingArea");
 		app::GameObject__ctor(slidingAreaObject, slidingAreaObjectName, NULL);
 		app::RectTransform* slidingRectTransform = (app::RectTransform*)app::GameObject_AddComponent(slidingAreaObject, rectTransformType, NULL);
@@ -247,7 +247,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::Texture_set_wrapMode((app::Texture*)scrollbarHandleTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 		app::Texture_set_filterMode((app::Texture*)scrollbarHandleTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);*/
 
-		app::GameObject* scrollbarImageOject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* scrollbarImageOject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* scrollbarImageName = string_new("ScrollbarHandle");
 		app::GameObject__ctor(scrollbarImageOject, scrollbarImageName, NULL);
 		app::Image* scrollbarHandleImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)scrollbarImageOject, type, NULL);
@@ -297,7 +297,7 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::String* TextureName = string_new("_MainTex");
 		app::String* TextureName1 = string_new("_Color");
 
-		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* gameObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* gameObjectname = string_new(name.data());
 		app::GameObject__ctor(gameObject, gameObjectname, NULL);
 
@@ -317,11 +317,11 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::Dropdown__ctor(dropdownObject, NULL);
 
 		//Setup dropdown template
-		app::GameObject* templateObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* templateObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* templateObjectName = string_new("Template");
 		app::GameObject__ctor(templateObject, templateObjectName, NULL);
 
-		app::GameObject* templateItem = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* templateItem = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* templateItemName = string_new("Item");
 		app::GameObject__ctor(templateItem, templateItemName, NULL);
 
@@ -372,15 +372,15 @@ std::vector<std::string> DrawUI::AllTexture2DNames;
 		app::String* option2S = string_new("Test2");
 		app::String* option3S = string_new("Test3");
 
-		app::List_1_UnityEngine_UI_Dropdown_OptionData___TypeInfo;
+		//app::List_1_UnityEngine_UI_Dropdown_OptionData___TypeInfo;
 		app::List_1_UnityEngine_UI_Dropdown_OptionData_ options = app::List_1_UnityEngine_UI_Dropdown_OptionData_();// = app::Dropdown_get_options(dropdownObject, NULL);
-		options.fields._items = app::List_1_UnityEngine_UI_Dropdown_OptionData___TypeInfo->static_fields->_emptyArray;
+		options.fields._items = (*app::List_1_UnityEngine_UI_Dropdown_OptionData___TypeInfo)->static_fields->_emptyArray;
 
-		app::Dropdown_OptionData* option1 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)app::Dropdown_OptionData__TypeInfo);
+		app::Dropdown_OptionData* option1 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)(*app::Dropdown_OptionData__TypeInfo));
 		app::Dropdown_OptionData__ctor_1(option1, option1S, NULL);
-		app::Dropdown_OptionData* option2 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)app::Dropdown_OptionData__TypeInfo);
+		app::Dropdown_OptionData* option2 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)(*app::Dropdown_OptionData__TypeInfo));
 		app::Dropdown_OptionData__ctor_1(option2, option2S, NULL);
-		app::Dropdown_OptionData* option3 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)app::Dropdown_OptionData__TypeInfo);
+		app::Dropdown_OptionData* option3 = (app::Dropdown_OptionData*)il2cpp_object_new((Il2CppClass*)(*app::Dropdown_OptionData__TypeInfo));
 		app::Dropdown_OptionData__ctor_1(option3, option3S, NULL);
 
 		options.fields._items->vector[0] = option1;

@@ -17,7 +17,7 @@ public:
 	void CreateRecorder();
 	bool StartRecorder();
 	bool StopRecorder();
-	bool WriteRecorder(std::string filePath, LeaderboardEntryType type = LeaderboardEntryType::FinishedRace);
+	bool WriteRecorder(std::string filePath, LeaderboardEntryType type = LeaderboardEntryType::FinishedRace, std::string raceName = "Default", float time = 99999.0f);
 	void FinalizeGhostFrame();
 	void ResetRecorder();
 	void SetRecorderPath(std::string path);

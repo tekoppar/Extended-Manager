@@ -21,6 +21,7 @@
 #include <future>
 #include <chrono>
 #include <unordered_map>
+#include <filesystem>
 
 #define IL2CPP true
 
@@ -47,8 +48,12 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "TemRecorder.h"
 #include "UberStateManager.h"
 #include "SavesHelper.h"
+#include "SeinVisualEditor.h"
+#include "SimpleJson.h"
 
 static bool MANAGER_INITIALIZED = false;
+static bool WRITE_THREAD_EXITED = false;
+static bool EXITING_THREAD = false;
 
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
@@ -56,10 +61,6 @@ Graph graphDrawerDebug;
 DebugDrawer debugDrawer;
 RaceManager raceManager = RaceManager();
 
-std::vector<app::GhostPlayer*> ActiveGhostPlayers;
-std::vector<app::MoonAnimation*> allAnimations;
-
-app::GameObject* randotest = nullptr;
 bool stopLoop1 = false;
 int framesPlayed = 0;
 unsigned long long totalFrames = 0;
@@ -67,22 +68,11 @@ unsigned long long totalFrames = 0;
 std::chrono::high_resolution_clock::time_point ProgramStart = std::chrono::high_resolution_clock::now();
 std::chrono::high_resolution_clock::time_point LastTime;
 
-app::GhostCharacterAbilitiesPlugin* ghostAP;
-app::GhostCharacterPlugin* ghostCP;
-app::GhostStateMachinePlugin* ghostSMP;
-app::GhostGenericEventsPlugin* ghostGEP;
-app::GhostRecordingMetaDataPlugin* ghostMDP;
-app::GhostRecorder* ghostC;
-app::RaceSystem* raceSC;
-app::UnityRaceTimerDisplay* raceTimerText;
-app::RaceTimer* ghostRaceTimer;
 app::PetrifiedOwlBossEntity* petrifiedOwlBossEntity = nullptr;
 app::SeinUI* seinUI = nullptr;
 app::Ku* kuRide = nullptr;
 
 app::MoonGuid* willowPowlBackgroundGUID = nullptr;
-std::string ShriekData = "";
-
 app::GameObject* HitboxDebug = nullptr;
 
 FrameStep frameStep;
@@ -96,13 +86,14 @@ HANDLE fileHandleWrite;
 DWORD pid;
 HANDLE hProcess;
 std::string managerPath = "";
-//std::string MessageToWrite = "";
 
 std::future<bool> HasLoadedScenes;
 bool SetupsAreDone = false;
 std::chrono::milliseconds span(1);
 
-app::Canvas* canvas123 = nullptr;
+int xxx = 0;
+int yyy = 0;
+int zzz = 0;
 
 app::String* string_new(const char* str)
 {
@@ -120,7 +111,7 @@ void InitializeDLL()
 
 	for (int i = 0; i < sceneManager->fields.AllScenes->fields._size; i++)
 	{
-		std::string sceneName = sutil::convert_csstring(sceneManager->fields.AllScenes->fields._items->vector[i]->fields.Scene);
+		std::string sceneName = il2cppi_to_string(sceneManager->fields.AllScenes->fields._items->vector[i]->fields.Scene);
 		if (sceneName == "willowPowlBackground")
 		{
 			willowPowlBackgroundGUID = sceneManager->fields.AllScenes->fields._items->vector[i]->fields.SceneMoonGuid;
@@ -165,7 +156,7 @@ void InitializeDLL()
 			if (texture2D != nullptr)
 			{
 				app::String* name = app::Object_1_get_name((app::Object_1*)texture2D, NULL);
-				std::string nameS = sutil::convert_csstring(name);
+				std::string nameS = il2cppi_to_string(name);
 
 				if (nameS != "" && nameS.find("lightCanvas") == std::string::npos)
 				{
@@ -179,7 +170,7 @@ void InitializeDLL()
 	TemSceneHelper::InitializeSceneNodes();
 	TemSceneHelper::FillUberPoolGroups();
 
-	app::Vector3__Boxed* myVector3 = (app::Vector3__Boxed*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3__Boxed* myVector3 = (app::Vector3__Boxed*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	app::Vector3__ctor(myVector3, -612.0f, -4318.0f, 0.0f, NULL);
 
 	auto scenes = TemSceneHelper::GetScenesAtPosition(myVector3->fields);
@@ -189,12 +180,10 @@ void InitializeDLL()
 	HasLoadedScenes = std::async(TemSceneHelper::IsScenesLoaded, scenes, false);
 	MDV::User.Initialize();
 
-	app::SimpleFPS* simpleFPS = app::SimpleFPS__TypeInfo->static_fields->Instance;
-	//simpleFPS->fields.ComplicatedMode = false;
-	//simpleFPS->fields.ReallySimpleMode = false;
-	//simpleFPS->fields.TrailerMode = false;
-	//app::Behaviour_set_moonReady((app::Behaviour*)simpleFPS, false, NULL);
+	app::SimpleFPS* simpleFPS = (*app::SimpleFPS__TypeInfo)->static_fields->Instance;
 	app::Behaviour_set_enabled((app::Behaviour*)simpleFPS, false, NULL);
+
+	app::PlayerInput* playerInput = (*app::PlayerInput__TypeInfo)->static_fields->Instance;
 
 	MANAGER_INITIALIZED = true;
 }
@@ -204,7 +193,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 	if (MANAGER_INITIALIZED == false)
 	{
 		InitializeDLL();
-
 	}
 	else
 	{
@@ -217,52 +205,25 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 		if (MANAGER_INITIALIZED == true && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
 		{
+			MDV::MessageToWrite.push_back("MANAGERINITIALIZED");
 			AnimationHelper::GetAnimations();
 			raceManager.SetupManager();
 			SetupsAreDone = true;
+
+			/*std::vector<std::string> scenePath = { "interactibles", "savePedestal" };
+			app::GameObject* foundObject = GetComponentByScenePath("kwoloksCavernSaveRoomA", scenePath);
+			app::SavePedestal* savePedestalObject = (app::SavePedestal*)app::Object_1_Instantiate_2((app::Object_1*)foundObject, NULL);
+			//app::GameObject__ctor(savePedestalObject, string_new("TestPort"), NULL);
+
+			//app::SavePedestal* savePedestal = (app::SavePedestal*)GetComponentByType(savePedestalObject, "", "SavePedestal");
+			app::SavePedestal__ctor(savePedestalObject, NULL);
+			TransformSetPosition((app::GameObject*)savePedestalObject, MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);*/
+			SeinVisualEditor::SetHolidayOri();
 		}
-
-		/*if (sceneManager != nullptr && willowPowlBackgroundGUID != nullptr && petrifiedOwlBossEntity == nullptr)
-		{
-			bool willowPowlBackgroundIsLoaded = app::ScenesManager_SceneIsEnabled_1(sceneManager, willowPowlBackgroundGUID, NULL);
-			if (willowPowlBackgroundIsLoaded == true && petrifiedOwlBossEntity == nullptr)
-			{
-				app::Type* type45 = GetType("", "PetrifiedOwlBossEntity");
-				app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(type45, NULL);
-
-				if (arr22 != nullptr && arr22->vector[0] != nullptr)
-					petrifiedOwlBossEntity = (app::PetrifiedOwlBossEntity*)arr22->vector[0];
-			}
-		}*/
-
-		if (MDV::MoonGameWorld != nullptr)
-		{
-			MDV::PreviousGameCompletion = MDV::GameCompletion;
-			MDV::GameCompletion = app::GameWorld_get_CompletionAmount(MDV::MoonGameWorld, NULL);
-
-			if (MDV::GameCompletion != MDV::PreviousGameCompletion)
-				MDV::MessageToWrite.push_back("GAMECOMPLETION:" + std::to_string(MDV::GameCompletion * 100));
-		}
-		/*if (petrifiedOwlBossEntity != nullptr && petrifiedOwlBossEntity->fields._._.m_vitals != nullptr && petrifiedOwlBossEntity->fields._._.m_sensor != nullptr)
-		{
-			std::string shriekData = "HP: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_health) + "/" + std::to_string(petrifiedOwlBossEntity->fields._._.m_vitals->fields.m_maxHealth);
-			shriekData += "POSITION: " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.x);
-			shriekData += ", " + std::to_string(petrifiedOwlBossEntity->fields._._.m_sensor->fields.m_platformMovement->fields.m_prevPosition.y);
-			MDV::MessageToWrite.push_back("SHRIEKDATA:" + shriekData);
-		}*/
 
 		for (auto& object : MDV::AllObjectsToCallUpdate)
 		{
 			object->Update();
-		}
-
-		//send data to the manager
-		if (MDV::MoonSein != nullptr && MDV::MoonSein->fields.PlatformBehaviour != nullptr && MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement != nullptr)
-		{
-			tem::Vector3 oldSeinPosition = tem::Vector3(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);
-			MDV::MessageToWrite.push_back("SEINPOSITION:" + oldSeinPosition.ToString());
-			unsigned long long seinPtr = (unsigned long long)(MDV::MoonSein);
-			MDV::MessageToWrite.push_back("SEINPTR:" + std::to_string(seinPtr));
 		}
 
 		LastTime = std::chrono::high_resolution_clock::now();
@@ -280,9 +241,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			if (message.second.Timeout < 0)
 			{
 				MessagesManager.RemoveMessage(message.second.Type);
-				//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
-				//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
-				//i--;
 				continue;
 			}
 
@@ -301,13 +259,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 			switch (message.second.Type)
 			{
-
-			case MessageType::GameCompletion:
-			{
-				if (MDV::MoonGameWorld != nullptr)
-					MDV::GameCompletion = app::GameWorld_get_CompletionAmount(MDV::MoonGameWorld, NULL);// oGetGameCompletion(pGameWorld);
-			}
-			break;
 
 			case MessageType::CreateCheckpoint:
 			{
@@ -347,7 +298,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			{
 				std::string ghostPath = sutil::getexepath();
 				sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost");
-				//app::GameObject* ghost = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)GhostHandler::BaseGhostManager->fields.GhostPrefab, NULL);
 				GhostHandler::CreateGhostPublic(ghostPath);
 				raceManager.startedWeRacing = totalFrames;
 			}
@@ -355,27 +305,13 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 			case MessageType::EndThread:
 			{
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 
-				::IsConnected = false;
+				TemSocket::IsConnected = false;
 #endif
 				SeinCharacterHelper::RestoreSeinAbilities();
 				GhostHandler::Cleanup();
 				loopBool = false;
-			}
-			break;
-
-			case MessageType::GetQuestByName:
-			{
-				/*BaseQuestsController = GetQuestsController(hProcess);
-
-				if (BaseQuestsController != nullptr) {
-					const char* qN = "Fallen Friend";
-					app::String* qName = string_new(qN);
-					Moon::HString* qName1 = new Moon::HString(L"Fallen Friend", 1);
-					Moon::Quest quest1 = BaseQuestsController->GetQuestByName(qName);
-					bool works = true;
-				}*/
 			}
 			break;
 
@@ -396,6 +332,18 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			}
 			break;
 
+			case MessageType::GetQuestByName:
+			{
+				if (xxx < 5)
+					xxx++;
+				if (xxx > 4)
+					yyy++;
+				if (yyy > 4)
+					zzz++;
+				TransformSetRotation(SeinVisualEditor::OriHat, tem::Vector3((xxx * 90), (yyy * 90), (zzz * 90)));
+			}
+			break;
+
 			case MessageType::RunRace:
 			{
 				raceManager.CheckHash();
@@ -410,7 +358,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 					if (raceManager.StartPosition.IsSet() && raceManager.FinishPosition.IsSet())
 					{
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 						TemSocket::SendSocketMessage("GETGHOSTS" + TemSocket::MD + raceManager.raceName);
 #endif
 
@@ -436,9 +384,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					else
 					{
 						MessagesManager.RemoveMessage(message.second.Type);
-						//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
-						//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
-						//i--;
 						continue;
 					}
 				}
@@ -470,7 +415,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					auto splitContent = sutil::SplitTem(message.second.Content, "|");
 					DebugDrawer::toggleDebugObjects = splitContent[1] == "False" ? false : true;
 					raceManager.LoadRaceData(splitContent[0]);
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 					TemSocket::SendSocketMessage("GETGHOSTS" + TemSocket::MD + raceManager.raceName);
 #endif
 					if (raceManager.StartPosition.IsSet() && raceManager.FinishPosition.IsSet())
@@ -497,9 +442,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					else
 					{
 						MessagesManager.RemoveMessage(message.second.Type);
-						//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
-						//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
-						//i--;
 						continue;
 					}
 				}
@@ -652,11 +594,25 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			}
 			break;
 
+			case MessageType::RefreshBackups:
+			{
+				app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
+				int saveIndex = std::max<int>(0, std::min<int>(9, std::stoi(message.second.Content)));
+				app::SaveSlotBackupsManager_RequestReadBackups(saveInfo->fields.m_slotIndex, NULL);
+				app::SaveGameController_Refresh(MDV::MoonGameController->fields.SaveGameController, NULL);
+			}
+			break;
+
 			case MessageType::CreateBackupSave:
 			{
 				app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
 				int saveIndex = std::max<int>(0, std::min<int>(9, std::stoi(message.second.Content)));
-				app::SaveGameController_SaveToFile(MDV::MoonGameController->fields.SaveGameController, saveInfo->fields.m_slotIndex, saveIndex, app::UberStateController_get_CurrentStateValueStore(NULL), true, true, NULL);
+				app::SaveGameController_SaveToFile(MDV::MoonGameController->fields.SaveGameController, saveInfo->fields.m_slotIndex, saveIndex, app::UberStateController_get_CurrentStateValueStore(NULL), false, false, NULL);
+				Message refreshBackupsMessage;
+				refreshBackupsMessage.Content = message.second.Content;
+				refreshBackupsMessage.Type = MessageType::RefreshBackups;
+				refreshBackupsMessage.TypeInt = (int)MessageType::RefreshBackups;
+				MessagesManager.AddMessage(refreshBackupsMessage);
 			}
 			break;
 
@@ -667,8 +623,8 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					app::SaveFileInfo* saveInfo = app::SaveGameController_get_CurrentSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, NULL);
 					app::SaveSlotBackup* backupSaves = app::SaveSlotBackupsManager_SaveSlotBackupAtIndex(saveInfo->fields.m_slotIndex, NULL);
 
-					int count = backupSaves->fields.Count;// app::SaveSlotBackupsManager__TypeInfo->static_fields->m_instance->fields.m_saveSlotBackups->fields._size;
-					app::SaveSlotBackupsManager_ClearCache(app::SaveSlotBackupsManager__TypeInfo->static_fields->m_instance, NULL);
+					int count = backupSaves->fields.Count;
+					app::SaveSlotBackupsManager_ClearCache((*app::SaveSlotBackupsManager__TypeInfo)->static_fields->m_instance, NULL);
 					app::SaveSlotBackupsManager_RequestReadBackups(saveInfo->fields.m_slotIndex, NULL);
 					MessagesManager.MessagesFutures[message.second.Type] = std::async(SavesHelper::IsBackupsLoaded, count, saveInfo->fields.m_slotIndex);
 					MessagesManager.SetTimeout(15 * 1000, message.second.Type);
@@ -694,12 +650,13 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						for (int i = 0; i < backupSaves->fields.Count; i++)
 						{
 							app::SaveSlotBackupInfo* backupsave = backupSaves->fields.SaveSlotInfos->vector[i];
+							app::SaveFileInfo* backupSaveInfo = app::SaveGameController_GetSaveFileInfo(MDV::MoonGameController->fields.SaveGameController, saveInfo->fields.m_slotIndex, backupsave->fields.Index, NULL);
 							backupsaveInfo += sutil::convert_csstring(backupsave->fields.SaveSlotInfo->fields.AreaName) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Completion) + ";";
 							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Health) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxHealth) + ";";
 							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Energy) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxEnergy) + ";";
 							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Order) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Difficulty) + ";";
 							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Hours) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Minutes) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Seconds) + ";";
-							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.DebugOn) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.WasKilled) + ";" + std::to_string(backupsave->fields.Index) + ";";
+							backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.DebugOn) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.WasKilled) + ";" + std::to_string(backupSaveInfo->fields.m_backupSlotIndex) + ";";
 
 							backupsaves.push_back(backupsave);
 						}
@@ -710,14 +667,70 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			}
 			break;
 
+			case MessageType::SetOriVisuals:
+			{
+				SeinVisualEditor::ManagerLoaded = true;
+				SeinVisualEditor::VisualSettingsUpdated.ResetBooleans();
+				SeinVisualEditor::LoadJsonFile(message.second.Content);
+				SeinVisualEditor::SetAllVisuals();
+			}
+			break;
+
+			case MessageType::SetTransform:
+			{
+				if (MDV::SelectedObject != nullptr)
+				{
+					auto splitContent = sutil::SplitTem(message.second.Content, "|");
+					tem::Vector3 position = splitContent[0];
+					tem::Vector3 localPosition = splitContent[1];
+					tem::Vector3 scale = splitContent[2];
+					tem::Vector3 rotation = splitContent[3];
+					int sortingOrder = std::stoi(splitContent[4]);
+					sutil::ReplaceS(splitContent[5], ",", ".");
+					float moonZOffset = std::stof(splitContent[5]);
+					int renderQueue = std::stoi(splitContent[6]);
+					int renderingLayerMask = std::stoi(splitContent[7]);
+
+					TransformSetPosition(MDV::SelectedObject, position);
+					TransformSetLocalPosition(MDV::SelectedObject, localPosition);
+					TransformSetEulerAngles(MDV::SelectedObject, rotation);
+					TransformSetScale(MDV::SelectedObject, scale);
+
+					app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::SelectedObject, "UnityEngine", "MeshRenderer");
+					app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
+					app::Renderer_set_sortingOrder((app::Renderer*)meshRenderer, sortingOrder, NULL);
+					app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, moonZOffset, NULL);
+					app::Material_set_renderQueue(mat, renderQueue, NULL);
+					app::Renderer_set_renderingLayerMask((app::Renderer*)meshRenderer, renderingLayerMask, NULL);
+				}
+			}
+			break;
+
+			case MessageType::GetTransform:
+			{
+				if (MDV::SelectedObject != nullptr)
+				{
+					tem::Vector3 position = TransformGetPosition(MDV::SelectedObject);
+					tem::Vector3 localPosition = TransformGetLocalPosition(MDV::SelectedObject);
+					tem::Vector3 rotation = TransformGetRotation(MDV::SelectedObject);
+					tem::Vector3 scale = TransformGetScale(MDV::SelectedObject);
+
+					app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::SelectedObject, "UnityEngine", "MeshRenderer");
+					app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
+					int sortingOrder = app::Renderer_get_sortingOrder((app::Renderer*)meshRenderer, NULL);
+					float moonZOffset = app::Renderer_get_moonOffsetZ((app::Renderer*)meshRenderer, NULL);
+					int renderQueue = app::Material_get_renderQueue(mat, NULL);
+					int renderingLayerMask = app::Renderer_get_renderingLayerMask((app::Renderer*)meshRenderer, NULL);
+
+					MDV::MessageToWrite.push_back("GETTRANSFORM" + position.ToString() + "|" + localPosition.ToString() + "|" + rotation.ToString() + "|" + scale.ToString() + "|" + std::to_string(sortingOrder) + "|" + std::to_string(moonZOffset) + "|" + std::to_string(renderQueue) + "|" + std::to_string(renderingLayerMask));
+				}
+			}
+
 			}
 
 			if (futureExists == false)
 			{
 				MessagesManager.RemoveMessage(message.second.Type);
-				//MessagesManager.Messages.erase(MessagesManager.Messages.begin() + i);
-				//MessagesManager.CurrentMessagesType.erase(MessagesManager.CurrentMessagesType.begin() + i);
-				//i--;
 			}
 		}
 		MessagesManager.PullMessages();
@@ -749,13 +762,13 @@ void __fastcall My_GameControllerUpdate(void* __this, int edx)
 		Real_GameControllerUpdate(__this);
 	}
 
-	/*if (frameStep.State == FrameStepping::IsAutoFrameStepping) {
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping) {
 		Real_GameControllerUpdate(__this);
 	}
 
 	if (frameStep.State == FrameStepping::FrameSteppingDisabled) {
 		Real_GameControllerUpdate(__this);
-	}*/
+	}
 }
 
 void __fastcall My_OnPointerClick(void* __this, int edx)
@@ -803,12 +816,12 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	Assembly_BaseAddr = (unsigned long long)GetModuleHandleA("GameAssembly.dll");
 	UnityPlayer_BaseAddress = (unsigned long long)GetModuleHandleA("UnityPlayer.dll");
 
-	MDV::MoonGameWorld = app::GameWorld__TypeInfo->static_fields->Instance;// GetGameWorld(hProcess);
-	MDV::MoonGameController = app::GameController__TypeInfo->static_fields->Instance; // GetGameController(hProcess);
+	MDV::MoonGameWorld = (*app::GameWorld__TypeInfo)->static_fields->Instance;// GetGameWorld(hProcess);
+	MDV::MoonGameController = (*app::GameController__TypeInfo)->static_fields->Instance; // GetGameController(hProcess);
 	MDV::SeinGameplayCamera = (app::GameplayCamera*)GetComponentByTypeInChildren(MDV::MoonGameController->fields.m_systemsGameObject, "", "GameplayCamera");
 	MDV::MoonSein = app::Characters_get_Sein(NULL);// GetSeinCharacter(hProcess);
 	MDV::SeinPlayAnimationController = MDV::MoonSein->fields.Controller->fields.m_playAnimationController;
-	MDV::AreaMapUI = app::AreaMapUI__TypeInfo->static_fields->Instance;
+	MDV::AreaMapUI = (*app::AreaMapUI__TypeInfo)->static_fields->Instance;
 	std::vector<std::string> messages;
 
 	//initalize detours
@@ -820,7 +833,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	mov rbx,rcx
 	xor esi,esi
 	*/
-	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x6920c0);// +0x994520);
+	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x692380);// patch 1.3 0x6920c0);// patch 1.2 +0x994520);
 	Real_MoonDriverSystem = tMoonDriverSystem(Assembly_BaseAddr + 0xE463C0);
 	/* For finding GameAssembly.il2cpp_string_new <- goto adress subtract gameassembly.dll location
 	mov rdx,FFFFFFFFFFFFFFFF
@@ -828,10 +841,10 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	cmp byte ptr [rcx+rdx],00
 	jne 7FFD7B303B57
 	*/
-	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x279570);// 0x263B50);
-	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x01F2B430);
-	Real_GameControllerUpdate = tGameControllerUpdate(UnityPlayer_BaseAddress + 0x5f0350); //0x994040 gc -  0xA77FA0 sein
-	Real_OnPointerClick = tOnPointerClick(Assembly_BaseAddr + 0x1F2B430);
+	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x279550); // patch 1.3 +0x279570); patch 1.2 0x263B50);
+	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x6EAAE0); // patch 1.3 0x01F2B430);
+	Real_GameControllerUpdate = tGameControllerUpdate(UnityPlayer_BaseAddress + 0x692380);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_OnPointerClick = tOnPointerClick(Assembly_BaseAddr + 0x01F2BD90); // patch 1.3 0x1F2B430);
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -844,7 +857,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	DetourAttach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
-	//DetourAttach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
+	DetourAttach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
 	LONG lError = DetourTransactionCommit();
 
 	ProgramStart = std::chrono::high_resolution_clock::now();
@@ -866,16 +879,16 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	const char* msg = "\r\n";
 	WriteFile(fileHandle, msg, (DWORD)strlen(msg), nullptr, 0);
 
-	std::string managerExeName = "LiveSplit.OriWotW.exe";
+	std::string managerExeName = "ExtendedManager.exe";
 	DWORD proccessID = FindProcessId(managerExeName);
 	char* buffer = new char[512];
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 	TemSocket::ConnectToServer("HELLO SERVER");
 	TemSocket::SendSocketMessage("HELLO AGAIN");
 #endif
 
-	while (loopBool && IsProcessRunning(proccessID))
+	while (IsProcessRunning(proccessID) && loopBool)
 	{
 
 		buffer[512];
@@ -964,17 +977,18 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	while (MessagesManager.Messages.size() > 0)
 	{
 		Sleep(16);
-	}
+}
 	MessagesManager.Messages.clear();
 
 	//sleep to let game finish and then dettach all the detours
 	Sleep(25);
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 	TemSocket::Exit();
 #endif
 	graphDrawer.Destroy();
 	debugDrawer.CleanUp();
 	raceManager.CleanupManager();
+	SeinVisualEditor::Cleanup();
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -987,14 +1001,18 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	DetourDetach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
-	//DetourDetach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
+	DetourDetach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
 	DetourTransactionCommit();
 
 	CloseHandle(fileHandle);
 	CloseHandle(fileHandleWrite);
 
 	//sleep again to let the game cleanly return to it's own loops
-	Sleep(25);
+	EXITING_THREAD = true;
+	while (WRITE_THREAD_EXITED == false)
+	{
+		Sleep(25);
+	}
 	FreeLibraryAndExitThread(hIns, 0);
 	return 0;
 }
@@ -1006,19 +1024,26 @@ DWORD WINAPI ThreadWrite(HMODULE hIns)
 
 	fileHandleWrite = CreateFileA("\\\\.\\pipe\\injectdll-manager-pipe", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 
-	std::string managerExeName = "LiveSplit.OriWotW.exe";
+	std::string managerExeName = "ExtendedManager.exe";
 	std::string messageToSend = "";
 	DWORD proccessID = FindProcessId(managerExeName);
 
-	while (loopBool && IsProcessRunning(proccessID))
+	while (EXITING_THREAD == false || IsProcessRunning(proccessID) && loopBool)
 	{
 		if (IsWritingToMessageString == false && MDV::MessageToWrite.size() > 0)
 		{
 			messageToSend = "";
+
+			if (MDV::MessageToWrite.size() > 1000) {
+				MDV::MessageToWrite.clear();
+			}
+
 			while (MDV::MessageToWrite.size() > 0)
 			{
 				messageToSend += MDV::MessageToWrite[0] + "||";
-				MDV::MessageToWrite.erase(MDV::MessageToWrite.begin());
+
+				if (MDV::MessageToWrite.size() > 0)
+					MDV::MessageToWrite.erase(MDV::MessageToWrite.begin());
 			}
 			messageToSend += "\r\n";
 
@@ -1032,5 +1057,6 @@ DWORD WINAPI ThreadWrite(HMODULE hIns)
 		Sleep(7);
 	}
 
+	WRITE_THREAD_EXITED = true;
 	return 0;
 }

@@ -11,6 +11,8 @@
 
 #include "UberStateManager.h"
 
+bool UberStateManager::RunnerUberStatesSaved = false;
+
 std::string UberGroup::ToString() 
 {
 	std::string s = std::to_string(UberGroupID) + "||:";
@@ -131,9 +133,15 @@ void UberStateManager::SaveUberStates(std::string path)
 }
 
 void UberStateManager::LoadUberStates(std::string path)
-{
+{	
 	app::UberStateController_ApplyPendingChanges(NULL);
 	app::UberStateController_ApplyChanges(app::UberStateController_get_Instance(NULL), NULL);
+
+	if (UberStateManager::RunnerUberStatesSaved == false)
+	{
+		UberStateManager::SaveUberStates(ManagerPath + "\\RaceSettings\\temp.uberstates");
+		UberStateManager::RunnerUberStatesSaved = true;
+	}
 
 	if (std::filesystem::exists(path) == true && std::filesystem::is_regular_file(path) == true)
 	{
@@ -166,6 +174,67 @@ void UberStateManager::LoadUberStates(std::string path)
 		app::UberStateController_SetState(uberStates, NULL);
 		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::UberStateApplyContext__Enum_ValueChanged, NULL);
 	}
+}
+
+void UberStateManager::SetUberState(int UberGroupID, int UberID, std::uint8_t value)
+{
+	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+	app::UberStateValueGroup* UberStateValueGroup = UberStateManager::GetUberGroup(UberGroupID);
+
+	if (UberStateValueGroup != nullptr)
+	{
+		app::UberID* uberID = (app::UberID*)il2cpp_object_new((Il2CppClass*)(*app::UberID__TypeInfo));
+		app::UberID__ctor_1(uberID, UberID, NULL);
+		uberID->fields.m_id = UberID;
+
+		for (int i = 0; i < UberStateValueGroup->fields.m_byteStateMap->fields.count; i++)
+		{
+			if (UberStateValueGroup->fields.m_byteStateMap->fields.entries->vector[i].key->fields.m_id == UberID)
+				UberStateValueGroup->fields.m_byteStateMap->fields.entries->vector[i].value = value;
+		}
+	}
+}
+
+std::uint8_t UberStateManager::GetUberState(int UberGroupID, int UberID)
+{
+	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+	app::UberStateValueGroup* UberStateValueGroup = UberStateManager::GetUberGroup(UberGroupID);
+
+	if (UberStateValueGroup != nullptr)
+	{
+		for (int i = 0; i < UberStateValueGroup->fields.m_byteStateMap->fields.count; i++)
+		{
+			app::Dictionary_2_TKey_TValue_Entry_Moon_UberID_System_Byte_ item = UberStateValueGroup->fields.m_byteStateMap->fields.entries->vector[i];
+
+			if (item.key->fields.m_id == UberID)
+				return item.value;
+		}
+	}
+
+	return '0';
+}
+
+void UberStateManager::ResetUberStates()
+{
+	if (std::filesystem::exists(ManagerPath + "\\RaceSettings\\temp.uberstates") == true && std::filesystem::is_regular_file(ManagerPath + "\\RaceSettings\\temp.uberstates") == true)
+	{
+		UberStateManager::LoadUberStates(ManagerPath + "\\RaceSettings\\temp.uberstates");
+		std::filesystem::remove(ManagerPath + "\\RaceSettings\\temp.uberstates");
+		UberStateManager::RunnerUberStatesSaved = false;
+	}
+}
+
+app::UberStateValueGroup* UberStateManager::GetUberGroup(int UberGroupID)
+{
+	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+
+	for (int i = 0; i < uberStates->fields.m_groupMap->fields.count; i++)
+	{
+		if (uberStates->fields.m_groupMap->fields.entries->vector[i].key->fields.m_id == UberGroupID)
+			return uberStates->fields.m_groupMap->fields.entries->vector[i].value;
+	}
+
+	return nullptr;
 }
 
 void UberStateManager::SaveIntegers(app::UberStateValueGroup* group, std::unordered_map<int, int>& uberids)

@@ -65,7 +65,7 @@ namespace tem {
 			Z = 0.0f;
 		}
 
-		Vector3(std::string& other)
+		/*Vector3(std::string& other)
 		{
 			std::string temp = other;
 			sutil::ReplaceS(temp, ",", ".");
@@ -82,6 +82,31 @@ namespace tem {
 
 			if (content.size() > 2)
 				Z = std::stof(content[2]);
+		}*/
+
+		Vector3(std::string& other)
+		{
+			std::string temp = other;
+			auto content = sutil::SplitTem(temp, ",");
+			X = 0.0f;
+			Y = 0.0f;
+			Z = 0.0f;
+
+			if (content.size() > 0)
+				X = std::stof(content[0]);
+
+			if (content.size() > 1)
+				Y = std::stof(content[1]);
+
+			if (content.size() > 2)
+				Z = std::stof(content[2]);
+		}
+
+		Vector3(app::Color other)
+		{
+			X = other.r;
+			Y = other.g;
+			Z = other.b;
 		}
 
 		Vector3& operator+=(const Vector3& other) {
@@ -154,7 +179,7 @@ namespace tem {
 
 		static app::Vector2 ToVector2(float x = 0.0f, float y = 0.0f)
 		{
-			app::Vector2* moon = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+			app::Vector2* moon = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 			moon->x = x;
 			moon->y = x;
 			return *moon;
@@ -162,12 +187,23 @@ namespace tem {
 
 		app::Vector3 ToMoon()
 		{
-			app::Vector3* moon = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+			app::Vector3* moon = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 			moon->x = this->X;
 			moon->y = this->Y;
 			moon->z = this->Z;
 
 			return *moon;
+		}
+
+		app::Color ToColor()
+		{
+			app::Color moon;
+			moon.r = this->X;
+			moon.g = this->Y;
+			moon.b = this->Z;
+			moon.a = 1.0f;
+
+			return moon;
 		}
 
 		std::string ToString()

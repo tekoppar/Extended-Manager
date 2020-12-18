@@ -121,6 +121,7 @@ std::vector<TemJsonObject> SimpleJson::ParseToJsonObjects(std::string json)
 
 		switch (objectType)
 		{
+
 		default:
 		case JsonObjectValueType::String:
 		{
@@ -154,7 +155,7 @@ std::vector<TemJsonObject> SimpleJson::ParseToJsonObjects(std::string json)
 		{
 			std::string dictionary = "";
 			if (jsonValue[0] == '[')
-				dictionary = jsonValue.substr(1, jsonValue.size() - 1);
+				dictionary = jsonValue.substr(1, jsonValue.size() - (jsonValue[jsonValue.size() - 1] == ']' ? 2 : 1));
 			else
 				dictionary = jsonValue;
 
@@ -164,7 +165,7 @@ std::vector<TemJsonObject> SimpleJson::ParseToJsonObjects(std::string json)
 			{
 			case JsonObjectValueType::Dictionary:
 			{
-				auto splitValues = sutil::SplitTemNeighbours(dictionary, "},{");
+				auto splitValues = SplitValues('{', '}', dictionary);// sutil::SplitTemNeighbours(dictionary, "},{");
 				TemJsonObjectData data;
 
 				std::vector< TemJsonObject*> jsonobjects;
@@ -269,7 +270,7 @@ void SimpleJson::GetJsonName(std::string& json, std::string& value, int& index)
 
 		value = json.substr(startIndex, endIndex - (startIndex - 1));
 	}
-	else 
+	else
 	{
 		index = startIndex;
 	}
@@ -277,14 +278,85 @@ void SimpleJson::GetJsonName(std::string& json, std::string& value, int& index)
 
 void SimpleJson::GetJsonValue(std::string& json, std::string& value, int& index)
 {
+	int foundMoreObjectIndex = 0;
+	int foundStartObjects = 0;
+	int foundEndObjects = 0;
 	if (json[index] == ':')
 		index++;
 
 	std::size_t endIndex = std::string::npos;
 	if (json[index] == '{')
-		endIndex = json.find('}', index);
+	{
+		foundStartObjects++;
+
+		int loopIndex = 1;
+		while (foundStartObjects != foundEndObjects)
+		{
+			char charFound = json[index + loopIndex];
+
+			if (charFound == '{')
+			{
+				foundStartObjects++;
+				foundMoreObjectIndex = index + loopIndex;
+			}
+			else if (charFound == '}')
+			{
+				foundEndObjects++;
+				endIndex = index + loopIndex;
+			}
+
+			loopIndex++;
+
+			if (index + loopIndex >= json.size())
+			{
+				index = endIndex;
+				return;
+			}
+
+			if (foundStartObjects == foundEndObjects && (endIndex > foundMoreObjectIndex || foundMoreObjectIndex == -1))
+				goto EndLoop1;
+		}
+
+	EndLoop1:
+		if (endIndex != std::string::npos && json[endIndex] == '}')
+			endIndex++;
+	}
 	else if (json[index] == '[')
-		endIndex = json.find(']', index);
+	{
+		foundStartObjects++;
+
+		int loopIndex = 1;
+		while (foundStartObjects != foundEndObjects)
+		{
+			char charFound = json[index + loopIndex];
+
+			if (charFound == '[')
+			{
+				foundStartObjects++;
+				foundMoreObjectIndex = index + loopIndex;
+			}
+			else if (charFound == ']')
+			{
+				foundEndObjects++;
+				endIndex = index + loopIndex;
+			}
+
+			loopIndex++;
+
+			if (index + loopIndex >= json.size())
+			{
+				index = endIndex;
+				return;
+			}
+
+			if (foundStartObjects == foundEndObjects && (endIndex > foundMoreObjectIndex || foundMoreObjectIndex == -1))
+				goto EndLoop2;
+		}
+
+	EndLoop2:
+		if (endIndex != std::string::npos && json[endIndex] == ']')
+			endIndex++;
+	}
 	else
 	{
 		endIndex = json.find(newJsonObject, index);
@@ -306,6 +378,72 @@ void SimpleJson::GetJsonValue(std::string& json, std::string& value, int& index)
 		value = json.substr(index, endIndex - index);
 
 	index = endIndex;
+}
+
+std::vector<std::string> SimpleJson::SplitValues(char start, char end, std::string& values)
+{
+	int startIndex = 0;
+	int endIndex = 0;
+	int foundMoreObjectIndex = 0;
+	int foundStartObjects = 0;
+	int foundEndObjects = 0;
+	std::vector<std::string> foundValues;
+
+	if (values[startIndex] == start)
+	{
+	Restart:
+		foundStartObjects++;
+
+		int loopIndex = 1;
+		while (foundStartObjects != foundEndObjects)
+		{
+			char charFound = values[startIndex + loopIndex];
+
+			if (charFound == start)
+			{
+				foundStartObjects++;
+				foundMoreObjectIndex = startIndex + loopIndex;
+			}
+			else if (charFound == end)
+			{
+				foundEndObjects++;
+				endIndex = startIndex + loopIndex;
+			}
+
+			loopIndex++;
+
+			if (startIndex + loopIndex >= values.size())
+			{
+				if (foundStartObjects == foundEndObjects && endIndex != std::string::npos)
+				{
+					endIndex = (values[endIndex + 1] == end ? endIndex + 1 : endIndex);
+					startIndex = values[startIndex - 1] == start ? startIndex - 1 : startIndex;
+					foundValues.push_back(values.substr(startIndex, endIndex - (startIndex - 1)));
+				}
+				return foundValues;
+			}
+
+			if (foundStartObjects == foundEndObjects && (endIndex > foundMoreObjectIndex || foundMoreObjectIndex == -1))
+				goto EndLoop;
+		}
+
+	EndLoop:
+		if (endIndex != std::string::npos && values[endIndex] == end)
+			endIndex++;
+
+		if (endIndex != std::string::npos)
+			foundValues.push_back(values.substr(startIndex, endIndex - startIndex));
+	}
+	if (endIndex < values.size() && values[endIndex + 1] == start)
+	{
+		foundStartObjects = 0;
+		foundEndObjects = 0;
+		foundMoreObjectIndex = 0;
+		startIndex = endIndex + 2;
+		goto Restart;
+	}
+
+	return foundValues;
 }
 
 JsonObjectValueType SimpleJson::GetJsonObjectType(std::string& value)

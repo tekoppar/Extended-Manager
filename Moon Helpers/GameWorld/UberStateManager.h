@@ -25,9 +25,14 @@ class UberStateManager
 {
 public:
 	static std::unordered_map<int, UberGroup> UberGroups;
+	static bool RunnerUberStatesSaved;
 
 	static void SaveUberStates(std::string path);
 	static void LoadUberStates(std::string path);
+	static void ResetUberStates();
+	static void SetUberState(int UberGroupID, int UberID, std::uint8_t value);
+	static std::uint8_t GetUberState(int UberGroupID, int UberID);
+	static app::UberStateValueGroup* GetUberGroup(int UberGroupID);
 	static void SaveIntegers(app::UberStateValueGroup* group, std::unordered_map<int, int>& uberids);
 	static void SaveBools(app::UberStateValueGroup* group, std::unordered_map<int, bool>& uberids);
 	static void SaveFloats(app::UberStateValueGroup* group, std::unordered_map<int, float>& uberids);

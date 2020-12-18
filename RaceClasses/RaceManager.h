@@ -83,6 +83,7 @@ public:
 	std::vector<tem::Rect> raceCheckpointsRects;
 	std::vector<bool> raceCheckpointsHit;
 	std::unordered_map<int, SeinStateUpdate> abilitiesStates;
+	std::unordered_map<int, SeinStateUpdate> abilitiesUpgradeStates;
 	std::vector<SeinShardUpdate> shardsStates;
 	std::unordered_map<int, SeinShard> shardsInInventory;
 	std::vector<app::SpiritShardType__Enum> shardsToEquip;

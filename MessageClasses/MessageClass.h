@@ -7,6 +7,8 @@
 #ifndef _MESSAGECLASS_H
 #define _MESSAGECLASS_H
 
+#include "ManagerDef.h"
+
 enum class MessageType 
 {
 	EndThread = 0,
@@ -39,7 +41,11 @@ enum class MessageType
 	LoadUberStates = 27,
 	SetSeinPosition = 28,
 	CreateBackupSave = 29,
-	GetSaveInfo = 30
+	GetSaveInfo = 30,
+	RefreshBackups = 31,
+	SetOriVisuals = 32,
+	SetTransform = 33,
+	GetTransform = 34
 };
 
 class Message {
@@ -63,6 +69,7 @@ public:
 	void AddMessage(Message message)
 	{
 		PullTemp();
+		//sutil::Append(ManagerPath + "message_error_dll.log", "DLL:" + message.Content + " - " + std::to_string(message.TypeInt) + "\n");
 
 		if (IsPulling == true)
 		{

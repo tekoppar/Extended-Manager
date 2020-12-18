@@ -114,6 +114,7 @@ void Graph::Initialize(int width)
 		SetupTextures(newWidth, CurrentGraphHeight);
 	}
 	AllFloatData = std::vector<FloatData>();
+	(*app::DebugMenu__TypeInfo)->static_fields->ShouldKeepImGUIEnabled = true;
 
 	if (graphColorTexture != nullptr)
 	{
@@ -150,7 +151,7 @@ void Graph::Update()
 
 void Graph::CleanUpStatic()
 {
-	app::DebugMenu__TypeInfo->static_fields->ShouldKeepImGUIEnabled = false;
+	(*app::DebugMenu__TypeInfo)->static_fields->ShouldKeepImGUIEnabled = false;
 
 	Graph* temp = Graph::Instance;
 	for (auto& graphLabel : AllDefaultGraphLabels)
@@ -204,7 +205,7 @@ void Graph::CleanUpStatic()
 void Graph::CloseGraph()
 {
 	ClearGraph(graphColorTexture, GraphColors::Transparent);
-	app::DebugMenu__TypeInfo->static_fields->ShouldKeepImGUIEnabled = false;
+	(*app::DebugMenu__TypeInfo)->static_fields->ShouldKeepImGUIEnabled = false;
 
 	if (masterCanvas != nullptr)
 		app::GameObject_SetActiveRecursively(masterCanvas, false, NULL);
@@ -225,7 +226,7 @@ void Graph::StartDrawing(int width)
 {
 	int newWidth = width;
 	FindNextWidth(newWidth);
-	app::DebugMenu__TypeInfo->static_fields->ShouldKeepImGUIEnabled = true;
+	(*app::DebugMenu__TypeInfo)->static_fields->ShouldKeepImGUIEnabled = true;
 
 	if (newWidth == 0)
 		newWidth = GraphWidth;
@@ -390,7 +391,7 @@ void Graph::SetupTextures(int width, int height)
 	app::Material_EnableKeyword_1(RaceDataBlackMaterial, UNITY_UI_ALPHACLIPName, NULL);
 	app::Material_EnableKeyword_1(RaceDataBlackMaterial, UNITY_UI_CLIP_RECTName, NULL);
 
-	graphColorTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)app::Texture2D__TypeInfo);
+	graphColorTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
 	app::Texture2D__ctor_3(graphColorTexture, width, GraphHeight, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
@@ -405,7 +406,7 @@ void Graph::SetupTextures(int width, int height)
 
 	ClearGraph(graphColorTexture, GraphColors::Transparent, width);
 
-	lightMap = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)app::Texture2D__TypeInfo);
+	lightMap = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
 	app::Texture2D__ctor_3(lightMap, GraphWidth, GraphHeight, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, true, true, NULL);
 	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
@@ -452,7 +453,7 @@ void Graph::SetupUI(int width, int height)
 		app::Type* imageType = GetType("UnityEngine.UI", "Image");
 		app::Type* buttonType = GetType("UnityEngine.UI", "Button");
 
-		masterCanvas = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		masterCanvas = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(masterCanvas, testingCanvasName, NULL);
 
 		app::CanvasRenderer* canvasRenderer = (app::CanvasRenderer*)app::GameObject_AddComponent((app::GameObject*)masterCanvas, CanvasRendererType, NULL);
@@ -468,13 +469,13 @@ void Graph::SetupUI(int width, int height)
 
 		app::GameObject* rectMask2D = DrawUI::RectMask2D("CanvasMask", GraphWidth, GraphHeight, GraphWidth, GraphHeight);
 
-		canvasGraphBackground = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		canvasGraphBackground = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* canvasBackgroundImageName = string_new("CanvasBackgroundImage");
 		app::GameObject__ctor(canvasGraphBackground, canvasBackgroundImageName, NULL);
 		app::Image* canvasBackgroundImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphBackground, imageType, NULL);
 		app::Image_set_material(canvasBackgroundImage, RaceDataBlackMaterial, NULL);
 
-		canvasGraphData = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		canvasGraphData = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::String* canvasImageName = string_new("CanvasDataImage");
 		app::GameObject__ctor(canvasGraphData, canvasImageName, NULL);
 		app::Image* canvasImage = (app::Image*)app::GameObject_AddComponent((app::GameObject*)canvasGraphData, imageType, NULL);

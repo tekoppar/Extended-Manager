@@ -50,7 +50,7 @@ namespace tem {
 
 		app::Rect ToMoon()
 		{
-			app::Rect* moon = (app::Rect*)il2cpp_object_new((Il2CppClass*)app::Rect__TypeInfo);
+			app::Rect* moon = (app::Rect*)il2cpp_object_new((Il2CppClass*)(*app::Rect__TypeInfo));
 			moon->m_XMin = this->X;
 			moon->m_YMin = this->Y;
 			moon->m_Width = this->Width;

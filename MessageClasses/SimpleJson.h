@@ -69,6 +69,7 @@ private:
 	static void GetJsonName(std::string& json, std::string& value, int& index);
 	static JsonObjectValueType GetJsonObjectType(std::string& value);
 	static JsonObjectValueType IsIntegerOrFloat(std::string& s);
+	static std::vector<std::string> SplitValues(char start, char end, std::string& values);
 	static bool IsDigit(char& s);
 };
 

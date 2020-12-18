@@ -117,7 +117,7 @@ void RaceManager::SetupManager()
 		app::Object_1__Array* seinArr = app::Object_1_FindObjectsOfType(seinType, NULL);
 
 		if (raceSC == nullptr)
-			raceSC = (app::RaceSystem*)il2cpp_object_new((Il2CppClass*)app::RaceSystem__TypeInfo);
+			raceSC = (app::RaceSystem*)il2cpp_object_new((Il2CppClass*)(*app::RaceSystem__TypeInfo));
 
 		if (std::filesystem::exists(racePath + "Default") == false)
 			std::filesystem::create_directory(racePath + "Default");
@@ -272,7 +272,7 @@ void RaceManager::LoadRaceData(std::string path)
 				{
 					auto values = sutil::SplitTem(jsonObject.value.data.GetS(), "|");
 					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
-					StartPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+					StartPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 					StartPosition.X = (float)position.X;
 					StartPosition.Y = (float)position.Y - 0.5f;
 					StartPosition.Z = (float)position.Z;
@@ -283,7 +283,7 @@ void RaceManager::LoadRaceData(std::string path)
 				{
 					auto values = sutil::SplitTem(jsonObject.value.data.GetS(), "|");
 					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
-					FinishPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+					FinishPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 					FinishPosition.X = position.X;
 					FinishPosition.Y = position.Y - 0.5f;
 					FinishPosition.Z = position.Z;
@@ -322,15 +322,20 @@ void RaceManager::LoadRaceData(std::string path)
 				{
 					auto values = jsonObject.value.GetD();
 					std::string active = "";
+					int abilityIndex = -1;
 
 					for (auto& value : values)
 					{
 						SeinStateUpdate state;
 
 						state.Active = value.second.GetB();
-						state.AbilityType = (app::AbilityType__Enum)std::stoi(value.second.ObjectName);
+						abilityIndex = std::stoi(value.second.ObjectName);
+						state.AbilityType = (app::AbilityType__Enum)abilityIndex;
 
-						abilitiesStates[std::stoi(value.second.ObjectName)] = state;
+						if (abilityIndex < 256)
+							abilitiesStates[std::stoi(value.second.ObjectName)] = state;
+						else
+							abilitiesUpgradeStates[std::stoi(value.second.ObjectName)] = state;
 					}
 				}
 				break;
@@ -410,7 +415,7 @@ void RaceManager::LoadRaceData(std::string path)
 void RaceManager::CleanupManager()
 {
 	IsRacing = false;
-	app::InvisibleCheckpoint__TypeInfo->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
+	(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
 
 	GhostHandler::CleanupGhosts();
 
@@ -548,7 +553,7 @@ void RaceManager::CheckTimer()
 			if (RaceTime.RaceTimerState == TimerState::TimerHasStarted && RaceManager::State != RaceState::RaceIsStopping &&
 				RaceManager::State != RaceState::RaceIsStopped && RaceManager::State == RaceState::RaceIsRunning)
 			{
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 				//std::string ghostframes = GetLastGhostFrame();
 				//TemSocket::SendSocketMessage("WRITEGHOSTSYNC" + TemSocket::MD + raceName + TemSocket::MD + std::to_string(ghostC->fields.CurrentFrameIndex) + TemSocket::MD + ghostframes);
 				//sutil::Append(ManagerPath + "\\RaceSettings\\test.ghostsync", ghostframes);
@@ -569,7 +574,7 @@ void RaceManager::CheckTimer()
 
 				raceCheckpointsHit[raceCheckpointsRects.size() - 1] = false;
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 				/*if (GhostHandler::ServerRespond == true)
 				{
 					TemSocket::SendSocketMessage("GETGHOSTSYNC" + TemSocket::MD + std::to_string(GhostHandler::LastReadGhostFrame) + TemSocket::MD + raceName);
@@ -594,10 +599,10 @@ void RaceManager::FinishedRace(float time)
 	ResetHitCheckpoints();
 	MDV::MessageToWrite.push_back("FINISHEDRACE");
 
-	app::InvisibleCheckpoint__TypeInfo->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
+	(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
 	app::SeinCharacter_set_Position(MDV::MoonSein, FinishPosition.ToMoon(), NULL);
 	app::SeinCharacter_PlaceOnGround(MDV::MoonSein, NULL);
-	app::Vector3* zeroSpeed = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3* zeroSpeed = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	zeroSpeed->z = zeroSpeed->y = zeroSpeed->x = 0;
 	app::Vector2 zeroSpeedV2;
 	zeroSpeedV2.x = zeroSpeedV2.y = 0.0f;
@@ -611,19 +616,19 @@ void RaceManager::FinishedRace(float time)
 	{
 		if (AttemptManager.BestAttempt.RaceTime > RaceTime.GhostRaceTimer->fields._ElapsedTime_k__BackingField)
 		{
-			TemGhostRecorder.WriteRecorder(racePath + raceName + ".topscore.ghost", LeaderboardEntryType::TopScore);
+			TemGhostRecorder.WriteRecorder(racePath + raceName + ".topscore.ghost", LeaderboardEntryType::TopScore, raceName, RaceTime.GhostRaceTimer->fields._ElapsedTime_k__BackingField);
 			FrameLogger.LogFrameData(racePath + raceName + ".topscore.frames");
 			AnimationHelper::PlayAnimation("oriTopScore");
 		}
 		else if (AttemptManager.BestAttempt.RaceTime > RaceTime.GhostRaceTimer->fields._PersonalBestTime_k__BackingField)
 		{
-			TemGhostRecorder.WriteRecorder(racePath + raceName + ".newbp.ghost", LeaderboardEntryType::PersonalBest);
+			TemGhostRecorder.WriteRecorder(racePath + raceName + ".newbp.ghost", LeaderboardEntryType::PersonalBest, raceName, RaceTime.GhostRaceTimer->fields._ElapsedTime_k__BackingField);
 			FrameLogger.LogFrameData(racePath + raceName + ".newbp.frames");
 			AnimationHelper::PlayAnimation("oriNewPBRace");
 		}
 		else
 		{
-			TemGhostRecorder.WriteRecorder(racePath + raceName + ".ghost", LeaderboardEntryType::FinishedRace);
+			TemGhostRecorder.WriteRecorder(racePath + raceName + ".ghost", LeaderboardEntryType::FinishedRace, raceName, RaceTime.GhostRaceTimer->fields._ElapsedTime_k__BackingField);
 			FrameLogger.LogFrameData(racePath + raceName + ".frames");
 			AnimationHelper::PlayAnimation("oriFinishRace");
 		}
@@ -641,6 +646,7 @@ void RaceManager::FinishedRace(float time)
 	SeinCharacterHelper::RestoreBoundAbilities();
 	SeinCharacterHelper::RestoreShards();
 	SeinCharacterHelper::RestoreEquippedShards();
+	SeinCharacterHelper::RestoreSeinAbilitiesUpgrades();
 }
 
 void RaceManager::StartRace()
@@ -681,6 +687,7 @@ void RaceManager::RestartRace()
 		SeinCharacterHelper::RestoreBoundAbilities();
 		SeinCharacterHelper::RestoreShards();
 		SeinCharacterHelper::RestoreEquippedShards();
+		SeinCharacterHelper::RestoreSeinAbilitiesUpgrades();
 
 		app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, false, NULL);
 		app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, false, NULL);
@@ -713,9 +720,9 @@ void RaceManager::StopRace()
 
 		app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, false, NULL);
 		app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, false, NULL);
-		app::SeinCharacter_set_Position(MDV::MoonSein, StartPosition.ToMoon(), NULL);
+		app::SeinCharacter_set_Position(MDV::MoonSein, tem::Vector3(StartPosition.X, StartPosition.Y + 0.1f, StartPosition.Z).ToMoon(), NULL);
 		app::SeinCharacter_FillHealthAndEnergy(MDV::MoonSein, NULL);
-		app::InvisibleCheckpoint__TypeInfo->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
+		(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
 		app::SeinPlayAnimationController_StopAnimation(MDV::SeinPlayAnimationController, NULL);
 
 		SeinCharacterHelper::RestoreSeinAbilities();
@@ -723,6 +730,8 @@ void RaceManager::StopRace()
 		SeinCharacterHelper::RestoreShards();
 		SeinCharacterHelper::RestoreEquippedShards();
 		TemSceneHelper::SetAllScenesCanUnload();
+		UberStateManager::ResetUberStates();
+		SeinCharacterHelper::RestoreSeinAbilitiesUpgrades();
 
 		RaceManager::State = RaceState::RaceIsStopped;
 		RaceManager::TickCount = 0;
@@ -743,7 +752,7 @@ void RaceManager::CreateFinishLine()
 	if (RaceGoalObject == nullptr)
 	{
 		app::String* raceFinishName = string_new("RaceFinish");
-		RaceGoalObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		RaceGoalObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceGoalObject, raceFinishName, NULL);
 
 		DebugDrawer debugDrawer = DebugDrawer();
@@ -753,7 +762,7 @@ void RaceManager::CreateFinishLine()
 		raceFinishZone = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(raceFinishDebug, playerInsideZoneType, NULL);
 
 		raceFinishZone->fields.OnlyTriggerIfGrounded = false;
-		app::Vector2* size2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+		app::Vector2* size2 = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 		size2->x = 3.0f;
 		size2->y = 15.0f;
 		raceFinishZone->fields._.Size = *size2;
@@ -802,22 +811,22 @@ void RaceManager::CreateFinishLine()
 		}
 
 		app::String* raceBodyName = string_new("RaceBase");
-		app::GameObject* RaceBodyA = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* RaceBodyA = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceBodyA, raceBodyName, NULL);
 		app::Transform* transformRaceBodyA = app::GameObject_get_transform(RaceBodyA, NULL);
 
 		raceBodyName = string_new("RaceCenter");
-		app::GameObject* RaceBodyB = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* RaceBodyB = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceBodyB, raceBodyName, NULL);
 		app::Transform* transformRaceBodyB = app::GameObject_get_transform(RaceBodyB, NULL);
 
 		raceBodyName = string_new("RaceCollar");
-		app::GameObject* RaceBodyC = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* RaceBodyC = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceBodyC, raceBodyName, NULL);
 		app::Transform* transformRaceBodyC = app::GameObject_get_transform(RaceBodyC, NULL);
 
 		raceBodyName = string_new("RaceCollarGlow");
-		app::GameObject* RaceBodyD = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+		app::GameObject* RaceBodyD = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceBodyD, raceBodyName, NULL);
 		app::Transform* transformRaceBodyD = app::GameObject_get_transform(RaceBodyD, NULL);
 
@@ -846,7 +855,7 @@ void RaceManager::CreateFinishLine()
 			app::MeshRenderer* meshRenderer = (app::MeshRenderer*)app::GameObject_AddComponent(BodyParts[i], meshRendererType, NULL);
 			app::Material* meshMat = app::Renderer_GetMaterial((app::Renderer*)meshRenderers[i], NULL);
 
-			app::Material* raceMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)app::Material__TypeInfo);
+			app::Material* raceMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)(*app::Material__TypeInfo));
 			app::Material__ctor_1(raceMaterial, meshMat, NULL);
 			app::Material_CopyPropertiesFromMaterial(raceMaterial, meshMat , NULL);
 			RaceGoalMaterials.push_back(raceMaterial);
@@ -883,7 +892,7 @@ void RaceManager::SetupRace(float raceDuration)
 		ResetHitCheckpoints();
 
 		MDV::MessageToWrite.push_back("STARTEDRACE");
-		app::InvisibleCheckpoint__TypeInfo->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = false;
+		(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = false;
 
 		FrameLogger.CleanUpData();
 
@@ -892,7 +901,7 @@ void RaceManager::SetupRace(float raceDuration)
 			//app::SeinCharacter_set_Position(MDV::MoonSein, tem::Vector3(StartPosition.X, StartPosition.Y + 0.5f, StartPosition.Z).ToMoon(), NULL);
 			app::ScenesManager_set_CurrentCameraTargetPosition(TemSceneHelper::SceneManager, StartPosition.ToVector2(), NULL);
 			app::ScenesManager_SetTargetPositions(TemSceneHelper::SceneManager, StartPosition.ToMoon(), NULL);
-			app::CharacterPlatformMovement_TeleportAndPlaceOnGround(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, StartPosition.ToMoon(), 0.0f, 0.01f, NULL);
+			app::CharacterPlatformMovement_TeleportAndPlaceOnGround(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, tem::Vector3(StartPosition.X, StartPosition.Y, StartPosition.Z).ToMoon(), 0.0f, 0.01f, NULL);
 			//app::SeinCharacter_PlaceOnGround(MDV::MoonSein, NULL);
 			app::GameplayCamera_MoveToTargetCharacter(MDV::SeinGameplayCamera, 0.01f, NULL);
 		}
@@ -918,6 +927,7 @@ void RaceManager::SetupRacePhase2(float raceDuration)
 	SeinCharacterHelper::StoreBoundAbilities();
 	SeinCharacterHelper::StoreEquippedShards();
 	SeinCharacterHelper::StoreShards();
+	SeinCharacterHelper::StoreSeinAbilitiesUpgrades();
 
 	if (IsRaceCheckpointCreated == true)
 	{
@@ -963,6 +973,11 @@ void RaceManager::SetupRacePhase4(float raceDuration)
 		SeinCharacterHelper::UpdateSeinStates(abilitiesStates);
 	}
 
+	if (abilitiesUpgradeStates.size() > 0)
+	{
+		SeinCharacterHelper::UpdateSeinAbilitiesUpgradesStates(abilitiesUpgradeStates);
+	}
+
 	if (shardsInInventory.size() > 0)
 	{
 		SeinCharacterHelper::GiveShards(shardsInInventory);
@@ -998,7 +1013,7 @@ void RaceManager::SetupRacePhase5(float raceDuration)
 		GhostHandler::CreateGhostPublic(racePath + raceName + ".newbp.ghost", "BP Ghost", StartPosition);
 	}
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 	//GhostHandler::CreateStreamGhost(StartPosition);
 #endif
 

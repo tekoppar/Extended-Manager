@@ -7,6 +7,7 @@
 #include "ManagerDef.h"
 #include "Tem.h"
 #include "RaceManager.h"
+#include "TemSocket.h"
 
 #include "TemRecorder.h"
 
@@ -198,7 +199,7 @@ bool TemRecorder::StopRecorder()
 	return false;
 }
 
-bool TemRecorder::WriteRecorder(std::string filePath, LeaderboardEntryType type)
+bool TemRecorder::WriteRecorder(std::string filePath, LeaderboardEntryType type, std::string raceName, float time)
 {
 	if (GhostRecorder != nullptr) {
 		/*if (std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath) == true)
@@ -213,7 +214,7 @@ bool TemRecorder::WriteRecorder(std::string filePath, LeaderboardEntryType type)
 
 		app::GhostRecorder_FinalizeFrame(GhostRecorder, NULL);
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 		//std::string ghostframes = GetLastGhostFrame();
 		//TemSocket::SendSocketMessage("WRITEGHOSTSYNC" + TemSocket::MD + raceName + TemSocket::MD + std::to_string(ghostC->fields.CurrentFrameIndex) + TemSocket::MD + ghostframes);
 		//sutil::Append(ManagerPath + "\\RaceSettings\\test.ghostsync", ghostframes);
@@ -228,10 +229,10 @@ bool TemRecorder::WriteRecorder(std::string filePath, LeaderboardEntryType type)
 		sutil::Write(filePath, base64encodedGhost);
 		std::remove(raceFileS.c_str());
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 		if (type != LeaderboardEntryType::FinishedRace && MDV::User.IsValid() == true)
 		{
-			std::string serverGhostMessage = raceName + TemSocket::MD + std::to_string(MDV::User.GetID()) + TemSocket::MD + "player" + TemSocket::MD + std::to_string(RaceTime.GhostRaceTimer->fields._ElapsedTime_k__BackingField) + TemSocket::MD + base64encodedGhost;
+			std::string serverGhostMessage = raceName + TemSocket::MD + std::to_string(MDV::User.GetID()) + TemSocket::MD + "player" + TemSocket::MD + std::to_string(time) + TemSocket::MD + base64encodedGhost;
 			TemSocket::SendSocketMessage("WRITEGHOST" + TemSocket::MD + serverGhostMessage);
 		}
 #endif

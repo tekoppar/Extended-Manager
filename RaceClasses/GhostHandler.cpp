@@ -58,7 +58,7 @@ void GhostHandler::Update()
 {
 	GhostHandler::UpdateStatic();
 
-#ifdef _DEBUG
+#ifdef TEMSOCKET
 	if (StreamGhost != nullptr && StreamGhost->fields.GhostRecorderData != nullptr)
 		LastPosition = std::min<float>(StreamGhost->fields.CurrentTime, StreamGhost->fields.GhostRecorderData->fields.Duration);
 
@@ -328,7 +328,7 @@ void GhostHandler::CleanupGhosts()
 			{
 				app::Object_1_Destroy_1((app::Object_1*)ActiveGhostIcons[ghostPlayer.first], NULL);
 				ActiveGhostIcons[ghostPlayer.first] = nullptr;
-				ActiveGhostIcons.erase(ghostPlayer.first);
+				//ActiveGhostIcons.erase(ghostPlayer.first);
 			}
 
 			if (ghostPlayer.second != nullptr)
@@ -344,7 +344,7 @@ void GhostHandler::CleanupGhosts()
 						app::Object_1_Destroy((app::Object_1*)parentObject, 1.0f, NULL);
 				}
 				ghostPlayer.second = nullptr;
-				ActiveGhostPlayers.erase(ghostPlayer.first);
+				//ActiveGhostPlayers.erase(ghostPlayer.first);
 			}
 		}
 
@@ -498,8 +498,8 @@ void GhostHandler::UpdateStreamGhost()
 		app::GhostRecorderData__ctor(ghostRecorderData, NULL);
 
 		//app::BinaryWriter* seinWriter = (app::BinaryWriter*)ghostC->fields.m_binaryWriter;
-		app::Encoding* encoding = (app::Encoding*)il2cpp_object_new((Il2CppClass*)app::Encoding__TypeInfo);
-		encoding = app::Encoding__TypeInfo->static_fields->utf8Encoding;
+		app::Encoding* encoding = (app::Encoding*)il2cpp_object_new((Il2CppClass*)(*app::Encoding__TypeInfo));
+		encoding = (*app::Encoding__TypeInfo)->static_fields->utf8Encoding;
 
 		auto MemoryStreamClass = GetClass<>("System.IO", "MemoryStream");
 		app::MemoryStream* seinMemoryStream = (app::MemoryStream*)il2cpp_object_new((Il2CppClass*)MemoryStreamClass);

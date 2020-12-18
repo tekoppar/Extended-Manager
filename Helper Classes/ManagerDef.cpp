@@ -7,7 +7,9 @@
 #include <vector>
 
 #include "StringUtils.h"
+#include "SeinCharacterHelper.h"
 #include "ManagerDef.h"
+#include "SeinVisualEditor.h"
 
 app::ScenesManager* sceneManager;
 std::string ManagerPath = "";
@@ -20,14 +22,19 @@ app::SeinCharacter* MDV::MoonSein = nullptr;
 app::SeinPlayAnimationController* MDV::SeinPlayAnimationController = nullptr;
 app::AreaMapUI* MDV::AreaMapUI = nullptr;
 std::vector<std::string> MDV::MessageToWrite = std::vector<std::string>();
-float MDV::GameCompletion = 0.0f;
-float MDV::PreviousGameCompletion = 0.0f;
+app::GameObject* MDV::SelectedObject = nullptr;
 bool MDV::CanCallMethods = false;
 
 void MDV::ValidatePointers()
 {
+	app::GameStateMachine* stateMachine = (*app::GameStateMachine__TypeInfo)->static_fields->m_instance;
+
 	if (MoonSein == nullptr || MoonSein != nullptr && MoonSein->fields._._._._.m_CachedPtr == nullptr)
+	{
 		MoonSein = app::Characters_get_Sein(NULL);
+		SeinVisualEditor::VisualSettingsUpdated.ResetBooleans();
+		SeinVisualEditor::SetHolidayOri();
+	}
 
 	if (SeinPlayAnimationController == nullptr)
 		SeinPlayAnimationController = MoonSein->fields.Controller->fields.m_playAnimationController;
@@ -36,7 +43,13 @@ void MDV::ValidatePointers()
 		SeinPlayAnimationController->fields.Sein = MoonSein;
 
 	if (AreaMapUI == nullptr || AreaMapUI->fields._._._._.m_CachedPtr == nullptr)
-		AreaMapUI = app::AreaMapUI__TypeInfo->static_fields->Instance;
+		AreaMapUI = (*app::AreaMapUI__TypeInfo)->static_fields->Instance;
+
+	//update visuals
+	if (SeinVisualEditor::ManagerLoaded == true && MoonGameController != nullptr && stateMachine->fields._CurrentState_k__BackingField == app::GameStateMachine_State__Enum::GameStateMachine_State__Enum_Game && MoonSein != nullptr)
+	{
+		SeinVisualEditor::SetAllVisuals();
+	}
 }
 
 app::GameObject* GetSceneByName(std::string sceneToFind)
@@ -192,6 +205,7 @@ app::GameObject* EnableSceneByName(std::string sceneToPreload)
 app::GameObject* GetComponentByScenePath(std::string sceneName, std::vector<std::string> scenePath)
 {
 	app::GameObject* currentObject = GetSceneByName(sceneName);
+	app::String* activeObjectName = nullptr;
 
 	if (currentObject == nullptr)
 		currentObject = GetSceneByNameAll(sceneName);
@@ -202,6 +216,7 @@ app::GameObject* GetComponentByScenePath(std::string sceneName, std::vector<std:
 	{
 		for (auto& string : scenePath)
 		{
+			activeObjectName = string_new(string.c_str());
 			app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(currentObject, transformType, true, NULL);
 
 			if (components != nullptr)
@@ -212,9 +227,9 @@ app::GameObject* GetComponentByScenePath(std::string sceneName, std::vector<std:
 					{
 						app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
 						app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
-						std::string nameS = sutil::convert_csstring(oName);
 
-						if (nameS == string)
+						bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+						if (same)
 						{
 							currentObject = gamyobj;
 							break;
@@ -226,6 +241,141 @@ app::GameObject* GetComponentByScenePath(std::string sceneName, std::vector<std:
 	}
 
 	return currentObject;
+}
+
+app::GameObject* GetComponentByPath(app::GameObject* object, std::vector<std::string> scenePath)
+{
+	app::GameObject* currentObject = object;
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+	app::String* activeObjectName = nullptr;
+
+	if (currentObject != nullptr)
+	{
+		for (auto& string : scenePath)
+		{
+			activeObjectName = string_new(string.c_str());
+			app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(currentObject, transformType, true, NULL);
+
+			if (components != nullptr)
+			{
+				for (int i = 0; i < components->max_length; i++)
+				{
+					if (components->vector[i] != nullptr)
+					{
+						app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+						app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+						bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+
+						if (same && currentObject != gamyobj)
+						{
+							currentObject = gamyobj;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return currentObject;
+}
+
+std::vector<app::GameObject*> GetComponentsByName(app::GameObject* object, std::string componentName)
+{
+	std::vector<app::GameObject*> foundComponents;
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+	app::String* activeObjectName = string_new(componentName.c_str());;
+
+	if (object != nullptr)
+	{
+			app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(object, transformType, true, NULL);
+
+			if (components != nullptr)
+			{
+				for (int i = 0; i < components->max_length; i++)
+				{
+					if (components->vector[i] != nullptr)
+					{
+						app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+						app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+						bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+
+						if (same && object != gamyobj)
+						{
+							foundComponents.push_back(gamyobj);
+						}
+					}
+				}
+		}
+	}
+
+	return foundComponents;
+}
+
+app::GameObject* GetComponentByName(app::GameObject* object, std::string componentName)
+{
+	app::GameObject* foundComponent = nullptr;
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+	app::String* activeObjectName = string_new(componentName.c_str());;
+
+	if (object != nullptr)
+	{
+		app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(object, transformType, true, NULL);
+
+		if (components != nullptr)
+		{
+			for (int i = 0; i < components->max_length; i++)
+			{
+				if (components->vector[i] != nullptr)
+				{
+					app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+					app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+					bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+
+					if (same && object != gamyobj)
+					{
+						return gamyobj;
+
+					}
+				}
+			}
+		}
+	}
+
+	return foundComponent;
+}
+
+app::GameObject* GetComponentByNameContainsType(app::GameObject* object, std::string componentName, app::Type* type)
+{
+	app::GameObject* foundComponent = nullptr;
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+	app::String* activeObjectName = string_new(componentName.c_str());;
+
+	if (object != nullptr)
+	{
+		app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(object, transformType, true, NULL);
+
+		if (components != nullptr)
+		{
+			for (int i = 0; i < components->max_length; i++)
+			{
+				if (components->vector[i] != nullptr)
+				{
+					app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+					app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+					bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+					app::Component_1* typeComponent = app::GameObject_GetComponent(gamyobj, type, NULL);
+
+					if (same && object != gamyobj && typeComponent != nullptr)
+					{
+						return gamyobj;
+					}
+				}
+			}
+		}
+	}
+
+	return foundComponent;
 }
 
 void DrawLine(app::Texture2D* tex, int x0, int y0, int x1, int y1, app::Color color)
@@ -305,52 +455,12 @@ app::Component_1* GetComponentByType(app::GameObject* object, std::string Namesp
 
 app::GameObject* CreateNewCanvas()
 {
-	/*app::Type* canvasType = GetType("UnityEngine", "Canvas");
-	app::Type* CanvasRendererType = GetType("UnityEngine", "CanvasRenderer");
-	app::Type* rectTransformType = GetType("UnityEngine", "RectTransform");
-	app::Object_1__Array* meshArr = app::Object_1_FindObjectsOfType(CanvasRendererType, NULL);
-
-	//find videoEditor(Clone)
-	app::GameObject* clone = nullptr;
-	for (int i = 0; i < meshArr->max_length; i++)
-	{
-		if (meshArr->vector[i] != nullptr)
-		{
-			app::CanvasRenderer* mesh = (app::CanvasRenderer*)meshArr->vector[i];
-			app::GameObject* gamyobj = app::Component_1_get_gameObject((app::Component_1*)mesh, NULL);
-			app::String* name = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
-			std::string nameS = sutil::convert_csstring(name);
-			if (nameS == "videoEditor(Clone)")
-				clone = gamyobj;
-		}
-	}
-
-	//clone canvas from video editor
-	app::GameObject* newCanvas = nullptr;
-	app::Canvas* videoCanvas = (app::Canvas*)app::GameObject_GetComponentInChildren(clone, canvasType, true, NULL);
-	app::GameObject* videoCanvasParent = app::Component_1_get_gameObject((app::Component_1*)videoCanvas, NULL);
-	newCanvas = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)videoCanvasParent, NULL);
-
-	//destroy all children of canvas
-	app::Component_1__Array* arrComps = app::GameObject_GetComponentsInChildren_1((app::GameObject*)newCanvas, rectTransformType, true, NULL);
-	for (int i = 0; i < arrComps->max_length; i++)
-	{
-		if (arrComps->vector[i] != nullptr)
-		{
-			app::RectTransform* mesh = (app::RectTransform*)arrComps->vector[i];
-			app::GameObject* gamyobj = app::Component_1_get_gameObject((app::Component_1*)mesh, NULL);
-			if (gamyobj != nullptr && gamyobj->fields._.m_CachedPtr != newCanvas->fields._.m_CachedPtr)
-				app::Object_1_DestroyObject_1((app::Object_1*)gamyobj, NULL);
-		}
-	}
-	app::GameObject_SetActiveRecursively(newCanvas, true, NULL);*/
-
-	app::GameObject* canvasObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)app::GameObject__TypeInfo);
+	app::GameObject* canvasObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 	app::String* canvasObjectName = string_new("Canvas");
 	app::GameObject__ctor(canvasObject, canvasObjectName, NULL);
 	app::Transform* canvasObjectTransform = app::GameObject_get_transform(canvasObject, NULL);
 
-	il2cpp_runtime_class_init((Il2CppClass*)app::Canvas__TypeInfo);
+	il2cpp_runtime_class_init((Il2CppClass*)(*app::Canvas__TypeInfo));
 	auto CanvasScalerC = GetClass<>("UnityEngine.UI", "CanvasScaler");
 	il2cpp_runtime_class_init((Il2CppClass*)CanvasScalerC);
 	auto GraphicRaycasterC = GetClass<>("UnityEngine.UI", "GraphicRaycaster");
@@ -394,10 +504,10 @@ void TransformSetScale(app::GameObject* object, tem::Vector3 scale)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 		app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
-		app::Vector3* scaleLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+		app::Vector3* scaleLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 		scaleLocal->x = scale.X;
 		scaleLocal->y = scale.Y;
 		scaleLocal->z = scale.Z;
@@ -410,7 +520,7 @@ tem::Vector3 TransformGetScale(app::GameObject* object)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
 	app::Vector3 scaleLocal = app::Transform_get_localScale(objectTransform, NULL);
@@ -423,10 +533,10 @@ void TransformSetPosition(app::GameObject* object, tem::Vector3 position)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
-	app::Vector3* positionWorld = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3* positionWorld = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	positionWorld->x = position.X;
 	positionWorld->y = position.Y;
 	positionWorld->z = position.Z;
@@ -439,7 +549,7 @@ app::Vector3 TransformGetPosition(app::GameObject* object)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
 	return app::Transform_get_position(objectTransform, NULL);
@@ -451,14 +561,27 @@ void TransformSetLocalPosition(app::GameObject* object, tem::Vector3 position)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
-	app::Vector3* positionLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3* positionLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	positionLocal->x = position.X;
 	positionLocal->y = position.Y;
 	positionLocal->z = position.Z;
 	app::Transform_set_localPosition(objectTransform, *positionLocal, NULL);
+}
+
+tem::Vector3 TransformGetLocalPosition(app::GameObject* object)
+{
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+
+	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
+	{
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
+	}
+	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+	app::Vector3 localPosition = app::Transform_get_localPosition(objectTransform, NULL);
+	return localPosition;
 }
 
 void TransformSetRotation(app::GameObject* object, tem::Vector3 rotation)
@@ -467,15 +590,48 @@ void TransformSetRotation(app::GameObject* object, tem::Vector3 rotation)
 
 	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
 	{
-		transformType = GetTypeFromClass((Il2CppClass*)app::Transform__TypeInfo);
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
 
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
-	app::Vector3* rotationLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)app::Vector3__TypeInfo);
+	app::Vector3* rotationLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	rotationLocal->x = rotation.X;
 	rotationLocal->y = rotation.Y;
 	rotationLocal->z = rotation.Z;
 	app::Transform_Rotate(objectTransform, *rotationLocal, app::Space__Enum::Space__Enum_Self, NULL);
+}
+
+void TransformSetEulerAngles(app::GameObject* object, tem::Vector3 angles)
+{
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+
+	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
+	{
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
+	}
+
+	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+	app::Vector3* rotationLocal = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
+	rotationLocal->x = angles.X;
+	rotationLocal->y = angles.Y;
+	rotationLocal->z = angles.Z;
+	app::Transform_set_eulerAngles(objectTransform, *rotationLocal, NULL);
+}
+
+tem::Vector3 TransformGetRotation(app::GameObject* object)
+{
+	app::Type* transformType = GetType("UnityEngine", "Transform");
+
+	if (transformType->klass->_0.name != "Transform" && transformType->klass->_0.name != "RectTransform")
+	{
+		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
+	}
+	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+	app::Quaternion rotation = app::Transform_get_rotation(objectTransform, NULL);
+	app::Quaternion__Boxed* quatBoxed = (app::Quaternion__Boxed*)il2cpp_object_new((Il2CppClass*)(*app::Quaternion__TypeInfo));
+	quatBoxed->fields = rotation;
+	tem::Vector3 rotationV3 = app::Quaternion_ToEulerAngles(quatBoxed, NULL);
+	return rotationV3;
 }
 
 void TransformSetParent(app::GameObject* object, app::GameObject* parent)
@@ -507,7 +663,7 @@ void TransformSetParentFromObject(app::GameObject* object, app::GameObject* chil
 void RectTransformSetSize(app::GameObject* object, tem::Vector3 size)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
-	app::Vector2* sizeDelta = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+	app::Vector2* sizeDelta = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 	sizeDelta->x = size.X;
 	sizeDelta->y = size.Y;
 	app::RectTransform_set_sizeDelta((app::RectTransform*)objectTransform, *sizeDelta, NULL);
@@ -516,7 +672,7 @@ void RectTransformSetSize(app::GameObject* object, tem::Vector3 size)
 void RectTransformSetAnchoredPosition(app::GameObject* object, tem::Vector3 anchor)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
-	app::Vector2* anchorSize = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+	app::Vector2* anchorSize = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 	anchorSize->x = anchor.X;
 	anchorSize->y = anchor.Y;
 	app::RectTransform_set_anchoredPosition((app::RectTransform*)objectTransform, *anchorSize, NULL);
@@ -525,8 +681,8 @@ void RectTransformSetAnchoredPosition(app::GameObject* object, tem::Vector3 anch
 void RectTransformSetMinMax(app::GameObject* object, tem::Vector3 min, tem::Vector3 max)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
-	app::Vector2* anchorMin = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
-	app::Vector2* anchorMax = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+	app::Vector2* anchorMin = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
+	app::Vector2* anchorMax = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 	anchorMin->x = min.X;
 	anchorMin->y = min.Y;
 	anchorMax->x = max.X;
@@ -550,7 +706,7 @@ app::Vector2 RectTransformGetMin(app::GameObject* object)
 void RectTransformSetPivot(app::GameObject* object, tem::Vector3 pivot)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
-	app::Vector2* newPivot = (app::Vector2*)il2cpp_object_new((Il2CppClass*)app::Vector2__TypeInfo);
+	app::Vector2* newPivot = (app::Vector2*)il2cpp_object_new((Il2CppClass*)(*app::Vector2__TypeInfo));
 	newPivot->x = pivot.X;
 	newPivot->y = pivot.Y;
 	app::RectTransform_set_pivot((app::RectTransform*)objectTransform, *newPivot, NULL);
@@ -592,7 +748,7 @@ app::Material* CreateNewMaterial(std::string shader)
 {
 	app::String* standardMatS = string_new(shader.data());
 	app::Shader* standardShader = app::Shader_Find(standardMatS, NULL);
-	app::Material* newMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)app::Material__TypeInfo);
+	app::Material* newMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)(*app::Material__TypeInfo));
 	app::Material__ctor(newMaterial, standardShader, NULL);
 	app::Color newColor = app::Color();
 	newColor.a = 0.0f, newColor.b = 1.0f, newColor.g = 1.0f, newColor.r = 1.0f;

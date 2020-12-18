@@ -62,7 +62,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v142</PlatformToolset>
@@ -109,7 +109,7 @@
     <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
-    <OutDir>..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\</OutDir>
+    <OutDir>..\..\..\..\Desktop\ExtendedManager\bin\</OutDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
@@ -148,7 +148,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -173,7 +173,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -184,6 +184,7 @@
       <SubSystem>Windows</SubSystem>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -229,6 +230,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Custom Types\Tem.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\BowVisual.cpp" />
     <ClCompile Include="DrawerClasses\CreateUI.cpp" />
     <ClCompile Include="DrawerClasses\DebugDrawer.cpp" />
     <ClCompile Include="DrawerClasses\GraphDrawer.cpp" />
@@ -265,11 +271,22 @@
     <ClCompile Include="RaceClasses\RaceTime.cpp" />
     <ClCompile Include="Moon Helpers\GameWorld\UberStateManager.cpp" />
     <ClCompile Include="Moon Helpers\Sein\SavesHelper.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisualEditor.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\OriVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.h" />
+    <ClInclude Include="MessageClasses\json.hpp" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\BowVisual.h" />
     <ClInclude Include="Custom Types\Rect.h" />
     <ClInclude Include="Custom Types\Tem.h" />
     <ClInclude Include="Custom Types\Vector3.h" />
+    <ClInclude Include="Custom Types\Vector4.h" />
     <ClInclude Include="DrawerClasses\CreateUI.h" />
     <ClInclude Include="DrawerClasses\DebugDrawer.h" />
     <ClInclude Include="DrawerClasses\GraphDrawer.h" />
@@ -277,6 +294,7 @@
     <ClInclude Include="Il2Cpp\appdata\il2cpp-functions5.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-functions6.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-functions7.h" />
+    <ClInclude Include="Il2Cpp\appdata\il2cpp-metadata-version.h" />
     <ClInclude Include="RaceClasses\RaceEnums.h" />
     <ClInclude Include="RaceClasses\TemRecorder.h" />
     <ClInclude Include="Helper Classes\Adresses.h" />
@@ -331,6 +349,11 @@
     <ClInclude Include="RaceClasses\RaceTime.h" />
     <ClInclude Include="Moon Helpers\GameWorld\UberStateManager.h" />
     <ClInclude Include="Moon Helpers\Sein\SavesHelper.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisualEditor.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\OriVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
