@@ -42,11 +42,11 @@ public:
 
 	static const int GhostLimit;
 
-	app::GhostCharacterAbilitiesPlugin* ghostAP = nullptr;
+	/*app::GhostCharacterAbilitiesPlugin* ghostAP = nullptr;
 	app::GhostCharacterPlugin* ghostCP = nullptr;
 	app::GhostStateMachinePlugin* ghostSMP = nullptr;
 	app::GhostGenericEventsPlugin* ghostGEP = nullptr;
-	app::GhostRecordingMetaDataPlugin* ghostMDP = nullptr;
+	app::GhostRecordingMetaDataPlugin* ghostMDP = nullptr;*/
 	app::GhostRecorder* ghostC = nullptr;
 	app::RaceSystem* raceSC = nullptr;
 
@@ -127,11 +127,11 @@ public:
 	void SetupRacePhase5(float raceDuration = 60.0f);
 	void SetupRacePhase6(float raceDuration = 60.0f);
 	std::string GetLastGhostFrame();
-	void CreateMimicGhost();
-	void RegisterGhostPlayerPlugins(app::GhostPlayer* ghostPlayer);
-	void UpdateMimicGhostFrameData(int lastFrame);
-	app::GhostRecorder* CreateNewGhostRecorder();
-	void CreateSeinRecorder();
+	//void CreateMimicGhost();
+	//void RegisterGhostPlayerPlugins(app::GhostPlayer* ghostPlayer);
+	//void UpdateMimicGhostFrameData(int lastFrame);
+	//app::GhostRecorder* CreateNewGhostRecorder();
+	//void CreateSeinRecorder();
 	void GetSeinFrames();
 	void CheckHash();
 };

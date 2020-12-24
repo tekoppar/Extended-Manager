@@ -433,12 +433,6 @@ void RaceManager::CleanupManager()
 		mat = nullptr;
 	}
 
-	ghostAP = nullptr;
-	ghostCP = nullptr;
-	ghostSMP = nullptr;
-	ghostGEP = nullptr;
-	ghostMDP = nullptr;
-
 	ghostC = nullptr;
 	raceSC = nullptr;
 	raceFinishZone = nullptr;
@@ -1060,7 +1054,7 @@ std::string RaceManager::GetLastGhostFrame()
 	return bytes;
 }
 
-void RaceManager::CreateMimicGhost()
+/*void RaceManager::CreateMimicGhost()
 {
 	std::string ghostPath = sutil::getexepath();
 	sutil::ReplaceS(ghostPath, "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\works.ghost");
@@ -1102,9 +1096,9 @@ void RaceManager::CreateMimicGhost()
 	ghostHasStarted = true;
 
 	RegisterGhostPlayerPlugins(newSeinMimicGhost);
-}
+}*/
 
-void RaceManager::RegisterGhostPlayerPlugins(app::GhostPlayer* ghostPlayer)
+/*void RaceManager::RegisterGhostPlayerPlugins(app::GhostPlayer* ghostPlayer)
 {
 	bool ghostCharacterPluginB = false;
 	bool ghostStateMachinePluginB = false;
@@ -1174,9 +1168,9 @@ void RaceManager::RegisterGhostPlayerPlugins(app::GhostPlayer* ghostPlayer)
 		app::GhostPlayer_RegisterPlugin(ghostPlayer, (app::IGhostRecorderPlugin*)ghostSMP1, NULL);
 		ghostSMP1->fields._.m_player = ghostPlayer;
 	}
-}
+}*/
 
-void RaceManager::UpdateMimicGhostFrameData(int lastFrame)
+/*void RaceManager::UpdateMimicGhostFrameData(int lastFrame)
 {
 	if (ghostHasStarted == true)
 	{
@@ -1185,9 +1179,9 @@ void RaceManager::UpdateMimicGhostFrameData(int lastFrame)
 		newSeinMimicGhost->fields.m_isStarted = true;
 		newSeinMimicGhost->fields._IsFinished_k__BackingField = false;
 	}
-}
+}*/
 
-app::GhostRecorder* RaceManager::CreateNewGhostRecorder()
+/*app::GhostRecorder* RaceManager::CreateNewGhostRecorder()
 {
 	auto Class1 = GetClass<>("", "GhostRecorder");
 	app::GhostRecorder* ghostRecorder = (app::GhostRecorder*)il2cpp_object_new((Il2CppClass*)Class1);
@@ -1196,9 +1190,9 @@ app::GhostRecorder* RaceManager::CreateNewGhostRecorder()
 	app::GameObject__ctor((app::GameObject*)ghostRecorder, gName, NULL);
 
 	return ghostRecorder;
-}
+}*/
 
-void RaceManager::CreateSeinRecorder()
+/*void RaceManager::CreateSeinRecorder()
 {
 	seinRecorder = app::GhostManager_GetOrCreateRecorder(NULL);
 
@@ -1232,7 +1226,7 @@ void RaceManager::CreateSeinRecorder()
 		app::GhostRecorder_InitializeRecorder(seinRecorder, MRecorderPath, NULL);
 		app::GhostRecorder_StartRecorder(seinRecorder, NULL);
 	}
-}
+}*/
 
 void RaceManager::GetSeinFrames()
 {

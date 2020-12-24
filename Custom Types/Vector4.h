@@ -186,6 +186,14 @@ namespace tem {
 			return *this;
 		}
 
+		Vector4& operator*(const Vector4& other) {
+			X *= other.X;
+			Y *= other.Y;
+			Z *= other.Z;
+			A *= other.A;
+			return *this;
+		}
+
 		Vector4& operator*(const float& other) {
 			X *= other;
 			Y *= other;

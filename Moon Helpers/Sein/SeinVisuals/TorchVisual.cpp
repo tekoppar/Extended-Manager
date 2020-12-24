@@ -42,163 +42,116 @@ void TorchVisualSettings::SetTorchVisuals(TorchVisualSettings torchSettings)
 		app::Type* particleRendererType = GetType("UnityEngine", "ParticleSystemRenderer");
 
 		std::vector < std::string> sceneTorchFlame = { "fireEffectStatic", "fireEffectA", "flame" };
-		SeinVisualEditor::SetParticleRendererColor(sceneSeinLeftItemModel, sceneTorchFlame, torchSettings.TorchColor);
+		SeinVisualEditor::SetParticleRendererColor(sceneSeinLeftItemModel, sceneTorchFlame, torchSettings.TorchColor, "Torch");
 		std::vector < std::string> sceneTorchFireC = { "fireEffectStatic", "fireEffectA", "fireC" };
-		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchFireC, torchSettings.TorchColor);
+		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchFireC, torchSettings.TorchColor, "Torch");
 		std::vector < std::string> sceneTorchTrailMesh = { "fireEffectStatic", "newTrail (2)" };
-		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchTrailMesh, torchSettings.TorchTrailMeshColor, (torchSettings.TorchTrailMeshEnable == true ? 1 : 0));
+		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchTrailMesh, torchSettings.TorchTrailMeshColor, "Torch", (torchSettings.TorchTrailMeshEnable == true ? 1 : 0));
 		std::vector < std::string> sceneTorchFireEffectMove = { "fireEffectStatic", "fireEffectmove" };
-		SeinVisualEditor::SetParticleRendererColor(sceneSeinLeftItemModel, sceneTorchFireEffectMove, torchSettings.TorchRunningColor);
+		SeinVisualEditor::SetParticleRendererColor(sceneSeinLeftItemModel, sceneTorchFireEffectMove, torchSettings.TorchRunningColor, "Torch");
 		std::vector<std::string> sceneTorchParticle = { "fireEffectStatic", "spriteSnowPettern2" };
-		SeinVisualEditor::SetParticleRendererColor(seinLeftItem, sceneTorchParticle, torchSettings.TorchFloatingSparkColor);
+		SeinVisualEditor::SetParticleRendererColor(seinLeftItem, sceneTorchParticle, torchSettings.TorchFloatingSparkColor, "Torch");
 		std::vector < std::string> sceneTorchParticle2 = { "fireEffectStatic", "spriteSnowPettern2", "spriteSnowPettern2" };
-		SeinVisualEditor::SetParticleRendererColor(seinLeftItem, sceneTorchParticle2, torchSettings.TorchFloatingSparkColor);
+		SeinVisualEditor::SetParticleRendererColor(seinLeftItem, sceneTorchParticle2, torchSettings.TorchFloatingSparkColor, "Torch");
 		std::vector < std::string> sceneTorchLight = { "lightHolder", "CirlceShape1" };
-		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchLight, torchSettings.TorchColor);
+		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchLight, torchSettings.TorchColor, "Torch");
 		std::vector < std::string> sceneTorchGlow = { "lightHolder", "CirlceShape1", "glow" };
-		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchGlow, torchSettings.TorchColor);
+		SeinVisualEditor::SetMeshRendererColor(sceneSeinLeftItemModel, sceneTorchGlow, torchSettings.TorchColor, "Torch");
 
-		/*std::vector<std::string> groupNames = { "torchAttackAir1Effect", "torchAttackAir2Effect" , "torchAttackAir3Effect", "torchAttackGround1Effect", "torchAttackGround2Effect", "torchAttackGround3Effect", "torchBreakEffect", "torchHitEffect", "torchHitEffectSmall", "torchLightEffect", "torchSpark" };
+		std::vector<std::string> groupNames = { "torchAttackAir1Effect", "torchAttackAir2Effect" , "torchAttackAir3Effect", "torchAttackGround1Effect",
+			"torchAttackGround2Effect", "torchAttackGround3Effect", "torchBreakEffect", "torchHitEffect", "torchHitEffectSmall" };
 		std::unordered_map<std::string, app::UberPoolGroup*> groupMap = SeinVisualEditor::GetUberGroups(groupNames);
 
 		app::UberPoolGroup* uberPoolGroup = groupMap[groupNames[0]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchAirAttacks[0].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchAirAttacks[0].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchAirAttacks[0].FireSprite.ToColor(), torchSettings.TorchAirAttacks[0].FireSprite.ToColor(), "torchAttackAir1Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchAirAttacks[0].TrailZigZag.ToColor(), torchSettings.TorchAirAttacks[0].TrailZigZag.ToColor(), "torchAttackAir1Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[1]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchAirAttacks[1].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchAirAttacks[1].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchAirAttacks[1].FireSprite.ToColor(), torchSettings.TorchAirAttacks[1].FireSprite.ToColor(), "torchAttackAir2Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchAirAttacks[1].TrailZigZag.ToColor(), torchSettings.TorchAirAttacks[1].TrailZigZag.ToColor(), "torchAttackAir2Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[2]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchAirAttacks[2].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchAirAttacks[2].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchAirAttacks[2].FireSprite.ToColor(), torchSettings.TorchAirAttacks[2].FireSprite.ToColor(), "torchAttackAir3Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchAirAttacks[2].TrailZigZag.ToColor(), torchSettings.TorchAirAttacks[2].TrailZigZag.ToColor(), "torchAttackAir3Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[3]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchGroundAttacks[0].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchGroundAttacks[0].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchGroundAttacks[0].FireSprite.ToColor(), torchSettings.TorchGroundAttacks[0].FireSprite.ToColor(), "torchAttackGround1Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchGroundAttacks[0].TrailZigZag.ToColor(), torchSettings.TorchGroundAttacks[0].TrailZigZag.ToColor(), "torchAttackGround1Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[4]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchGroundAttacks[1].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchGroundAttacks[1].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchGroundAttacks[1].FireSprite.ToColor(), torchSettings.TorchGroundAttacks[1].FireSprite.ToColor(), "torchAttackGround2Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchGroundAttacks[1].TrailZigZag.ToColor(), torchSettings.TorchGroundAttacks[1].TrailZigZag.ToColor(), "torchAttackGround2Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[5]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "trailBox", "fireSprite2" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchGroundAttacks[2].FireSprite);
-			std::vector < std::string> torchAttackAirTrail = { "trailBox", "trailZigzag" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchGroundAttacks[2].TrailZigZag);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireSprite2", torchSettings.TorchGroundAttacks[2].FireSprite.ToColor(), torchSettings.TorchGroundAttacks[2].FireSprite.ToColor(), "torchAttackGround3Effect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "trailZigzag", torchSettings.TorchGroundAttacks[2].TrailZigZag.ToColor(), torchSettings.TorchGroundAttacks[2].TrailZigZag.ToColor(), "torchAttackGround3Effect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[6]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "acidParticles" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchBreak.AcidParticles);
-			std::vector < std::string> torchAttackAirTrail = { "characterGlow" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchBreak.CharacterGlow);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "acidParticles", torchSettings.TorchBreak.AcidParticles.ToColor(), torchSettings.TorchBreak.AcidParticles.ToColor(), "torchBreakEffect");
+			SeinVisualEditor::SetMeshRendererColorByName(poolItem->fields.Target, "characterGlow", torchSettings.TorchBreak.CharacterGlow.ToColor(), torchSettings.TorchBreak.CharacterGlow.ToColor(), "torchBreakEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "smoke", torchSettings.TorchBreak.Smoke.ToColor(), torchSettings.TorchBreak.Smoke.ToColor(), "torchBreakEffect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[7]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "flame", "fireC" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchHit.FlameFireC);
-			std::vector < std::string> torchAttackAirTrail = { "flame", "glow" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchHit.FlameGlow);
-			std::vector < std::string> fsBox = { "fsBox" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fsBox, torchSettings.TorchHit.FsBox);
-			std::vector < std::string> fireEffect = { "fsBox", "fireEffect" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fireEffect, torchSettings.TorchHit.FireEffect);
-			std::vector < std::string> fireEffect1 = { "fsBox", "fireEffect(1)" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fireEffect1, torchSettings.TorchHit.FireEffect2);
-			std::vector < std::string> radialBurned = { "fsBox", "radialBurned" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, radialBurned, torchSettings.TorchHit.RadialBurned);
-			std::vector < std::string> radialBurned2 = { "fsBox", "radialBurned2" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, radialBurned2, torchSettings.TorchHit.RadialBurned2);
-			SeinVisualEditor::SetParticleRenderersColor(poolItem->fields.Target, "spriteSnowPettern2", torchSettings.TorchHit.SpriteSnowPattern);
-			std::vector < std::string> glow = { "glow" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, glow, torchSettings.TorchHit.Glow);
-			std::vector < std::string> glowUnMask = { "glowUnmask" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, glow, torchSettings.TorchHit.GlowUnmask);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireEffect", torchSettings.TorchHit.FireEffect.ToColor(), torchSettings.TorchHit.FireEffect.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireEffect (1)", torchSettings.TorchHit.FireEffect2.ToColor(), torchSettings.TorchHit.FireEffect2.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetMeshRendererColorByName(poolItem->fields.Target, "fireC", torchSettings.TorchHit.FlameFireC.ToColor(), torchSettings.TorchHit.FlameFireC.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetMeshRenderersColor(poolItem->fields.Target, "glow", torchSettings.TorchHit.FlameGlow.ToColor(), torchSettings.TorchHit.FlameGlow.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fxBox", torchSettings.TorchHit.FsBox.ToColor(), torchSettings.TorchHit.FsBox.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "radialBurned", torchSettings.TorchHit.RadialBurned.ToColor(), torchSettings.TorchHit.RadialBurned.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "radialBurned2", torchSettings.TorchHit.RadialBurned2.ToColor(), torchSettings.TorchHit.RadialBurned2.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRenderersColor(poolItem->fields.Target, "spriteSnowPettern2", torchSettings.TorchHit.SpriteSnowPattern.ToColor(), torchSettings.TorchHit.SpriteSnowPattern.ToColor(), "torchHitEffect");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "glowUnmask", torchSettings.TorchHit.GlowUnmask.ToColor(), torchSettings.TorchHit.GlowUnmask.ToColor(), "torchHitEffect");
 		}
 
 		uberPoolGroup = groupMap[groupNames[8]];
 		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
 		{
 			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "flame", "fireC" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchHitSmall.FlameFireC);
-			std::vector < std::string> torchAttackAirTrail = { "flame", "glow" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAirTrail, torchSettings.TorchHitSmall.FlameGlow);
-			std::vector < std::string> fsBox = { "fsBox" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fsBox, torchSettings.TorchHitSmall.FsBox);
-			std::vector < std::string> fireEffect = { "fsBox", "fireEffect" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fireEffect, torchSettings.TorchHitSmall.FireEffect);
-			std::vector < std::string> fireEffect1 = { "fsBox", "fireEffect(1)" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, fireEffect1, torchSettings.TorchHitSmall.FireEffect2);
-			std::vector < std::string> radialBurned = { "fsBox", "radialBurned" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, radialBurned, torchSettings.TorchHitSmall.RadialBurned);
-			std::vector < std::string> radialBurned2 = { "fsBox", "radialBurned2" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, radialBurned2, torchSettings.TorchHitSmall.RadialBurned2);
-			SeinVisualEditor::SetParticleRenderersColor(poolItem->fields.Target, "spriteSnowPettern2", torchSettings.TorchHitSmall.SpriteSnowPattern);
-			std::vector < std::string> glow = { "glow" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, glow, torchSettings.TorchHitSmall.Glow);
-			std::vector < std::string> glowUnMask = { "glowUnmask" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, glow, torchSettings.TorchHitSmall.GlowUnmask);
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireEffect", torchSettings.TorchHitSmall.FireEffect.ToColor(), torchSettings.TorchHitSmall.FireEffect.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fireEffect (1)", torchSettings.TorchHitSmall.FireEffect2.ToColor(), torchSettings.TorchHitSmall.FireEffect2.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetMeshRendererColorByName(poolItem->fields.Target, "fireC", torchSettings.TorchHitSmall.FlameFireC.ToColor(), torchSettings.TorchHitSmall.FlameFireC.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetMeshRenderersColor(poolItem->fields.Target, "glow", torchSettings.TorchHitSmall.FlameGlow.ToColor(), torchSettings.TorchHitSmall.FlameGlow.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "fxBox", torchSettings.TorchHitSmall.FsBox.ToColor(), torchSettings.TorchHitSmall.FsBox.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "radialBurned", torchSettings.TorchHitSmall.RadialBurned.ToColor(), torchSettings.TorchHitSmall.RadialBurned.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "radialBurned2", torchSettings.TorchHitSmall.RadialBurned2.ToColor(), torchSettings.TorchHitSmall.RadialBurned2.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRenderersColor(poolItem->fields.Target, "spriteSnowPettern2", torchSettings.TorchHitSmall.SpriteSnowPattern.ToColor(), torchSettings.TorchHitSmall.SpriteSnowPattern.ToColor(), "torchHitEffectSmall");
+			SeinVisualEditor::SetParticleRendererColorByName(poolItem->fields.Target, "glowUnmask", torchSettings.TorchHitSmall.GlowUnmask.ToColor(), torchSettings.TorchHitSmall.GlowUnmask.ToColor(), "torchHitEffectSmall");
 		}
 
-		uberPoolGroup = groupMap[groupNames[9]];
-		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
-		{
-			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "CircleShape1" };
-			SeinVisualEditor::SetMeshRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchLightEffect);
-		}
+		groupMap.clear();
 
-		uberPoolGroup = groupMap[groupNames[10]];
-		for (int i = 0; i < uberPoolGroup->fields.m_poolObjects->fields._size; i++)
-		{
-			app::UberPoolItem* poolItem = uberPoolGroup->fields.m_poolObjects->fields._items->vector[i];
-			std::vector < std::string> torchAttackAir = { "redSpark" };
-			SeinVisualEditor::SetParticleRendererColor(poolItem->fields.Target, torchAttackAir, torchSettings.TorchSpark);
-		}
-
-		groupMap.clear();*/
-SeinVisualEditor::VisualSettings.TorchVisualSettings = torchSettings;
+		SeinVisualEditor::VisualSetting.TorchVisualSetting = torchSettings;
 		SeinVisualEditor::VisualSettingsUpdated.HasUpdatedTorch = true;
 	}
 }

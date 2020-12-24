@@ -45,7 +45,12 @@ enum class MessageType
 	RefreshBackups = 31,
 	SetOriVisuals = 32,
 	SetTransform = 33,
-	GetTransform = 34
+	GetTransform = 34,
+	ResetOriVisuals = 35,
+	GetSceneHierarchy = 36,
+	SetSelectedGameObject = 37,
+	CreateGameObject = 38,
+	MoveGameObjectHierarchy = 39
 };
 
 class Message {

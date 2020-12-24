@@ -27,6 +27,7 @@ public:
 	static app::AreaMapUI* AreaMapUI;
 	static app::GameObject* SelectedObject;
 	static bool CanCallMethods;
+	static std::vector<uint8_t> GCHandles;
 
 	static void ValidatePointers();
 };

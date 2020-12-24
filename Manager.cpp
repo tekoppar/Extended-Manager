@@ -25,6 +25,8 @@
 
 #define IL2CPP true
 
+//app::Array_Resize_35();
+
 //il2cpp generated
 #include "il2cpp-appdata.h"
 #include "helpers.h"
@@ -50,10 +52,13 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "SavesHelper.h"
 #include "SeinVisualEditor.h"
 #include "SimpleJson.h"
+#include "SceneList.h"
+#include "ObjectCreator.h"
 
 static bool MANAGER_INITIALIZED = false;
 static bool WRITE_THREAD_EXITED = false;
 static bool EXITING_THREAD = false;
+static bool READ_THREAD_DONE = false;
 
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
@@ -71,6 +76,7 @@ std::chrono::high_resolution_clock::time_point LastTime;
 app::PetrifiedOwlBossEntity* petrifiedOwlBossEntity = nullptr;
 app::SeinUI* seinUI = nullptr;
 app::Ku* kuRide = nullptr;
+app::SceneManagerScene* MyTestScene = nullptr;
 
 app::MoonGuid* willowPowlBackgroundGUID = nullptr;
 app::GameObject* HitboxDebug = nullptr;
@@ -89,6 +95,7 @@ std::string managerPath = "";
 
 std::future<bool> HasLoadedScenes;
 bool SetupsAreDone = false;
+bool CreateTestSceneOnce = false;
 std::chrono::milliseconds span(1);
 
 int xxx = 0;
@@ -102,12 +109,18 @@ app::String* string_new(const char* str)
 
 void InitializeDLL()
 {
+	auto rectClass = GetClass<>("UnityEngine", "Rect");
+	il2cpp_runtime_class_init((Il2CppClass*)rectClass);
 	app::Type* scenesManagerType = GetType("", "ScenesManager");
 	app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(scenesManagerType, NULL);
 
 	sceneManager = (app::ScenesManager*)arr22->vector[0];
 	TemSceneHelper::SceneManager = sceneManager;
 	GraphColors::Initialize();
+
+	//app::Scene scene = app::SceneManager_CreateScene_1(string_new("Test12345"), NULL); //got same error when trying to create a scene with an existing name as when I'm creating scene roots.
+	//app::SceneManager_LoadScene_1(string_new("Test12345"), NULL);
+	//bool isValid = app::Scene_IsValidInternal(scene.m_Handle, NULL);
 
 	for (int i = 0; i < sceneManager->fields.AllScenes->fields._size; i++)
 	{
@@ -205,10 +218,15 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 		if (MANAGER_INITIALIZED == true && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
 		{
+			//app::SceneRoot* sceneRoot = app::ScenesManager_RegisterSceneByName(sceneManager, string_new("Test1234"), false, true, NULL);
+
 			MDV::MessageToWrite.push_back("MANAGERINITIALIZED");
 			AnimationHelper::GetAnimations();
 			raceManager.SetupManager();
 			SetupsAreDone = true;
+
+			//app::ScenesManager* scenesManager = (*app::Scenes__TypeInfo)->static_fields->Manager;
+			//app::ScenesManager_PreloadScene(scenesManager, MyTestScene->fields.MetaData, NULL);
 
 			/*std::vector<std::string> scenePath = { "interactibles", "savePedestal" };
 			app::GameObject* foundObject = GetComponentByScenePath("kwoloksCavernSaveRoomA", scenePath);
@@ -218,7 +236,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			//app::SavePedestal* savePedestal = (app::SavePedestal*)GetComponentByType(savePedestalObject, "", "SavePedestal");
 			app::SavePedestal__ctor(savePedestalObject, NULL);
 			TransformSetPosition((app::GameObject*)savePedestalObject, MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);*/
-			SeinVisualEditor::SetHolidayOri();
 		}
 
 		for (auto& object : MDV::AllObjectsToCallUpdate)
@@ -334,13 +351,8 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 			case MessageType::GetQuestByName:
 			{
-				if (xxx < 5)
-					xxx++;
-				if (xxx > 4)
-					yyy++;
-				if (yyy > 4)
-					zzz++;
-				TransformSetRotation(SeinVisualEditor::OriHat, tem::Vector3((xxx * 90), (yyy * 90), (zzz * 90)));
+				//ObjectCreator creator;
+				//creator.CreateObject("", "SceneManagerScene");
 			}
 			break;
 
@@ -676,6 +688,13 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			}
 			break;
 
+			case MessageType::ResetOriVisuals:
+			{
+				SeinVisualEditor::VisualSettingsUpdated.ResetBooleans();
+				SeinVisualEditor::ResetAllVisuals();
+			}
+			break;
+
 			case MessageType::SetTransform:
 			{
 				if (MDV::SelectedObject != nullptr)
@@ -697,11 +716,14 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					TransformSetScale(MDV::SelectedObject, scale);
 
 					app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::SelectedObject, "UnityEngine", "MeshRenderer");
-					app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
-					app::Renderer_set_sortingOrder((app::Renderer*)meshRenderer, sortingOrder, NULL);
-					app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, moonZOffset, NULL);
-					app::Material_set_renderQueue(mat, renderQueue, NULL);
-					app::Renderer_set_renderingLayerMask((app::Renderer*)meshRenderer, renderingLayerMask, NULL);
+					if (meshRenderer != nullptr)
+					{
+						app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
+						app::Renderer_set_sortingOrder((app::Renderer*)meshRenderer, sortingOrder, NULL);
+						app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, moonZOffset, NULL);
+						app::Material_set_renderQueue(mat, renderQueue, NULL);
+						app::Renderer_set_renderingLayerMask((app::Renderer*)meshRenderer, renderingLayerMask, NULL);
+					}
 				}
 			}
 			break;
@@ -716,15 +738,62 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					tem::Vector3 scale = TransformGetScale(MDV::SelectedObject);
 
 					app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::SelectedObject, "UnityEngine", "MeshRenderer");
-					app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
-					int sortingOrder = app::Renderer_get_sortingOrder((app::Renderer*)meshRenderer, NULL);
-					float moonZOffset = app::Renderer_get_moonOffsetZ((app::Renderer*)meshRenderer, NULL);
-					int renderQueue = app::Material_get_renderQueue(mat, NULL);
-					int renderingLayerMask = app::Renderer_get_renderingLayerMask((app::Renderer*)meshRenderer, NULL);
+
+					int sortingOrder = -1;
+					float moonZOffset = -1.0f;
+					int renderQueue = -1;
+					int renderingLayerMask = -1;
+
+					if (meshRenderer != nullptr)
+					{
+						app::Material* mat = app::Renderer_GetMaterial((app::Renderer*)meshRenderer, NULL);
+						sortingOrder = app::Renderer_get_sortingOrder((app::Renderer*)meshRenderer, NULL);
+						moonZOffset = app::Renderer_get_moonOffsetZ((app::Renderer*)meshRenderer, NULL);
+						renderQueue = app::Material_get_renderQueue(mat, NULL);
+						renderingLayerMask = app::Renderer_get_renderingLayerMask((app::Renderer*)meshRenderer, NULL);
+					}
 
 					MDV::MessageToWrite.push_back("GETTRANSFORM" + position.ToString() + "|" + localPosition.ToString() + "|" + rotation.ToString() + "|" + scale.ToString() + "|" + std::to_string(sortingOrder) + "|" + std::to_string(moonZOffset) + "|" + std::to_string(renderQueue) + "|" + std::to_string(renderingLayerMask));
 				}
 			}
+			break;
+
+			case MessageType::GetSceneHierarchy:
+			{
+				app::GameObject* gamyobj1 = app::Component_1_get_gameObject((app::Component_1*)TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[0]->fields.SceneRoot, NULL);
+				SceneList sceneList;
+				SceneHierarchy sceneHierarchy = sceneList.GetSceneStructureFromGameObjectNested(gamyobj1);
+				std::string values = sceneHierarchy.ToString();
+				MDV::MessageToWrite.push_back("GETSCENEHIERARCHY" + values);
+			}
+			break;
+
+			case MessageType::SetSelectedGameObject:
+			{
+				auto messageContent = sutil::SplitTem(message.second.Content, "|");
+				SceneList sceneList;
+				app::GameObject* gamyobj1 = app::Component_1_get_gameObject((app::Component_1*)TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[0]->fields.SceneRoot, NULL);
+				MDV::SelectedObject = sceneList.GetGameObjectFromNames(messageContent[0], messageContent[1], gamyobj1);
+
+				if (MDV::SelectedObject != nullptr)
+					MDV::MessageToWrite.push_back("SELECTEDGAMEOBJECT" + messageContent[1]);
+				else
+					MDV::MessageToWrite.push_back("SELECTEDGAMEOBJECTNone");
+			}
+			break;
+
+			case MessageType::MoveGameObjectHierarchy:
+			{
+				auto messageContent = sutil::SplitTem(message.second.Content, "|");
+				app::GameObject* gamyobj1 = app::Component_1_get_gameObject((app::Component_1*)TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[0]->fields.SceneRoot, NULL);
+				SceneList sceneList;
+				app::GameObject* moving = sceneList.GetGameObjectFromHierarchyIndex(gamyobj1, messageContent[0]);
+				app::GameObject* newParent = sceneList.GetGameObjectFromHierarchyIndex(gamyobj1, messageContent[1]);
+
+				if (moving != nullptr && newParent != nullptr)
+					TransformSetParent(moving, newParent);
+			}
+			break;
 
 			}
 
@@ -822,7 +891,6 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	MDV::MoonSein = app::Characters_get_Sein(NULL);// GetSeinCharacter(hProcess);
 	MDV::SeinPlayAnimationController = MDV::MoonSein->fields.Controller->fields.m_playAnimationController;
 	MDV::AreaMapUI = (*app::AreaMapUI__TypeInfo)->static_fields->Instance;
-	std::vector<std::string> messages;
 
 	//initalize detours
 	/* For finding CClassFunction
@@ -882,12 +950,15 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	std::string managerExeName = "ExtendedManager.exe";
 	DWORD proccessID = FindProcessId(managerExeName);
 	char* buffer = new char[512];
+	READ_THREAD_DONE = true;
 
 #ifdef TEMSOCKET
 	TemSocket::ConnectToServer("HELLO SERVER");
 	TemSocket::SendSocketMessage("HELLO AGAIN");
 #endif
+	sutil::Append("C:\\moon\\manager_error.log", "Injection was succesful\r\nPipe is being read from.\r\n");
 
+	std::vector<std::string> messages;
 	while (IsProcessRunning(proccessID) && loopBool)
 	{
 
@@ -977,7 +1048,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	while (MessagesManager.Messages.size() > 0)
 	{
 		Sleep(16);
-}
+	}
 	MessagesManager.Messages.clear();
 
 	//sleep to let game finish and then dettach all the detours
@@ -1019,10 +1090,34 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 
 DWORD WINAPI ThreadWrite(HMODULE hIns)
 {
+	while (READ_THREAD_DONE == false && EXITING_THREAD == false)
+	{
+		Sleep(100);
+	}
+
 	pid = GetCurrentProcessId();
 	hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pid);
 
+recreateFile:
 	fileHandleWrite = CreateFileA("\\\\.\\pipe\\injectdll-manager-pipe", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+
+	DWORD errorMessageID = ::GetLastError();
+	if (errorMessageID != 0 && EXITING_THREAD == false)
+	{
+		LPSTR messageBuffer = nullptr;
+		size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+		std::string message(messageBuffer, size);
+
+		//Free the buffer.
+		LocalFree(messageBuffer);
+		Sleep(500);
+		sutil::Append("C:\\moon\\manager_error.log", "Insufficient privileges, couldn't create pipe. Access denied.\r\n");
+		goto recreateFile;
+	}
+
+	sutil::Append("C:\\moon\\manager_error.log", "DLL pipe was succesful\r\n");
 
 	std::string managerExeName = "ExtendedManager.exe";
 	std::string messageToSend = "";

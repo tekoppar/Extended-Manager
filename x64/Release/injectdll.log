@@ -1,4 +1,0 @@
-﻿  inject.cpp
-C:\Users\Tekoppar\source\repos\injectdll\injectdll\inject.cpp(299,37): warning C4305: 'argument': truncation from 'int' to 'char'
-C:\Users\Tekoppar\source\repos\injectdll\injectdll\inject.cpp(299,33): warning C4309: 'argument': truncation of constant value
-  injectdll.vcxproj -> C:\Users\Tekoppar\source\repos\injectdll\injectdll\..\..\..\..\Desktop\LiveSplit.OriWotW-master\bin\injectdll.dll

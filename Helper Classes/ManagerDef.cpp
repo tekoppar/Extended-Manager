@@ -24,6 +24,7 @@ app::AreaMapUI* MDV::AreaMapUI = nullptr;
 std::vector<std::string> MDV::MessageToWrite = std::vector<std::string>();
 app::GameObject* MDV::SelectedObject = nullptr;
 bool MDV::CanCallMethods = false;
+std::vector<uint8_t> MDV::GCHandles = std::vector<uint8_t>();
 
 void MDV::ValidatePointers()
 {
@@ -33,7 +34,6 @@ void MDV::ValidatePointers()
 	{
 		MoonSein = app::Characters_get_Sein(NULL);
 		SeinVisualEditor::VisualSettingsUpdated.ResetBooleans();
-		SeinVisualEditor::SetHolidayOri();
 	}
 
 	if (SeinPlayAnimationController == nullptr)

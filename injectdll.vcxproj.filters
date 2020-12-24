@@ -195,6 +195,12 @@
     <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\ObjectCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inject.h">
@@ -423,6 +429,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\ObjectCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

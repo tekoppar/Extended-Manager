@@ -14,16 +14,17 @@
 
 // Application-specific functions
 #define DO_APP_FUNC(a, r, n, p) r (*n) p
+#define DO_APP_FUNC_METHODINFO(a, n) struct MethodInfo ** n
 namespace app {
-	#include "il2cpp-functions1.h"
-	#include "il2cpp-functions2.h"
-	#include "il2cpp-functions3.h"
-	#include "il2cpp-functions4.h"
-	#include "il2cpp-functions5.h"
-	#include "il2cpp-functions6.h"
-	#include "il2cpp-functions7.h"
+#include "il2cpp-functions1.h"
+#include "il2cpp-functions2.h"
+#include "il2cpp-functions3.h"
+#include "il2cpp-functions4.h"
+#include "il2cpp-functions5.h"
+#include "il2cpp-functions6.h"
 }
 #undef DO_APP_FUNC
+#undef DO_APP_FUNC_METHODINFO
 
 // TypeInfo pointers
 #define DO_TYPEDEF(a, n) n ## __Class** n ## __TypeInfo
@@ -47,14 +48,15 @@ void init_il2cpp()
 
 	// Define function addresses
 	#define DO_APP_FUNC(a, r, n, p) n = (r (*) p)(baseAddress + a)
-		#include "il2cpp-functions1.h"
+ 	#define DO_APP_FUNC_METHODINFO(a, n) n = (struct MethodInfo **)(baseAddress + a)
+	#include "il2cpp-functions1.h"
 	#include "il2cpp-functions2.h"
 	#include "il2cpp-functions3.h"
 	#include "il2cpp-functions4.h"
 	#include "il2cpp-functions5.h"
 	#include "il2cpp-functions6.h"
-	#include "il2cpp-functions7.h"
 	#undef DO_APP_FUNC
+ 	#undef DO_APP_FUNC_METHODINFO
 
 	// Define TypeInfo variables
 	#define DO_TYPEDEF(a, n) n ## __TypeInfo = (n ## __Class**) (baseAddress + a);

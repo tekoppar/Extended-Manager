@@ -169,7 +169,7 @@
       <ConformanceMode>true</ConformanceMode>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <CompileAsManaged>false</CompileAsManaged>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -184,7 +184,8 @@
       <SubSystem>Windows</SubSystem>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -239,6 +240,7 @@
     <ClCompile Include="DrawerClasses\DebugDrawer.cpp" />
     <ClCompile Include="DrawerClasses\GraphDrawer.cpp" />
     <ClCompile Include="Helper Classes\MD5.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\ObjectCreator.cpp" />
     <ClCompile Include="RaceClasses\TemRecorder.cpp" />
     <ClCompile Include="Helper Classes\Adresses.cpp" />
     <ClCompile Include="Helper Classes\Base64.cpp" />
@@ -276,6 +278,7 @@
     <ClCompile Include="Moon Helpers\Sein\SeinVisuals\OriVisual.cpp" />
     <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.cpp" />
     <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h" />
@@ -295,6 +298,7 @@
     <ClInclude Include="Il2Cpp\appdata\il2cpp-functions6.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-functions7.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-metadata-version.h" />
+    <ClInclude Include="Moon Helpers\Scenes\ObjectCreator.h" />
     <ClInclude Include="RaceClasses\RaceEnums.h" />
     <ClInclude Include="RaceClasses\TemRecorder.h" />
     <ClInclude Include="Helper Classes\Adresses.h" />
@@ -354,6 +358,7 @@
     <ClInclude Include="Moon Helpers\Sein\SeinVisuals\OriVisual.h" />
     <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.h" />
     <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

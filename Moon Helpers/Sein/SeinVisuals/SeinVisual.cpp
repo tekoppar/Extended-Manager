@@ -19,18 +19,18 @@ void GoldenSeinViualSettings::SetGoldenSeinVisuals(GoldenSeinViualSettings golde
 	{
 		if (MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.HasState == true && MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance != nullptr)
 		{
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "graphic", goldenSeinSettings.SeinBodyColor.ToColor(), goldenSeinSettings.SeinBodyEmissiveColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "glowUnmask", goldenSeinSettings.SeinBodyColor.ToColor(), goldenSeinSettings.SeinBodyEmissiveColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "oriCSparkle", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor());
-			SeinVisualEditor::SetParticleRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "spriteSnowPettern2", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor());
-			SeinVisualEditor::SetParticleRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "spriteSnowPettern2(1)", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "radialLightRays(2)", goldenSeinSettings.SeinRadialLightColor.ToColor(), goldenSeinSettings.SeinRadialLightColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "outerGlow", goldenSeinSettings.SeinRadialLightColor.ToColor(), goldenSeinSettings.SeinRadialLightColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "newTrail(2)", goldenSeinSettings.SeinTrailColor.ToColor(), goldenSeinSettings.SeinTrailColor.ToColor());
-			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "trailMesh(1)", goldenSeinSettings.SeinTrailMeshColor.ToColor(), goldenSeinSettings.SeinTrailMeshColor.ToColor());
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "graphic", goldenSeinSettings.SeinBodyColor.ToColor(), goldenSeinSettings.SeinBodyEmissiveColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "glowUnmask", goldenSeinSettings.SeinBodyColor.ToColor(), goldenSeinSettings.SeinBodyEmissiveColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "oriCSparkle", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetParticleRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "spriteSnowPettern2", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetParticleRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "spriteSnowPettern2(1)", goldenSeinSettings.SeinParticleColor.ToColor(), goldenSeinSettings.SeinParticleColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "radialLightRays(2)", goldenSeinSettings.SeinRadialLightColor.ToColor(), goldenSeinSettings.SeinRadialLightColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "outerGlow", goldenSeinSettings.SeinRadialLightColor.ToColor(), goldenSeinSettings.SeinRadialLightColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "newTrail(2)", goldenSeinSettings.SeinTrailColor.ToColor(), goldenSeinSettings.SeinTrailColor.ToColor(), "GoldenSein");
+			SeinVisualEditor::SetMeshRendererColorByName(MDV::MoonSein->fields.Abilities->fields.GoldenSeinWrapper->fields.State->fields.m_goldenSeinInstance->fields.Root, "trailMesh(1)", goldenSeinSettings.SeinTrailMeshColor.ToColor(), goldenSeinSettings.SeinTrailMeshColor.ToColor(), "GoldenSein");
 		}
 
-		SeinVisualEditor::VisualSettings.GoldenSeinVisualSettings = goldenSeinSettings;
+		SeinVisualEditor::VisualSetting.GoldenSeinVisualSetting = goldenSeinSettings;
 		SeinVisualEditor::VisualSettingsUpdated.HasUpdatedGoldenSein = true;
 	}
 }

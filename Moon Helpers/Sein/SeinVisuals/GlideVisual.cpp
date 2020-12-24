@@ -19,15 +19,15 @@ void GlideVisualSettings::SetGlideVisuals(GlideVisualSettings glideSettings)
 	{
 		if (MDV::MoonSein->fields.Prefabs->fields.Glide->fields.m_gameObject != nullptr)
 		{
-			SeinVisualEditor::SetSkinnedMeshRendererColor(MDV::MoonSein->fields.Prefabs->fields.Glide->fields.m_gameObject, "feather", glideSettings.FeatherColor.ToColor(), glideSettings.FeatherEmissiveColor.ToColor());
+			SeinVisualEditor::SetSkinnedMeshRendererColor(MDV::MoonSein->fields.Prefabs->fields.Glide->fields.m_gameObject, "feather", glideSettings.FeatherColor.ToColor(), glideSettings.FeatherEmissiveColor.ToColor(), "Glide");
 		}
 
 		if (MDV::MoonSein->fields.Prefabs->fields.FeatherFlap->fields.m_gameObject != nullptr)
 		{
-			SeinVisualEditor::SetSkinnedMeshRendererColor(MDV::MoonSein->fields.Prefabs->fields.FeatherFlap->fields.m_gameObject, "featherflap", glideSettings.FeatherflapColor.ToColor(), glideSettings.FeatherflapEmissiveColor.ToColor());
+			SeinVisualEditor::SetSkinnedMeshRendererColor(MDV::MoonSein->fields.Prefabs->fields.FeatherFlap->fields.m_gameObject, "featherflap", glideSettings.FeatherflapColor.ToColor(), glideSettings.FeatherflapEmissiveColor.ToColor(), "FeatherFlap");
 		}
 
-		SeinVisualEditor::VisualSettings.GlideVisualSettings = glideSettings;
+		SeinVisualEditor::VisualSetting.GlideVisualSetting = glideSettings;
 		SeinVisualEditor::VisualSettingsUpdated.HasUpdatedGlide = true;
 	}
 }

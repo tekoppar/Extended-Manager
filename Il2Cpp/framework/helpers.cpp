@@ -38,6 +38,7 @@ void il2cppi_new_console() {
     freopen_s((FILE**) stdout, "CONOUT$", "w", stdout);
 }
 
+#if _MSC_VER >= 1920
 // Helper function to convert Il2CppString to std::string
 std::string il2cppi_to_string(Il2CppString* str) {
     std::u16string u16(reinterpret_cast<const char16_t*>(str->chars));
@@ -49,6 +50,7 @@ std::string il2cppi_to_string(app::String* str) {
     std::u16string u16(reinterpret_cast<const char16_t*>(&str->fields.m_firstChar));
     return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
 }
+#endif
 
 template<typename Return>
 Return* GetClass(std::string Namespace, std::string name)
@@ -108,9 +110,30 @@ app::Type* GetType(std::string Namespace, std::string name)
     return app::Type_GetType_5(type_str, false, NULL);
 }
 
+app::String* CreateString(std::string& s)
+{
+    unsigned char* bytess = reinterpret_cast<unsigned char*>(s.data());
+    return app::String_CreateStringFromEncoding(&bytess[0], s.size(), (*app::Encoding__TypeInfo)->static_fields->defaultEncoding, NULL);
+}
+
+app::Type* GetTypeFromName(std::string name)
+{
+    return app::Type_GetType_4(CreateString(name), NULL);
+}
+
 app::Type* GetTypeFromClass(Il2CppClass* Class)
 {
     auto qualified = GetQualifiedFromClass(Class);
+    if (qualified == NULL)
+        return NULL;
+
+    auto type_str = reinterpret_cast<app::String*>(il2cpp_string_new(qualified));
+    return app::Type_GetType_5(type_str, false, NULL);
+}
+
+app::Type* GetTypeFromObject(app::Object_1* object)
+{
+    auto qualified = GetQualifiedFromClass(object->klass->_0.element_class);
     if (qualified == NULL)
         return NULL;
 
