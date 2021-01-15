@@ -268,7 +268,7 @@ void FrameLogger::DisplayData()
 {
 	DataIsDisplayed = true;
 
-	graphDrawer.Initialize(AllFrames.size());
+	graphDrawer.Initialize(static_cast<int>(AllFrames.size()));
 	Graph::Instance = &graphDrawer;
 	graphDrawer.SeinCharacter = MDV::MoonSein;
 
@@ -290,7 +290,7 @@ void FrameLogger::DisplayData()
 		if (AllFramesLast.size() > i)
 			floatData[7].push_back(AllFramesLast[i].seinPlatformMovement.CurrentSpeed.x + AllFramesLast[i].seinPlatformMovement.CurrentSpeed.y);
 	}
-	graphDrawer.StartDrawing(AllFrames.size());
+	graphDrawer.StartDrawing(static_cast<int>(AllFrames.size()));
 
 	//Graph.DrawFloats(floatData[0], GraphColors::Red, 2, 1);
 	//Graph.DrawFloats(floatData[1], GraphColors::Green, 2, 1);
@@ -323,7 +323,7 @@ void FrameLogger::CleanUpData()
 	ResetData();
 }
 
-void FrameLogger::CleanUp()
+void FrameLogger::Cleanup()
 {
 	droppedFrameMonitor = nullptr;
 	fpsMonitor = nullptr;

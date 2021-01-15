@@ -111,7 +111,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
     <OutDir>..\..\..\..\Desktop\ExtendedManager\bin\</OutDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\UIElements;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\JSON;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\Socket;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Creators;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\String Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Gizmo;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor\SeinVisuals;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Functions;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\TemFramework;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -173,12 +173,15 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch-il2cpp.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RemoveUnreferencedCodeData>
       </RemoveUnreferencedCodeData>
+      <EnableParallelCodeGeneration>
+      </EnableParallelCodeGeneration>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -186,6 +189,8 @@
       <AdditionalDependencies>detours.lib;syelog.lib;Kernel32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -231,21 +236,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseClasses\Gizmo\GizmoEvents.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\Component.cpp" />
+    <ClCompile Include="BaseClasses\Gizmo\Gizmo.cpp" />
+    <ClCompile Include="BaseClasses\Creators\MeshUtility.cpp" />
+    <ClCompile Include="BaseClasses\Creators\CollisionCreator.cpp" />
     <ClCompile Include="Custom Types\Tem.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\BowVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\ScenesJSON.cpp" />
+    <ClCompile Include="Moon Helpers\TemFramework\FieldHelper.cpp" />
+    <ClCompile Include="Moon Helpers\TemFramework\PropertyHelper.cpp" />
+    <ClCompile Include="Moon Helpers\TemFramework\FrameworkJSON.cpp" />
+    <ClCompile Include="Moon Helpers\TemFramework\TemFramework.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GrenadeVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\HammerVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GlideVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\BowVisual.cpp" />
     <ClCompile Include="DrawerClasses\CreateUI.cpp" />
     <ClCompile Include="DrawerClasses\DebugDrawer.cpp" />
     <ClCompile Include="DrawerClasses\GraphDrawer.cpp" />
-    <ClCompile Include="Helper Classes\MD5.cpp" />
-    <ClCompile Include="Moon Helpers\Scenes\ObjectCreator.cpp" />
+    <ClCompile Include="Helper Classes\String Helpers\MD5.cpp" />
+    <ClCompile Include="BaseClasses\Creators\ObjectCreator.cpp" />
     <ClCompile Include="RaceClasses\TemRecorder.cpp" />
     <ClCompile Include="Helper Classes\Adresses.cpp" />
-    <ClCompile Include="Helper Classes\Base64.cpp" />
-    <ClCompile Include="Helper Classes\Global.cpp" />
-    <ClCompile Include="Helper Classes\ManagerDef.cpp" />
+    <ClCompile Include="Helper Classes\String Helpers\Base64.cpp" />
+    <ClCompile Include="BaseClasses\Global.cpp" />
+    <ClCompile Include="ManagerDef.cpp" />
     <ClCompile Include="Il2Cpp\framework\helpers.cpp" />
     <ClCompile Include="Il2Cpp\framework\il2cpp-init.cpp" />
     <ClCompile Include="Il2Cpp\framework\pch-il2cpp.cpp">
@@ -258,9 +273,9 @@
     </ClCompile>
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="MessageClasses\MessageHelper.cpp" />
-    <ClCompile Include="MessageClasses\SimpleJson.cpp" />
-    <ClCompile Include="MessageClasses\TemSocket.cpp" />
-    <ClCompile Include="MessageClasses\TemUser.cpp" />
+    <ClCompile Include="MessageClasses\JSON\SimpleJson.cpp" />
+    <ClCompile Include="MessageClasses\Socket\TemSocket.cpp" />
+    <ClCompile Include="MessageClasses\Socket\TemUser.cpp" />
     <ClCompile Include="Moon Helpers\Animation\MoonAnimationHelper.cpp" />
     <ClCompile Include="Moon Helpers\GameWorld\AreaMapManager.cpp" />
     <ClCompile Include="Moon Helpers\GameWorld\GameWorldHelper.cpp" />
@@ -273,19 +288,43 @@
     <ClCompile Include="RaceClasses\RaceTime.cpp" />
     <ClCompile Include="Moon Helpers\GameWorld\UberStateManager.cpp" />
     <ClCompile Include="Moon Helpers\Sein\SavesHelper.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisualEditor.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\OriVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.cpp" />
-    <ClCompile Include="Moon Helpers\Scenes\SceneList.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisualEditor.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\TorchVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\OriVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SeinVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SwordVisual.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneList.cpp" />
+    <ClCompile Include="MessageClasses\TemLogger.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneObject.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.cpp" />
+    <ClCompile Include="BaseClasses\UIEvents.cpp" />
+    <ClCompile Include="DrawerClasses\UIElements\TreeItem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.h" />
-    <ClInclude Include="MessageClasses\json.hpp" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\BowVisual.h" />
+    <ClInclude Include="Custom Types\Bounds.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\Component.h" />
+    <ClInclude Include="Custom Types\TemMath.h" />
+    <ClInclude Include="Custom Types\UVCalculator.h" />
+    <ClInclude Include="Custom Types\VectorAlgo.h" />
+    <ClInclude Include="BaseClasses\Gizmo\GizmoEvents.h" />
+    <ClInclude Include="BaseClasses\Gizmo\Gizmo.h" />
+    <ClInclude Include="BaseClasses\Creators\MeshUtility.h" />
+    <ClInclude Include="BaseClasses\Creators\CollisionCreator.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types14.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types15.h" />
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types16.h" />
+    <ClInclude Include="Custom Types\Quaternion.h" />
+    <ClInclude Include="Custom Types\Vector2.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\ScenesJSON.h" />
+    <ClInclude Include="Moon Helpers\TemFramework\FieldHelper.h" />
+    <ClInclude Include="Moon Helpers\TemFramework\PropertyHelper.h" />
+    <ClInclude Include="Moon Helpers\TemFramework\FrameworkJSON.h" />
+    <ClInclude Include="Moon Helpers\TemFramework\TemFramework.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GrenadeVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\HammerVisual.h" />
+    <ClInclude Include="MessageClasses\JSON\json.hpp" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GlideVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\BowVisual.h" />
     <ClInclude Include="Custom Types\Rect.h" />
     <ClInclude Include="Custom Types\Tem.h" />
     <ClInclude Include="Custom Types\Vector3.h" />
@@ -293,29 +332,29 @@
     <ClInclude Include="DrawerClasses\CreateUI.h" />
     <ClInclude Include="DrawerClasses\DebugDrawer.h" />
     <ClInclude Include="DrawerClasses\GraphDrawer.h" />
-    <ClInclude Include="Helper Classes\MD5.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions5.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions6.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions7.h" />
+    <ClInclude Include="Helper Classes\String Helpers\MD5.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions5.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions6.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions7.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-metadata-version.h" />
-    <ClInclude Include="Moon Helpers\Scenes\ObjectCreator.h" />
+    <ClInclude Include="BaseClasses\Creators\ObjectCreator.h" />
     <ClInclude Include="RaceClasses\RaceEnums.h" />
     <ClInclude Include="RaceClasses\TemRecorder.h" />
     <ClInclude Include="Helper Classes\Adresses.h" />
-    <ClInclude Include="Helper Classes\Base64.h" />
+    <ClInclude Include="Helper Classes\String Helpers\Base64.h" />
     <ClInclude Include="Helper Classes\CPPBeDumb.h" />
     <ClInclude Include="Helper Classes\Detour\detours.h" />
     <ClInclude Include="Helper Classes\Detour\detver.h" />
     <ClInclude Include="Helper Classes\Detour\syelog.h" />
-    <ClInclude Include="Helper Classes\Global.h" />
-    <ClInclude Include="Helper Classes\ManagerDef.h" />
-    <ClInclude Include="Helper Classes\StringUtils.h" />
+    <ClInclude Include="BaseClasses\Global.h" />
+    <ClInclude Include="ManagerDef.h" />
+    <ClInclude Include="Helper Classes\String Helpers\StringUtils.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-api-functions-ptr.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-api-functions.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions1.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions2.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions3.h" />
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions4.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions1.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions2.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions3.h" />
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions4.h" />
     <ClInclude Include="Il2Cpp\appdata\il2cpp-types-ptr.h" />
     <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types1.h" />
     <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types10.h" />
@@ -338,9 +377,9 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="MessageClasses\MessageClass.h" />
     <ClInclude Include="MessageClasses\MessageHelper.h" />
-    <ClInclude Include="MessageClasses\SimpleJson.h" />
-    <ClInclude Include="MessageClasses\TemSocket.h" />
-    <ClInclude Include="MessageClasses\TemUser.h" />
+    <ClInclude Include="MessageClasses\JSON\SimpleJson.h" />
+    <ClInclude Include="MessageClasses\Socket\TemSocket.h" />
+    <ClInclude Include="MessageClasses\Socket\TemUser.h" />
     <ClInclude Include="Moon Helpers\Animation\MoonAnimationHelper.h" />
     <ClInclude Include="Moon Helpers\GameWorld\AreaMapManager.h" />
     <ClInclude Include="Moon Helpers\GameWorld\GameWorldHelper.h" />
@@ -353,12 +392,17 @@
     <ClInclude Include="RaceClasses\RaceTime.h" />
     <ClInclude Include="Moon Helpers\GameWorld\UberStateManager.h" />
     <ClInclude Include="Moon Helpers\Sein\SavesHelper.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisualEditor.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\OriVisual.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.h" />
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.h" />
-    <ClInclude Include="Moon Helpers\Scenes\SceneList.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisualEditor.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\TorchVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\OriVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SeinVisual.h" />
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SwordVisual.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneList.h" />
+    <ClInclude Include="MessageClasses\TemLogger.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneObject.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.h" />
+    <ClInclude Include="BaseClasses\UIEvents.h" />
+    <ClInclude Include="DrawerClasses\UIElements\TreeItem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

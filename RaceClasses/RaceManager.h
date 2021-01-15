@@ -100,8 +100,8 @@ public:
 
 	void SetupManager();
 	virtual void Update() override;
+	virtual void Cleanup() override;
 	void LoadRaceData(std::string path);
-	void CleanupManager();
 	void RemoveCheckpoint(int index);
 	void UpdateCheckpoint(tem::Vector3 position, tem::Vector3 scale, int index);
 	bool CheckIfHitAllCheckpoints();

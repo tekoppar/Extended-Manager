@@ -3,7 +3,7 @@
 #ifndef _VECTOR4_H
 #define _VECTOR4_H
 
-#include "../StringUtils.h"
+#include "StringUtils.h"
 
 namespace tem {
 	class Vector4 {
@@ -13,12 +13,28 @@ namespace tem {
 		float Z = 0.0f;
 		float A = 0.0f;
 
-		Vector4(float x = 0.0f, float y = 0.0f, float z = 0.0f, float a = 0.0f)
+		Vector4()
+		{
+			X = 0.0f;
+			Y = 0.0f;
+			Z = 0.0f;
+			A = 0.0f;
+		}
+
+		Vector4(float x, float y, float z, float a)
 		{
 			X = x;
 			Y = y;
 			Z = z;
 			A = a;
+		}
+
+		Vector4(float all)
+		{
+			X = all;
+			Y = all;
+			Z = all;
+			A = all;
 		}
 
 		Vector4(app::Vector4* other)
@@ -91,11 +107,33 @@ namespace tem {
 			A = 1.0f;
 		}
 
+		Vector4(const char*& other)
+		{
+			std::string temp = std::string(other);
+			sutil::ReplaceS(temp, ",", ".");
+			auto content = sutil::SplitTem(temp, ";");
+			X = 0.0f;
+			Y = 0.0f;
+			Z = 0.0f;
+			A = 0.0f;
+
+			if (content.size() > 0)
+				X = std::stof(content[0]);
+
+			if (content.size() > 1)
+				Y = std::stof(content[1]);
+
+			if (content.size() > 2)
+				Z = std::stof(content[2]);
+
+			if (content.size() > 3)
+				A = std::stof(content[3]);
+		}
+
 		Vector4(std::string& other)
 		{
 			std::string temp = other;
-			sutil::ReplaceS(temp, ",", ".");
-			auto content = sutil::SplitTem(temp, ";");
+			auto content = sutil::SplitTem(temp, ",");
 			X = 0.0f;
 			Y = 0.0f;
 			Z = 0.0f;
@@ -122,6 +160,14 @@ namespace tem {
 			A = other.a;
 		}
 
+		Vector4(app::Color* other)
+		{
+			X = other->r;
+			Y = other->g;
+			Z = other->b;
+			A = other->a;
+		}
+
 		Vector4& operator+=(const Vector4& other) {
 			X += other.X;
 			Y += other.Y;
@@ -138,28 +184,16 @@ namespace tem {
 			return *this;
 		}
 
-		Vector4& operator+(const Vector4& other) {
-			X += other.X;
-			Y += other.Y;
-			Z += other.Z;
-			A += other.A;
-			return *this;
+		Vector4 operator+(const Vector4& other) {
+			return tem::Vector4(X + other.X, Y + other.Y, Z + other.Z, A + other.A);
 		}
 
-		Vector4& operator+(const float& other) {
-			X += other;
-			Y += other;
-			Z += other;
-			A += other;
-			return *this;
+		Vector4 operator+(const float& other) {
+			return tem::Vector4(X + other, Y + other, Z + other, A + other);
 		}
 
-		Vector4& operator-(const Vector4& other) {
-			X -= other.X;
-			Y -= other.Y;
-			Z -= other.Z;
-			A -= other.A;
-			return *this;
+		Vector4 operator-(const Vector4& other) {
+			return tem::Vector4(X - other.X, Y - other.Y, Z - other.Z, A - other.A);
 		}
 
 		Vector4& operator-=(const Vector4& other) {
@@ -170,12 +204,8 @@ namespace tem {
 			return *this;
 		}
 
-		Vector4& operator-(const float& other) {
-			X -= other;
-			Y -= other;
-			Z -= other;
-			A -= other;
-			return *this;
+		Vector4 operator-(const float& other) {
+			return tem::Vector4(X - other, Y - other, Z - other, A - other);
 		}
 
 		Vector4& operator-=(const float& other) {
@@ -186,20 +216,12 @@ namespace tem {
 			return *this;
 		}
 
-		Vector4& operator*(const Vector4& other) {
-			X *= other.X;
-			Y *= other.Y;
-			Z *= other.Z;
-			A *= other.A;
-			return *this;
+		Vector4 operator*(const Vector4& other) {
+			return tem::Vector4(X * other.X, Y * other.Y, Z * other.Z, A * other.A);
 		}
 
-		Vector4& operator*(const float& other) {
-			X *= other;
-			Y *= other;
-			Z *= other;
-			A *= other;
-			return *this;
+		Vector4 operator*(const float& other) {
+			return tem::Vector4(X * other, Y * other, Z * other, A * other);
 		}
 
 		Vector4& operator*=(const float& other) {
@@ -239,9 +261,20 @@ namespace tem {
 			return *moon;
 		}
 
+		app::Vector4* ToMoonP()
+		{
+			app::Vector4* moon = (app::Vector4*)il2cpp_object_new((Il2CppClass*)(*app::Vector4__TypeInfo));
+			moon->x = this->X;
+			moon->y = this->Y;
+			moon->z = this->Z;
+			moon->w = this->A;
+
+			return moon;
+		}
+
 		app::Color ToColor()
 		{
-			app::Color moon;
+			app::Color moon = app::Color();
 			moon.r = this->X;
 			moon.g = this->Y;
 			moon.b = this->Z;

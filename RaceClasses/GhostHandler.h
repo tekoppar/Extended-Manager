@@ -32,8 +32,9 @@ public:
 	static int GhostIndex;
 
 	static void Initialize();
-	static void Cleanup();
+	virtual void Cleanup() override;
 	virtual void Update() override;
+
 	static void UpdateStatic();
 	static bool RunGhost();
 	static void CreateGhostPublic(std::string path, std::string ghostName = "", tem::Vector3 startPosition = tem::Vector3(0, 0, 0));

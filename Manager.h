@@ -23,9 +23,6 @@ tIl2CppString RealIl2cpp_string_new_wrapper;
 typedef void(__thiscall* tGameControllerUpdate)(void* __this);
 tGameControllerUpdate Real_GameControllerUpdate;
 
-typedef void(__thiscall* tOnPointerClick)(void* __this);
-tOnPointerClick Real_OnPointerClick;
-
 typedef void(__thiscall* tSeinOnKill)(void* __this);
 tSeinOnKill Real_SeinOnKill;
 

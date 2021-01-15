@@ -14,6 +14,14 @@
 #include "il2cpp-types6.h"
 #include "il2cpp-types7.h"
 #include "il2cpp-types8.h"
+#include "il2cpp-types9.h"
+#include "il2cpp-types10.h"
+#include "il2cpp-types11.h"
+#include "il2cpp-types12.h"
+#include "il2cpp-types13.h"
+#include "il2cpp-types14.h"
+#include "il2cpp-types15.h"
+#include "il2cpp-types16.h"
 
 // IL2CPP API function pointers
 #include "il2cpp-api-functions-ptr.h"
@@ -27,12 +35,13 @@
 #define DO_APP_FUNC(a, r, n, p) extern r (*n) p
 #define DO_APP_FUNC_METHODINFO(a, n) extern struct MethodInfo ** n
 namespace app {
-	#include "il2cpp-functions1.h"
-	#include "il2cpp-functions2.h"
-	#include "il2cpp-functions3.h"
-	#include "il2cpp-functions4.h"
-	#include "il2cpp-functions5.h"
-	#include "il2cpp-functions6.h"
+#include "il2cpp-functions1.h"
+#include "il2cpp-functions2.h"
+#include "il2cpp-functions3.h"
+#include "il2cpp-functions4.h"
+#include "il2cpp-functions5.h"
+#include "il2cpp-functions6.h"
+#include "il2cpp-functions7.h"
 }
 #undef DO_APP_FUNC
 #undef DO_APP_FUNC_METHODINFO
@@ -40,6 +49,6 @@ namespace app {
 // TypeInfo pointers
 #define DO_TYPEDEF(a, n) extern n ## __Class** n ## __TypeInfo
 namespace app {
-	#include "il2cpp-types-ptr.h"
+#include "il2cpp-types-ptr.h"
 }
 #undef DO_TYPEDEF

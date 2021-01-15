@@ -122,7 +122,7 @@ void GhostHandler::CreateGhostPublic(std::string path, std::string ghostName, te
 
 		app::GameObject* ghost = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)GhostHandler::BaseGhostManager->fields.GhostPrefab, NULL);
 
-		app::Color purple;
+		app::Color purple = app::Color();
 		purple.a = 0.8f;
 		purple.b = 0.8f;
 		purple.g = 0.2f;
@@ -503,7 +503,7 @@ void GhostHandler::UpdateStreamGhost()
 
 		auto MemoryStreamClass = GetClass<>("System.IO", "MemoryStream");
 		app::MemoryStream* seinMemoryStream = (app::MemoryStream*)il2cpp_object_new((Il2CppClass*)MemoryStreamClass);
-		app::MemoryStream__ctor_1(seinMemoryStream, AllStreamGhostFrames.capacity(), NULL);
+		app::MemoryStream__ctor_1(seinMemoryStream, static_cast<int32_t>(AllStreamGhostFrames.capacity()), NULL);
 		app::MemoryStream_SetLength(seinMemoryStream, AllStreamGhostFrames.size(), NULL);
 
 		std::string tempGhostFrames = "";

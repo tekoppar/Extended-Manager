@@ -114,12 +114,6 @@
     <ClCompile Include="MessageClasses\MessageHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessageClasses\SimpleJson.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MessageClasses\TemSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Il2Cpp\framework\helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -132,15 +126,6 @@
     <ClCompile Include="Helper Classes\Adresses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Helper Classes\Base64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Helper Classes\Global.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Helper Classes\ManagerDef.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DrawerClasses\CreateUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,55 +135,115 @@
     <ClCompile Include="DrawerClasses\GraphDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessageClasses\TemUser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RaceClasses\TemRecorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Moon Helpers\GameWorld\UberStateManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Helper Classes\MD5.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Moon Helpers\Sein\SavesHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisualEditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\BowVisual.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\OriVisual.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Custom Types\Tem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.cpp">
+    <ClCompile Include="Moon Helpers\TemFramework\FieldHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.cpp">
+    <ClCompile Include="Moon Helpers\TemFramework\PropertyHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.cpp">
+    <ClCompile Include="Moon Helpers\TemFramework\TemFramework.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.cpp">
+    <ClCompile Include="Moon Helpers\TemFramework\FrameworkJSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Scenes\SceneList.cpp">
+    <ClCompile Include="MessageClasses\TemLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moon Helpers\Scenes\ObjectCreator.cpp">
+    <ClCompile Include="BaseClasses\Global.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\Component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\ScenesJSON.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\UIEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\Gizmo\Gizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\Gizmo\GizmoEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\BowVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GlideVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GrenadeVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\HammerVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\OriVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SeinVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SwordVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\TorchVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon Helpers\Sein\VisualEditor\SeinVisualEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ManagerDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper Classes\String Helpers\Base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper Classes\String Helpers\MD5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\Creators\CollisionCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\Creators\ObjectCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageClasses\JSON\SimpleJson.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageClasses\Socket\TemUser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageClasses\Socket\TemSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseClasses\Creators\MeshUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawerClasses\UIElements\TreeItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -243,12 +288,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MessageClasses\MessageHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MessageClasses\SimpleJson.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MessageClasses\TemSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types1.h">
@@ -296,18 +335,6 @@
     <ClInclude Include="Il2Cpp\appdata\il2cpp-api-functions-ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Il2Cpp\appdata\il2cpp-types-ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -335,19 +362,7 @@
     <ClInclude Include="Helper Classes\Adresses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helper Classes\Base64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Helper Classes\CPPBeDumb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helper Classes\Global.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helper Classes\ManagerDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helper Classes\StringUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DrawerClasses\CreateUI.h">
@@ -368,9 +383,6 @@
     <ClInclude Include="Custom Types\Tem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageClasses\TemUser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RaceClasses\TemRecorder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -380,61 +392,166 @@
     <ClInclude Include="Moon Helpers\GameWorld\UberStateManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helper Classes\MD5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions6.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Il2Cpp\appdata\il2cpp-functions7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Moon Helpers\Sein\SavesHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Il2Cpp\appdata\il2cpp-metadata-version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisualEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Custom Types\Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\BowVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types14.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GlideVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types15.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\TorchVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Types\il2cpp-types16.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\OriVisual.h">
+    <ClInclude Include="Custom Types\Quaternion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageClasses\json.hpp">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SeinVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\SwordVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\HammerVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Sein\SeinVisuals\GrenadeVisual.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Scenes\SceneList.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Moon Helpers\Scenes\ObjectCreator.h">
+    <ClInclude Include="Il2Cpp\appdata\Functions\il2cpp-functions7.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\TemFramework\FieldHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\TemFramework\PropertyHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\TemFramework\TemFramework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\TemFramework\FrameworkJSON.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\TemLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\Vector2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\UVCalculator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\TemMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\VectorAlgo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\ScenesJSON.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\UIEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Gizmo\GizmoEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Gizmo\Gizmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\BowVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GlideVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\GrenadeVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\HammerVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\OriVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SeinVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\SwordVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisuals\TorchVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon Helpers\Sein\VisualEditor\SeinVisualEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagerDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper Classes\String Helpers\Base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper Classes\String Helpers\MD5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper Classes\String Helpers\StringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Creators\CollisionCreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Creators\ObjectCreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\JSON\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\JSON\SimpleJson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\Socket\TemUser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageClasses\Socket\TemSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Creators\MeshUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawerClasses\UIElements\TreeItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom Types\Bounds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

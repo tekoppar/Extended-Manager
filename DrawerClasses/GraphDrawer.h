@@ -90,14 +90,6 @@ public:
 };
 extern Graph graphDrawer;
 
-class IOnclick
-{
-public:
-	virtual ~IOnclick();
-
-	void IOnClick();
-};
-
 class GraphLabel : public app::MonoBehaviour, public app::Behaviour, public app::Component, public app::Object, app::IPointerClickHandler, app::ISubmitHandler, app::IEventSystemHandler {
 public:
 	void (*onClickMethod)(GraphLabel* __this);

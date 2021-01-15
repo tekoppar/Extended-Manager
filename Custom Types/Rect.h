@@ -3,7 +3,8 @@
 #ifndef _RECT_H
 #define _RECT_H
 
-#include "../StringUtils.h"
+#include "helpers.h"
+#include "StringUtils.h"
 
 namespace tem {
 	class Rect
@@ -48,6 +49,29 @@ namespace tem {
 			Height = other.m_Height;
 		}
 
+		Rect(std::string& other)
+		{
+			std::string temp = other;
+			sutil::ReplaceS(temp, ",", ".");
+			auto content = sutil::SplitTem(temp, ";");
+			X = 0.0f;
+			Y = 0.0f;
+			Width = 0.0f;
+			Height = 0.0f;
+
+			if (content.size() > 0)
+				X = std::stof(content[0]);
+
+			if (content.size() > 1)
+				Y = std::stof(content[1]);
+
+			if (content.size() > 2)
+				Width = std::stof(content[2]);
+
+			if (content.size() > 3)
+				Height = std::stof(content[3]);
+		}
+
 		app::Rect ToMoon()
 		{
 			app::Rect moon = app::Rect();
@@ -61,13 +85,30 @@ namespace tem {
 
 		app::Rect* ToMoonP()
 		{
-			app::Rect* moon = (app::Rect*)il2cpp_object_new((Il2CppClass*)(*app::Rect__TypeInfo));
-			moon->m_XMin = this->X;
-			moon->m_YMin = this->Y;
-			moon->m_Width = this->Width;
-			moon->m_Height = this->Height;
+			if ((*app::Rect__TypeInfo) == nullptr)
+			{
+				auto rectClass = GetClass<>("UnityEngine", "Rect");
+				app::Rect* moon = (app::Rect*)il2cpp_object_new((Il2CppClass*)rectClass);
+				moon->m_XMin = this->X;
+				moon->m_YMin = this->Y;
+				moon->m_Width = this->Width;
+				moon->m_Height = this->Height;
+				return moon;
+			}
+			else 
+			{
+				app::Rect* moon = (app::Rect*)il2cpp_object_new((Il2CppClass*)(*app::Rect__TypeInfo));
+				moon->m_XMin = this->X;
+				moon->m_YMin = this->Y;
+				moon->m_Width = this->Width;
+				moon->m_Height = this->Height;
+				return moon;
+			}
+		}
 
-			return moon;
+		std::string ToString()
+		{
+			return std::to_string(this->X) + ", " + std::to_string(this->Y) + ", " + std::to_string(this->Width) + ", " + std::to_string(this->Height);
 		}
 
 		bool IsPositionInsideRect(tem::Vector3 position)

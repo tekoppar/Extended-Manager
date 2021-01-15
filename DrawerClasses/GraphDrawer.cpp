@@ -10,15 +10,12 @@
 
 #include "CreateUI.h"
 #include "ManagerDef.h"
+#include "tem.h"
 
 #include "GraphDrawer.h"
 
 Graph graphDrawer = Graph();
 Graph* Graph::Instance;
-
-IOnclick::~IOnclick() {};
-
-void IOnclick::IOnClick() {};
 
 std::vector<GraphLabel*> AllGraphLabels;
 std::vector<GraphLabel*> AllDefaultGraphLabels;
@@ -73,7 +70,7 @@ void GraphColors::Initialize()
 
 app::Color GraphColors::RandomColor(float value, float alpha)
 {
-	app::Color color;
+	app::Color color = app::Color();
 
 	color.r = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / value));
 	color.g = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / value));
@@ -256,15 +253,15 @@ void Graph::DrawFloats(std::vector<float> data, app::Color color, float yScale, 
 {
 	if (graphColorTexture != nullptr)
 	{
-		int previousIndex = 0;
+		std::size_t previousIndex = 0;
 		float previousData = std::max<float>(0, std::min<float>(data[0], GraphWidth));
 		float currentData = 0.0f;
-		for (int i = 1; i < data.size(); i++)
+		for (std::size_t i = 1; i < data.size(); i++)
 		{
 			currentData = std::max<float>(0, std::min<float>(data[i], GraphWidth));
-			DrawLine(graphColorTexture, previousIndex, (previousData * yScale) + 5, i * (int)xScale, (int)(currentData * yScale) + 5, color);
+			DrawLine(graphColorTexture, static_cast<int>(previousIndex), static_cast<int>(previousData * yScale) + 5, static_cast<int>(i) * static_cast<int>(xScale), static_cast<int>(currentData * yScale) + 5, color);
 			previousData = currentData;
-			previousIndex = i * xScale;
+			previousIndex = i * static_cast<std::size_t>(xScale);
 		}
 		app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 	}
@@ -274,17 +271,17 @@ void Graph::DrawFloatsMapRange(std::vector<float> data, app::Color color, float 
 {
 	if (graphColorTexture != nullptr)
 	{
-		int previousIndex = 0;
+		std::size_t previousIndex = 0;
 		float previousData = std::max<float>(1, std::min<float>(data[0], GraphWidth));
 		float currentData = 0.0f;
 		previousData = MapRange(previousData, inMin, inMax, 16, GraphHeight - 16);
-		for (int i = 1; i < data.size(); i++)
+		for (std::size_t i = 1; i < data.size(); i++)
 		{
 			currentData = std::max<float>(1, std::min<float>(data[i], GraphWidth));
 			currentData = MapRange(currentData, inMin, inMax, 16, GraphHeight - 16);
-			DrawLine(graphColorTexture, previousIndex, (previousData * yScale), i * xScale, (currentData * yScale), color);
+			DrawLine(graphColorTexture, static_cast<int>(previousIndex), static_cast<int>(previousData * yScale), static_cast<int>(i) * static_cast<int>(xScale), static_cast<int>(currentData * yScale), color);
 			previousData = currentData;
-			previousIndex = i * xScale;
+			previousIndex = i * static_cast<std::size_t>(xScale);
 		}
 		app::Texture2D_Apply_1(graphColorTexture, true, NULL);
 	}
@@ -301,20 +298,20 @@ void Graph::ClearGraph(app::Texture2D* texture, app::Color color, int width)
 
 void Graph::DrawGraphLinesX(app::Texture2D* texture, app::Color color)
 {
-	int graphLineSpacing = std::floor(GraphWidth / 64);
-	for (int i = 1; i < graphLineSpacing; i++)
+	std::size_t graphLineSpacing = static_cast<std::size_t>(std::floor(GraphWidth / 64));
+	for (std::size_t i = 1; i < graphLineSpacing; i++)
 	{
-		DrawLine(texture, i * 64, 0, i * 64, GraphHeight, color);
+		DrawLine(texture, static_cast<int>(i * 64), 0, static_cast<int>(i * 64), GraphHeight, color);
 	}
 	app::Texture2D_Apply_1(texture, true, NULL);
 }
 
 void Graph::DrawGraphLinesY(app::Texture2D* texture, app::Color color)
 {
-	int graphLineSpacing = std::floor(GraphHeight / 64);
-	for (int i = 1; i < graphLineSpacing; i++)
+	std::size_t graphLineSpacing = static_cast<std::size_t>(std::floor(GraphHeight / 64));
+	for (std::size_t i = 1; i < graphLineSpacing; i++)
 	{
-		DrawLine(texture, 0, i * 64, GraphWidth, i * 64, color);
+		DrawLine(texture, 0, static_cast<int>(i) * 64, GraphWidth, static_cast<int>(i) * 64, color);
 	}
 	app::Texture2D_Apply_1(texture, true, NULL);
 }
@@ -537,7 +534,7 @@ void Graph::SetupUI(int width, int height)
 
 		//app::GameObject* dropdown = DrawUI::Dropdown("Test");
 
-		TransformSetPosition(masterCanvas, tem::Vector3(0, 0, 0.0f));
+		TransformSetPosition(masterCanvas, tem::Vector3(0.0f, 0.0f, 0.0f));
 
 		//TransformSetParent(canvasText, newCanvas);
 		//TransformSetParent(graphHorizontalLayout, newCanvas);
@@ -556,64 +553,64 @@ void Graph::SetupUI(int width, int height)
 		//TransformSetPosition(canvasText, tem::Vector3(0, 0, 0.0f));
 		//RectTransformSetSize(canvasText, tem::Vector3(200.0f, 400.0f, 0));
 
-		float newGraphWidth = GraphWidth / 2;
-		float newGraphHeight = GraphHeight / 2;
+		float newGraphWidth = (float)GraphWidth / 2.0f;
+		float newGraphHeight = (float)GraphHeight / 2.0f;
 
-		RectTransformSetMinMax(newCanvas, tem::Vector3(0, 0, 0), tem::Vector3(0, 0, 0));
-		RectTransformSetPivot(newCanvas, tem::Vector3(0.5, 0.5, 0));
+		RectTransformSetMinMax(newCanvas, tem::Vector2(0, 0), tem::Vector2(0, 0));
+		RectTransformSetPivot(newCanvas, tem::Vector2(0.5f, 0.5f));
 
 		//RectTransformSetWidthHeight(rectMask2D, newGraphWidth, newGraphHeight);
-		RectTransformSetPivot(rectMask2D, tem::Vector3(0, 0, 0));
-		RectTransformSetMinMax(rectMask2D, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		RectTransformSetPivot(rectMask2D, tem::Vector2(0, 0));
+		RectTransformSetMinMax(rectMask2D, tem::Vector2(0.5f, 0.5f), tem::Vector2(0.5f, 0.5f));
 		//TransformSetPosition(rectMask2D, tem::Vector3(TransformGetPosition(newCanvas)));
-		RectTransformSetSize(rectMask2D, tem::Vector3(GraphWidth, GraphHeight, 0));
+		RectTransformSetSize(rectMask2D, tem::Vector2(GraphWidth, GraphHeight));
 		TransformSetLocalPosition(rectMask2D, tem::Vector3(0, 0, 0)); //TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * -1, 0, 0));
 		//TransformSetLocalPosition(rectMask2D, tem::Vector3(newGraphWidth * - 1, newGraphHeight * -1, 0));
 		TransformSetScale(rectMask2D, tem::Vector3(1, 1, 1));
 
-		RectTransformSetPivot(canvasGraphBackground, tem::Vector3(0, 0, 0));
-		RectTransformSetMinMax(canvasGraphBackground, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		RectTransformSetPivot(canvasGraphBackground, tem::Vector2(0.0f, 0.0f));
+		RectTransformSetMinMax(canvasGraphBackground, tem::Vector2(0.5f, 0.5f), tem::Vector2(0.5f, 0.5f));
 		//TransformSetPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
-		RectTransformSetSize(canvasGraphBackground, tem::Vector3(GraphWidth, GraphHeight, 0));
-		TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(0, 0, 0.0f));
+		RectTransformSetSize(canvasGraphBackground, tem::Vector2(GraphWidth, GraphHeight));
+		TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(0.0f, 0.0f, 0.0f));
 		//TransformSetLocalPosition(canvasGraphBackground, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
 		TransformSetScale(canvasGraphBackground, tem::Vector3(1, 1, 1));
 
-		RectTransformSetPivot(canvasGraphData, tem::Vector3(0, 0, 0));
-		RectTransformSetMinMax(canvasGraphData, tem::Vector3(0.5, 0.5, 0), tem::Vector3(0.5, 0.5, 0));
+		RectTransformSetPivot(canvasGraphData, tem::Vector2(0.0f, 0.0f));
+		RectTransformSetMinMax(canvasGraphData, tem::Vector2(0.5f, 0.5f), tem::Vector2(0.5f, 0.5f));
 		//TransformSetPosition(canvasGraphData, tem::Vector3(0, 0, 0.0f));// tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
-		RectTransformSetSize(canvasGraphData, tem::Vector3(width, GraphHeight, 0));
-		TransformSetLocalPosition(canvasGraphData, tem::Vector3(0, 0, 0.0f));
+		RectTransformSetSize(canvasGraphData, tem::Vector2(width, GraphHeight));
+		TransformSetLocalPosition(canvasGraphData, tem::Vector3(0.0f, 0.0f, 0.0f));
 		//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
 		//TransformSetLocalPosition(canvasGraphData, tem::Vector3(newGraphWidth / 2, newGraphHeight / 2, 0));
 		TransformSetScale(canvasGraphData, tem::Vector3(1, 1, 1));
 
 		//TransformSetPosition(labelLayout, tem::Vector3(0, 0, 0.0f));
-		RectTransformSetSize(labelLayout, tem::Vector3(900, 32, 0));
-		TransformSetLocalPosition(labelLayout, tem::Vector3(0, 250, 0));
+		RectTransformSetSize(labelLayout, tem::Vector2(900.0f, 32.0f));
+		TransformSetLocalPosition(labelLayout, tem::Vector3(0.0f, 250.0f, 0.0f));
 		TransformSetScale(labelLayout, tem::Vector3(1, 1, 1));
 
 		//TransformSetLocalPosition(graphHorizontalLayout, tem::Vector3(0, 0, 0.0f));
 
 		//RectTransformSetMinMax(canvasVerticalLayout, tem::Vector3(0.5, 1, 0), tem::Vector3(0.5, 1, 0));
-		RectTransformSetPivot(canvasVerticalLayout, tem::Vector3(0.5, -0.5, 0));
+		RectTransformSetPivot(canvasVerticalLayout, tem::Vector2(0.5f, -0.5f));
 		//TransformSetPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0.0f));
 		//RectTransformSetAnchoredPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));
-		TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0));// tem::Vector3(TransformGetPosition(newCanvas)));
-		RectTransformSetSize(canvasVerticalLayout, tem::Vector3(GraphWidth, GraphHeight + 400, 0));
-		TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0, 0, 0.0f));
+		TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0.0f, 0.0f, 0.0f));// tem::Vector3(TransformGetPosition(newCanvas)));
+		RectTransformSetSize(canvasVerticalLayout, tem::Vector2(GraphWidth, GraphHeight + 400));
+		TransformSetLocalPosition(canvasVerticalLayout, tem::Vector3(0.0f, 0.0f, 0.0f));
 
 		app::Transform* dataTransform = app::GameObject_get_transform(canvasGraphData, NULL);
 
 		//app::Scrollbar* scrollRect = (app::Scrollbar*)app::GameObject_AddComponent((app::GameObject*)canvasGraphData, scrollType, NULL);
 		//TransformSetPosition(canvasGraphData, tem::Vector3(0.0f, 0.0f, 0.0f));
 
-		RectTransformSetPivot(canvasGraphData, tem::Vector3(0.0f, 0.0f, 0.0f));
-		RectTransformSetSize(canvasGraphData, tem::Vector3(width, GraphHeight, 0));
+		RectTransformSetPivot(canvasGraphData, tem::Vector2(0.0f, 0.0f));
+		RectTransformSetSize(canvasGraphData, tem::Vector2(width, GraphHeight));
 		//RectTransformSetMinMax(canvasGraphData, tem::Vector3(0.0, 0.0, 0), tem::Vector3(0.0f, 0.0f, 0));
 		TransformSetLocalPosition(canvasGraphData, tem::Vector3(0.0f, 0.0f, 0.0f));
 		app::RectTransform_set_anchoredPosition((app::RectTransform*)dataTransform, ToVector2(0.0f, 0.0f), NULL);
-		app::RectTransform_set_sizeDelta((app::RectTransform*)dataTransform, ToVector2(width, GraphHeight), NULL);
+		app::RectTransform_set_sizeDelta((app::RectTransform*)dataTransform, ToVector2(static_cast<float>(width), static_cast<float>(GraphHeight)), NULL);
 
 		/*auto rectcc = GetClass<>("UnityEngine", "Rect");
 		app::Rect* rect = (app::Rect*)il2cpp_object_new((Il2CppClass*)rectcc);

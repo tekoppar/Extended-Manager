@@ -17,7 +17,9 @@ void RaceTime::SetupRaceTimer(app::RaceTimer* raceTimer)
 		GhostRaceTimer = raceTimer;
 }
 
-void RaceTime::CleanUp()
+void RaceTime::Update() {}
+
+void RaceTime::Cleanup()
 {
 	//GhostRaceTimer = nullptr;
 	app::Object_1_Destroy_1((app::Object_1*)RaceCountdownBox, NULL);
@@ -77,14 +79,14 @@ void RaceTime::StartRaceTimer(float bestRaceTime, float bptime, float raceDurati
 		app::RaceTimer_SetTimeLimit(GhostRaceTimer, raceDuration + 99999999.0f, NULL);
 		app::RaceTimer_StartTimer(GhostRaceTimer, NULL);
 
-		RaceTimerBox = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(0, 3, 0), 99999999.0f);
+		RaceTimerBox = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(0.0f, 3.0f, 0.0f), 99999999.0f);
 
-		Toptime = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(0.5, 3.5, 0), 99999999.0f);
+		Toptime = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(0.5f, 3.5f, 0.0f), 99999999.0f);
 		MessageHelper::SetMessage(Toptime, RaceTime::FormatFloat(bestRaceTime), 16.0f);
 
 		if (bestRaceTime < bptime)
 		{
-			BPtime = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(-0.5, 3.5, 0), 99999999.0f);
+			BPtime = MessageHelper::CreateMessageboxNoBackground("00:00.000", tem::Vector3(-0.5f, 3.5f, 0.0f), 99999999.0f);
 			MessageHelper::SetMessage(BPtime, RaceTime::FormatFloat(bptime), 16.0f);
 		}
 	}
@@ -103,7 +105,7 @@ void RaceTime::StartRaceCountdown()
 		app::RaceTimer_StartTimer(GhostRaceTimer, NULL);
 	}
 
-	RaceCountdownBox = MessageHelper::CreateMessageboxNoBackground("00:03.000", tem::Vector3(0, 2.5f, 0), 3.0f);
+	RaceCountdownBox = MessageHelper::CreateMessageboxNoBackground("00:03.000", tem::Vector3(0.0f, 2.5f, 0.0f), 3.0f);
 }
 
 std::string RaceTime::FormatFloat(float time)

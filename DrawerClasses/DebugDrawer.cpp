@@ -13,10 +13,7 @@
 
 #include "DebugDrawer.h"
 
-app::GameObject* DebugDrawer::masterDebug = nullptr;
-bool DebugDrawer::toggleDebugObjects = true;
-bool DebugDrawer::HasCreatedResources = false;
-std::vector<app::GameObject*> DebugDrawer::debugObjects = std::vector<app::GameObject*>();
+DebugDrawer DebugDrawer::Instance = DebugDrawer();
 
 DebugDrawer::DebugDrawer()
 {
@@ -25,22 +22,24 @@ DebugDrawer::DebugDrawer()
 void DebugDrawer::Initialize()
 {
 	app::String* raceBodyName = string_new("RaceBase");
-	DebugDrawer::masterDebug = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
-	app::GameObject__ctor(DebugDrawer::masterDebug, raceBodyName, NULL);
-	TransformSetPosition(DebugDrawer::masterDebug, tem::Vector3(0, 0, 0));
+	masterDebug = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
+	app::GameObject__ctor(masterDebug, raceBodyName, NULL);
+	TransformSetPosition(masterDebug, tem::Vector3(0, 0, 0));
 }
 
 void DebugDrawer::ToggleDebugObjects()
 {
-	app::GameObject_SetMoonHiddenToHierarchy(DebugDrawer::masterDebug, DebugDrawer::toggleDebugObjects, NULL);
+	app::GameObject_SetMoonHiddenToHierarchy(masterDebug, toggleDebugObjects, NULL);
 
-	for (auto& debug : DebugDrawer::debugObjects)
+	for (auto& debug : debugObjects)
 	{
-		app::GameObject_SetMoonHiddenToHierarchy(debug, DebugDrawer::toggleDebugObjects, NULL);
+		app::GameObject_SetMoonHiddenToHierarchy(debug, toggleDebugObjects, NULL);
 	}
 }
 
-void DebugDrawer::CleanUp()
+void DebugDrawer::Update() {}
+
+void DebugDrawer::Cleanup()
 {
 	for (auto& object : debugObjects)
 	{
@@ -63,8 +62,8 @@ void DebugDrawer::CleanUp()
 		debugMaterial = nullptr;
 	}
 
-	app::Object_1_Destroy_1((app::Object_1*)DebugDrawer::masterDebug, NULL);
-	DebugDrawer::masterDebug = nullptr;
+	app::Object_1_Destroy_1((app::Object_1*)masterDebug, NULL);
+	masterDebug = nullptr;
 }
 
 void DebugDrawer::SetupTexture(app::Color color, tem::Vector3 position) 
@@ -111,15 +110,15 @@ void DebugDrawer::SetupTexture(app::Color color, tem::Vector3 position)
 	app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, 0.0f, NULL);
 	app::Material_set_renderQueue(debugMaterial, 2000, NULL);
 
-	TransformSetParent(debugParent, DebugDrawer::masterDebug);
+	TransformSetParent(debugParent, masterDebug);
 	TransformSetScale(debugObject, tem::Vector3(3, 15, 1));
 	TransformSetParent(debugObject, debugParent);
 	//TransformSetRotation(debugObject, tem::Vector3(-90, 0, 0));
 	TransformSetPosition(debugParent, position); //tem::Vector3(0, 15 / 2, 0) + 
 	TransformSetLocalPosition(debugObject, tem::Vector3(3/2 * -1, 15 / 2, 0));
 
-	DebugDrawer::debugObjects.push_back(debugParent);
-	DebugDrawer::ToggleDebugObjects();
+	debugObjects.push_back(debugParent);
+	ToggleDebugObjects();
 }
 
 app::GameObject* DebugDrawer::CreateDebugObjectStatic(app::Color color, tem::Vector3 position)
@@ -161,15 +160,15 @@ app::GameObject* DebugDrawer::CreateDebugObjectStatic(app::Color color, tem::Vec
 	app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, 0.0f, NULL);
 	app::Material_set_renderQueue(debugMaterial, 2000, NULL);
 
-	TransformSetParent(debugParent, DebugDrawer::masterDebug);
+	TransformSetParent(debugParent, DebugDrawer::Instance.masterDebug);
 	TransformSetScale(debugObject, tem::Vector3(3, 15, 1));
 	TransformSetParent(debugObject, debugParent);
 	//TransformSetRotation(debugObject, tem::Vector3(-90, 0, 0));
 	TransformSetPosition(debugParent, position); //tem::Vector3(0, 15 / 2, 0) + 
 	TransformSetLocalPosition(debugObject, tem::Vector3(3/2 * -1, 15 / 2, 0));
 	
-	DebugDrawer::debugObjects.push_back(debugParent);
-	DebugDrawer::ToggleDebugObjects();
+	DebugDrawer::Instance.debugObjects.push_back(debugParent);
+	DebugDrawer::Instance.ToggleDebugObjects();
 
 	return debugParent;
 }
@@ -213,15 +212,15 @@ app::GameObject* DebugDrawer::CreateDebugObject(app::Color color, tem::Vector3 p
 	app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, 0.0f, NULL);
 	app::Material_set_renderQueue(debugMaterial, 2000, NULL);
 
-	TransformSetParent(debugParent, DebugDrawer::masterDebug);
+	TransformSetParent(debugParent, masterDebug);
 	TransformSetScale(debugObject, tem::Vector3(1, 1, 1));
 	TransformSetParent(debugObject, debugParent);
 	//TransformSetRotation(debugObject, tem::Vector3(-90, 0, 0));
 	TransformSetPosition(debugParent, position); //tem::Vector3(0, 15 / 2, 0) + 
-	TransformSetLocalPosition(debugObject, tem::Vector3(scale.X / 2 * -1, scale.Y / 2, 0));
+	TransformSetLocalPosition(debugObject, tem::Vector3(scale.X / 2.0f * -1.0f, scale.Y / 2.0f, 0.0f));
 	
-	DebugDrawer::debugObjects.push_back(debugParent);
-	DebugDrawer::ToggleDebugObjects();
+	debugObjects.push_back(debugParent);
+	ToggleDebugObjects();
 
 	return debugParent;
 }
@@ -265,13 +264,13 @@ app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::V
 	app::Renderer_set_moonOffsetZ((app::Renderer*)meshRenderer, 0.0f, NULL);
 	app::Material_set_renderQueue(debugMaterial, 2000, NULL);
 
-	TransformSetScale(debugObject, tem::Vector3(1,1,1));
+	TransformSetScale(debugObject, tem::Vector3(1.0f,1.0f,1.0f));
 	TransformSetParent(debugObject, debugParent);
 	//TransformSetRotation(debugObject, tem::Vector3(-90, 0, 0));
 	TransformSetPosition(debugParent, position); //tem::Vector3(0, 15 / 2, 0) + 
-	TransformSetLocalPosition(debugObject, tem::Vector3(scale.X / 2 * -1, scale.Y / 2, 0));
+	TransformSetLocalPosition(debugObject, tem::Vector3(scale.X / 2.0f * -1.0f, scale.Y / 2.0f, 0.0f));
 
-	DebugDrawer::debugObjects.push_back(debugParent);
+	debugObjects.push_back(debugParent);
 
 	return debugParent;
 }

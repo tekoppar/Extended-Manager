@@ -5,3 +5,9 @@
 *.idb
 *.obj
 *.obj
+*.sarif
+x64/DebugRelease/injectdll.log
+x64/DebugRelease/injectdll.Build.CppClean.log
+x64/DebugRelease/injectdll.dll.recipe
+x64/DebugRelease/CodeAnalysisResultManifest.txt
+x64/DebugRelease/injectdll.vcxproj.FileListAbsolute.txt

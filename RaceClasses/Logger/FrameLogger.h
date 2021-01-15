@@ -7,7 +7,8 @@
 #include "Global.h"
 #include "FrameLoggerSingleFrame.h"
 
-class FrameLogger : public Global {
+class FrameLogger : public Global
+{
 public:
 	static std::vector<std::future<FrameLoggerFrames>> WaitingOnData;
 
@@ -26,6 +27,7 @@ public:
 	std::vector<FrameLoggerSingleFrame> AllFramesLast;
 
 	virtual void Update() override;
+	virtual void Cleanup() override;
 	static FrameLoggerFrames LoadFrames(std::string path, std::string name);
 	void LoadLastData(std::string path);
 	void ResetData();
@@ -36,7 +38,6 @@ public:
 	std::string GetSeinStatesData();
 	void DisplayDataPublic();
 	void CleanUpData();
-	void CleanUp();
 	void Initialize();
 
 private:

@@ -19,6 +19,7 @@
 #include "ManagerDef.h"
 #include "TemRecorder.h"
 #include "UberStateManager.h"
+#include "MessageClass.h"
 #include "MD5.h"
 
 #include "RaceManager.h"
@@ -219,7 +220,6 @@ void RaceManager::LoadRaceData(std::string path)
 
 			RaceManager::State = RaceState::RaceIsLoading;
 
-			DebugDrawer debugDrawer = DebugDrawer();
 			std::string contents = sutil::ReadFile(path);
 			RaceHash = md5(contents);
 			std::vector<TemJsonObject> jsonObjects = SimpleJson::ParseJsonFromString(contents);
@@ -237,7 +237,7 @@ void RaceManager::LoadRaceData(std::string path)
 			IsRaceCheckpointCreated = false;
 			RaceTime.ResetGhostTimer(AttemptManager.BestAttempt.RaceTime, RaceDuration);
 			RaceTime.StopRaceTimer();
-			RaceTime.CleanUp();
+			RaceTime.Cleanup();
 			FrameLogger.CleanUpData();
 			RaceManager::State = RaceState::RaceIsStopped;
 			RaceManager::TickCount = 0;
@@ -271,7 +271,7 @@ void RaceManager::LoadRaceData(std::string path)
 				case (sutil::hash("RaceStart")):
 				{
 					auto values = sutil::SplitTem(jsonObject.value.data.GetS(), "|");
-					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
+					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0.0f);
 					StartPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 					StartPosition.X = (float)position.X;
 					StartPosition.Y = (float)position.Y - 0.5f;
@@ -282,7 +282,7 @@ void RaceManager::LoadRaceData(std::string path)
 				case (sutil::hash("RaceFinish")):
 				{
 					auto values = sutil::SplitTem(jsonObject.value.data.GetS(), "|");
-					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0);
+					tem::Vector3 position = tem::Vector3(std::stof(values[0]), std::stof(values[1]), 0.0f);
 					FinishPosition = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 					FinishPosition.X = position.X;
 					FinishPosition.Y = position.Y - 0.5f;
@@ -296,20 +296,20 @@ void RaceManager::LoadRaceData(std::string path)
 
 					for (auto& checkpoint : values)
 					{
-						auto dictionaryCheckpoints = checkpoint.jsonobject->value.unorderedmap;
+						std::unordered_map<std::string, TemJsonObjectData> dictionaryCheckpoints = checkpoint.jsonobject->value.unorderedmap;
 
-						tem::Vector3 position = tem::Vector3(dictionaryCheckpoints["x"].GetF(), dictionaryCheckpoints["y"].GetF(), 0);
+						tem::Vector3 position = tem::Vector3(dictionaryCheckpoints["x"].GetF(), dictionaryCheckpoints["y"].GetF(), 0.0f);
 						tem::Vector3 scale = tem::Vector3(dictionaryCheckpoints["w"].GetF(), dictionaryCheckpoints["h"].GetF(), 1.0f);
 						raceCheckpointsRects.push_back(tem::Rect(position.X, position.Y, scale.X, scale.Y));
-						position.X = position.X - ((scale.X / 2) * -1);
+						position.X = position.X - ((scale.X / 2.0f) * -1.0f);
 						position.Y = position.Y;// -scale.Y;
 
-						auto debugObject = debugDrawer.CreateDebugObject(GraphColors::Pink, position, tem::Vector3(1.0f, 1.0f, 1.0f));
-						TransformSetScale(debugObject, tem::Vector3(1.0f, 1.0f, 1));
-						TransformSetLocalPosition(debugObject, tem::Vector3(1.0f / 2 * -1, 1.0f / 2, 0));
+						auto debugObject = DebugDrawer::Instance.CreateDebugObject(GraphColors::Pink, position, tem::Vector3(1.0f, 1.0f, 1.0f));
+						TransformSetScale(debugObject, tem::Vector3(1.0f, 1.0f, 1.0f));
+						TransformSetLocalPosition(debugObject, tem::Vector3(1.0f / 2.0f * -1.0f, 1.0f / 2.0f, 0.0f));
 						TransformSetPosition(debugObject, position);
 
-						TransformSetScale(debugObject, tem::Vector3(scale.X, scale.Y, 1));
+						TransformSetScale(debugObject, tem::Vector3(scale.X, scale.Y, 1.0f));
 						TransformSetPosition(debugObject, position);
 
 						raceCheckpointsHit.push_back(false);
@@ -326,7 +326,7 @@ void RaceManager::LoadRaceData(std::string path)
 
 					for (auto& value : values)
 					{
-						SeinStateUpdate state;
+						SeinStateUpdate state = SeinStateUpdate();
 
 						state.Active = value.second.GetB();
 						abilityIndex = std::stoi(value.second.ObjectName);
@@ -412,7 +412,7 @@ void RaceManager::LoadRaceData(std::string path)
 	RaceManager::State = RaceState::RaceIsNormal;
 }
 
-void RaceManager::CleanupManager()
+void RaceManager::Cleanup()
 {
 	IsRacing = false;
 	(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
@@ -455,8 +455,8 @@ void RaceManager::CleanupManager()
 	seinRecorder = nullptr;
 	newSeinMimicGhost = nullptr;
 
-	FrameLogger.CleanUp();
-	RaceTime.CleanUp();
+	FrameLogger.Cleanup();
+	RaceTime.Cleanup();
 }
 
 void RaceManager::RemoveCheckpoint(int index)
@@ -591,14 +591,14 @@ void RaceManager::FinishedRace(float time)
 
 	RaceTime.StopRaceTimer();
 	ResetHitCheckpoints();
-	MDV::MessageToWrite.push_back("FINISHEDRACE");
+	MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::FinishedRace)));
 
 	(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = true;
 	app::SeinCharacter_set_Position(MDV::MoonSein, FinishPosition.ToMoon(), NULL);
 	app::SeinCharacter_PlaceOnGround(MDV::MoonSein, NULL);
 	app::Vector3* zeroSpeed = (app::Vector3*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	zeroSpeed->z = zeroSpeed->y = zeroSpeed->x = 0;
-	app::Vector2 zeroSpeedV2;
+	app::Vector2 zeroSpeedV2 = app::Vector2();
 	zeroSpeedV2.x = zeroSpeedV2.y = 0.0f;
 	app::SeinCharacter_set_Speed(MDV::MoonSein, *zeroSpeed, NULL);
 	app::CharacterInstantStop_LockForDuration(MDV::MoonSein->fields.PlatformBehaviour->fields.InstantStop, 1.0f, NULL);
@@ -706,7 +706,7 @@ void RaceManager::StopRace()
 		IsRaceCheckpointCreated = false;
 		RaceTime.ResetGhostTimer(AttemptManager.BestAttempt.RaceTime, RaceDuration);
 		RaceTime.StopRaceTimer();
-		RaceTime.CleanUp();
+		RaceTime.Cleanup();
 		FrameLogger.CleanUpData();
 		GhostHandler::CleanupGhosts();
 		TemGhostRecorder.ResetRecorder();
@@ -748,9 +748,7 @@ void RaceManager::CreateFinishLine()
 		app::String* raceFinishName = string_new("RaceFinish");
 		RaceGoalObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 		app::GameObject__ctor(RaceGoalObject, raceFinishName, NULL);
-
-		DebugDrawer debugDrawer = DebugDrawer();
-		app::GameObject* raceFinishDebug = debugDrawer.CreateDebugObject(GraphColors::Pink, tem::Vector3(0, 0, 0));
+		app::GameObject* raceFinishDebug = DebugDrawer::Instance.CreateDebugObject(GraphColors::Pink, tem::Vector3(0, 0, 0));
 
 		app::Type* playerInsideZoneType = GetType("", "PlayerInsideZoneChecker");
 		raceFinishZone = (app::PlayerInsideZoneChecker*)app::GameObject_AddComponent(raceFinishDebug, playerInsideZoneType, NULL);
@@ -885,7 +883,7 @@ void RaceManager::SetupRace(float raceDuration)
 
 		ResetHitCheckpoints();
 
-		MDV::MessageToWrite.push_back("STARTEDRACE");
+		MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::StartedRace)));
 		(*app::InvisibleCheckpoint__TypeInfo)->static_fields->ENABLE_INVISIBLE_CHECKPOINTS = false;
 
 		FrameLogger.CleanUpData();

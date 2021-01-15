@@ -2,7 +2,7 @@
 
 #include "RaceEnums.h"
 
-class RaceTime
+class RaceTime : public Global
 {
 public:
 	app::RaceTimer* GhostRaceTimer = nullptr;
@@ -16,8 +16,10 @@ public:
 	TimerState CountdownTimerState = TimerState::TimerIsStopped;
 	TimerState RaceTimerState = TimerState::TimerIsStopped;
 
+	virtual void Update() override;
+	virtual void Cleanup() override;
+
 	void SetupRaceTimer(app::RaceTimer* raceTimer);
-	void CleanUp();
 	void ResetGhostTimer(float bestRaceTime, float raceDuration);
 	void StartRaceTimer(float bestRaceTime, float bptime, float raceDuration);
 	void StartRaceCountdown();

@@ -44,13 +44,23 @@ enum class MessageType
 	GetSaveInfo = 30,
 	RefreshBackups = 31,
 	SetOriVisuals = 32,
-	SetTransform = 33,
-	GetTransform = 34,
+	FinishedRace = 33,
+	StartedRace = 34,
 	ResetOriVisuals = 35,
 	GetSceneHierarchy = 36,
 	SetSelectedGameObject = 37,
 	CreateGameObject = 38,
-	MoveGameObjectHierarchy = 39
+	MoveGameObjectHierarchy = 39,
+	CloneGameObject = 40,
+	ExpandSceneHierarchy = 41,
+	GetFieldsProperties = 42,
+	SetFieldsProperties = 43,
+	SaveEditorWorld = 44,
+	LoadEditorWorld = 45,
+	AddCollisionPosition = 46,
+	GetFieldsPropertiesGameObject = 47,
+	StoppedRace = 48,
+	ManagerInitialized = 49
 };
 
 class Message {
@@ -63,13 +73,24 @@ public:
 
 class MessageManager {
 public:
-	//std::vector<Message> Messages;
-	//std::vector<int> CurrentMessagesType;
-	//std::vector<Message> NextMessages;
-	//std::vector<int> NextMessagesType;
 	std::unordered_map<MessageType, Message> Messages;
 	std::unordered_map<MessageType, Message> NextMessages;
 	std::unordered_map<MessageType, std::future<bool>> MessagesFutures;
+	std::vector<Message> QueuedMessages;
+	std::unordered_map<MessageType, int> QueuedMessagesCount;
+
+	MessageManager()
+	{
+		Messages = std::unordered_map<MessageType, Message>();
+		NextMessages = std::unordered_map<MessageType, Message>();
+		MessagesFutures = std::unordered_map<MessageType, std::future<bool>>();
+		QueuedMessages = std::vector<Message>();
+
+		for (int i = 0; i < 50; i++)
+		{
+			QueuedMessagesCount[static_cast<MessageType>(i)] = 0;
+		}
+	}
 
 	void AddMessage(Message message)
 	{
@@ -82,6 +103,11 @@ public:
 			{
 				this->Temp[message.Type] = message;
 			}
+			else if (QueuedMessagesCount[message.Type] < 100)
+			{
+				QueuedMessages.push_back(message);
+				QueuedMessagesCount[message.Type]++;
+			}
 		}
 		else
 		{
@@ -89,14 +115,20 @@ public:
 			{
 				this->NextMessages[message.Type] = message;
 			}
+			else if (QueuedMessagesCount[message.Type] < 100)
+			{
+				QueuedMessages.push_back(message);
+				QueuedMessagesCount[message.Type]++;
+			}
 		}
 	}
 
 	void PullMessages()
 	{
+		IsPulling = true;
+		PullQueue();
 		PullTemp();
 
-		IsPulling = true;
 		std::unordered_map<MessageType, Message> temp;
 		for (auto& message : this->NextMessages)
 		{
@@ -140,6 +172,25 @@ public:
 private:
 	std::unordered_map<MessageType, Message> Temp;
 	bool IsPulling = false;
+
+	void PullQueue()
+	{
+		std::vector<Message> temp;
+		if (QueuedMessages.size() > 0)
+		{
+			for (auto& tMessage : QueuedMessages)
+			{
+				if (this->NextMessages.find(tMessage.Type) == this->NextMessages.end())
+				{
+					this->NextMessages[tMessage.Type] = tMessage;
+					QueuedMessagesCount[tMessage.Type]--;
+				}
+				else
+					temp.push_back(tMessage);
+			}
+		}
+		QueuedMessages = temp;
+	}
 
 	void PullTemp()
 	{

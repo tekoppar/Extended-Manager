@@ -6,7 +6,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
+#include <locale> 
 #include <codecvt>
+#include <iostream>
+#include <fstream>
 #include "helpers.h"
 
 std::unordered_map<std::string, Il2CppClass*> resolved_classes;
@@ -39,17 +42,19 @@ void il2cppi_new_console() {
 }
 
 #if _MSC_VER >= 1920
+std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
 // Helper function to convert Il2CppString to std::string
 std::string il2cppi_to_string(Il2CppString* str) {
     std::u16string u16(reinterpret_cast<const char16_t*>(str->chars));
-    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
+    return convert.to_bytes(u16);
 }
 
 // Helper function to convert System.String to std::string
 std::string il2cppi_to_string(app::String* str) {
     std::u16string u16(reinterpret_cast<const char16_t*>(&str->fields.m_firstChar));
-    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
+    return convert.to_bytes(u16);
 }
+
 #endif
 
 template<typename Return>
@@ -113,7 +118,7 @@ app::Type* GetType(std::string Namespace, std::string name)
 app::String* CreateString(std::string& s)
 {
     unsigned char* bytess = reinterpret_cast<unsigned char*>(s.data());
-    return app::String_CreateStringFromEncoding(&bytess[0], s.size(), (*app::Encoding__TypeInfo)->static_fields->defaultEncoding, NULL);
+    return app::String_CreateStringFromEncoding(&bytess[0], static_cast<int32_t>(s.size()), (*app::Encoding__TypeInfo)->static_fields->utf8Encoding, NULL);
 }
 
 app::Type* GetTypeFromName(std::string name)

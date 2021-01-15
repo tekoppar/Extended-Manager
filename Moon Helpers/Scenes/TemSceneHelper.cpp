@@ -5,6 +5,7 @@
 
 #include <future>
 #include <unordered_map>
+#include <chrono>
 
 #include "StringUtils.h"
 #include "ManagerDef.h"
@@ -16,6 +17,12 @@ std::unordered_map<std::string, app::UberPoolGroup*> TemSceneHelper::UberPoolGro
 std::unordered_map<std::string, TemSceneNode> TemSceneHelper::SceneData = std::unordered_map<std::string, TemSceneNode>();
 app::ScenesManager* TemSceneHelper::SceneManager = nullptr;
 bool TemSceneHelper::CanCallMethods = false;
+app::ScenesManagerBehaviourCinematic* TemSceneHelper::BehaviourCinematic = nullptr;
+app::ScenesManagerBehaviourExplicit* TemSceneHelper::BehaviourExplicit = nullptr;
+app::ScenesManagerBehaviourGameplay* TemSceneHelper::BehaviourGameplay = nullptr;
+app::ScenesManagerBehaviourLegacy* TemSceneHelper::BehaviourLegacy = nullptr;
+app::ScenesManagerBehaviourStatic* TemSceneHelper::BehaviourStatic = nullptr;
+app::ScenesManagerBehaviourUtility* TemSceneHelper::BehaviourUtility = nullptr;
 
 std::vector< app::RuntimeSceneMetaData*> TemSceneHelper::GetScenesAtPosition(tem::Vector3 position)
 {
@@ -65,13 +72,20 @@ void TemSceneHelper::LoadScenes(std::vector<app::RuntimeSceneMetaData*> scenes)
 
 bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> scenes, bool preventUnloading)
 {
+	std::chrono::high_resolution_clock::time_point ProgramStart = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point LastTime = std::chrono::high_resolution_clock::now();
+	std::chrono::milliseconds timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
+
 	bool isLoaded = false;
 	bool isEnabled = false;
 	bool isSceneEnabled = false;
 	std::vector<app::SceneManagerScene*> managerScenes;
 
-	while (managerScenes.size() <= scenes.size())
+	while (managerScenes.size() <= scenes.size() && timeSpan.count() < 14 * 1000)
 	{
+		LastTime = std::chrono::high_resolution_clock::now();
+		timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
+
 		if (CanCallMethods == true) {
 			for (auto& scene : scenes)
 			{
@@ -91,8 +105,11 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 		}
 	}
 
-	while (scenes.size() > 0)
+	while (scenes.size() > 0 && timeSpan.count() < 14 * 1000)
 	{
+		LastTime = std::chrono::high_resolution_clock::now();
+		timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
+
 		if (CanCallMethods == true) {
 			if (scenes[0]->fields.SceneMoonGuid != nullptr)
 			{
@@ -133,7 +150,7 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 						if (isLoading == false)
 							app::ScenesManager_RequestAdditivelyLoadScene(TemSceneHelper::SceneManager, scenes[0], true, true, true, false, true, NULL);
 						//app::ScenesManager_PreloadScene(TemSceneHelper::SceneManager, scenes[0], NULL);
-					}
+ 					}
 					else
 						continue;
 				}
@@ -172,8 +189,10 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 			isSceneEnabled = isEnabled = false;
 		}
 	}*/
-
-	return true;
+	if (timeSpan.count() > 14 * 1000)
+		return false;
+	else
+		return true;
 }
 
 bool TemSceneHelper::ResetScenes(std::vector<app::RuntimeSceneMetaData*> scenes)
@@ -289,7 +308,7 @@ void TemSceneHelper::PostRestoreCheckpoint()
 void TemSceneHelper::InitializeSceneNodes()
 {
 	std::vector<std::string> sceneResourcesNames;
-
+	
 	for (int i = 0; i < TemSceneHelper::SceneManager->fields.AllScenes->fields._size; i++)
 	{
 		app::RuntimeSceneMetaData* currentScene = TemSceneHelper::SceneManager->fields.AllScenes->fields._items->vector[i];
@@ -299,7 +318,7 @@ void TemSceneHelper::InitializeSceneNodes()
 			TemSceneNode sceneNode = TemSceneNode();
 			sceneNode.SceneGuid = currentScene->fields.SceneMoonGuid;
 			sceneNode.SceneName = sutil::convert_csstring(currentScene->fields.Scene);
-			sceneNode.ScenePosition = tem::Vector3(currentScene->fields.m_totalRect.m_XMin + (currentScene->fields.m_totalRect.m_Width * 0.5), currentScene->fields.m_totalRect.m_YMin + (currentScene->fields.m_totalRect.m_Height * 0.5), 0.0f);
+			sceneNode.ScenePosition = tem::Vector3(currentScene->fields.m_totalRect.m_XMin + (currentScene->fields.m_totalRect.m_Width * 0.5f), currentScene->fields.m_totalRect.m_YMin + (currentScene->fields.m_totalRect.m_Height * 0.5f), 0.0f);
 			sceneNode.SceneBounds = currentScene->fields.m_totalRect; // app::RuntimeSceneMetaData_get_SceneBounds(currentScene, NULL);
 
 			app::List_1_MoonGuid_* scenesList = app::ScenesManager_GetConnectedScenesCached(TemSceneHelper::SceneManager, currentScene, NULL);
@@ -314,7 +333,7 @@ void TemSceneHelper::InitializeSceneNodes()
 					TemSceneNodeData sceneNodeData = TemSceneNodeData();
 					sceneNodeData.SceneGuid = tempScene->fields.SceneMoonGuid;
 					sceneNodeData.SceneName = sutil::convert_csstring(tempScene->fields.Scene);
-					sceneNodeData.ScenePosition = tem::Vector3(tempScene->fields.m_totalRect.m_XMin + (tempScene->fields.m_totalRect.m_Width * 0.5), tempScene->fields.m_totalRect.m_YMin + (tempScene->fields.m_totalRect.m_Height * 0.5), 0.0f);
+					sceneNodeData.ScenePosition = tem::Vector3(tempScene->fields.m_totalRect.m_XMin + (tempScene->fields.m_totalRect.m_Width * 0.5f), tempScene->fields.m_totalRect.m_YMin + (tempScene->fields.m_totalRect.m_Height * 0.5f), 0.0f);
 					sceneNodeData.Distance = tem::Vector3::Distance(sceneNode.ScenePosition, sceneNodeData.ScenePosition);
 					sceneNodeData.SceneBounds = tempScene->fields.m_totalRect;// app::RuntimeSceneMetaData_get_SceneBounds(sceneToCheck, NULL);
 
@@ -417,4 +436,78 @@ void TemSceneHelper::SetAllScenesCanUnload()
 	app::ScenesManager_ClearKeepLoadedForCheckpoint(TemSceneHelper::SceneManager, NULL);
 	app::ScenesManager_ClearPreventUnloading(TemSceneHelper::SceneManager, NULL);
 	app::ScenesManager_AllowUnloadingOnAllScenes(TemSceneHelper::SceneManager, NULL);
+}
+
+std::vector<TemSceneNodeData> TemSceneHelper::GetNearbyScenes(tem::Vector3 position)
+{
+	TemSceneNode closestNode = GetClosestSceneAtPosition(position);
+	std::vector<TemSceneNodeData> nearbyNodes;
+	std::unordered_map<std::string, bool> visitedNodes;
+	std::vector<TemSceneNodeData> nodesToCheck = closestNode.NearbyScenesVector;
+	TemSceneNodeData closeNode = TemSceneNodeData();
+	closeNode.Hops = 0;
+	closeNode.SceneBounds = closestNode.SceneBounds;
+	closeNode.SceneName = closestNode.SceneName;
+	closeNode.SceneGuid = closestNode.SceneGuid;
+	closeNode.ScenePosition = closestNode.ScenePosition;
+	closeNode.Distance = tem::Vector3::Distance(position, closestNode.ScenePosition);
+	nearbyNodes.push_back(closeNode);
+	visitedNodes[closeNode.SceneName] = true;
+
+	while (nodesToCheck.size() > 0)
+	{
+		if (visitedNodes.find(nodesToCheck[0].SceneName) == visitedNodes.end() && tem::Vector3::Distance(position, nodesToCheck[0].ScenePosition) < 500.0f)
+		{
+			TemSceneNodeData clone = nodesToCheck[0].Clone();
+			clone.Hops++;
+			nearbyNodes.push_back(clone);
+			visitedNodes[clone.SceneName] = true;
+
+			if (SceneData.find(nodesToCheck[0].SceneName) != SceneData.end())
+			{
+				nodesToCheck.insert(std::end(nodesToCheck), std::begin(SceneData[nodesToCheck[0].SceneName].NearbyScenesVector), std::end(SceneData[nodesToCheck[0].SceneName].NearbyScenesVector));
+			}
+		}
+
+		nodesToCheck.erase(nodesToCheck.begin());
+	}
+
+	return nearbyNodes;
+}
+
+app::Dictionary_2_MoonGuid_NearbySceneData_*  TemSceneHelper::TemSceneNodeDataToDictionary(std::vector<TemSceneNodeData> nodes)
+{
+	app::Dictionary_2_MoonGuid_NearbySceneData_* nearbyScenes = (app::Dictionary_2_MoonGuid_NearbySceneData_*)il2cpp_object_new((Il2CppClass*)(*app::Dictionary_2_MoonGuid_NearbySceneData___TypeInfo));
+	app::Dictionary_2_MoonGuid_NearbySceneData___ctor(nearbyScenes, static_cast<int32_t>(nodes.size()), (*app::Dictionary_2_MoonGuid_NearbySceneData___ctor__MethodInfo));
+
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		app::NearbySceneData nearbyData = app::NearbySceneData();
+		nearbyData.Hops = nodes[i].Hops;
+		nearbyData.SceneGuid = nodes[i].SceneGuid;
+		nearbyData.MetaData = app::ScenesManager_FindRuntimeSceneMetaData(SceneManager, nearbyData.SceneGuid, NULL);
+		app::Dictionary_2_MoonGuid_NearbySceneData__Add(nearbyScenes, nodes[i].SceneGuid, nearbyData, (*app::Dictionary_2_MoonGuid_NearbySceneData__Add__MethodInfo));
+	}
+
+	return nearbyScenes;
+}
+
+TemSceneNode TemSceneHelper::GetClosestSceneAtPosition(tem::Vector3 position)
+{
+	float closestDistance = 99999999.0f;
+	float currentDistance = 99999999.0f;
+	TemSceneNode closestNode = TemSceneNode();
+
+	for (auto &node : SceneData)
+	{
+		currentDistance = tem::Vector3::Distance(position, node.second.ScenePosition);
+
+		if (currentDistance < closestDistance)
+		{
+			closestNode = node.second;
+			closestDistance = currentDistance;
+		}
+	}
+
+	return closestNode;
 }
