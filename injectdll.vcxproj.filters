@@ -246,6 +246,9 @@
     <ClCompile Include="DrawerClasses\UIElements\TreeItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BaseClasses\Creators\Collision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inject.h">
@@ -552,6 +555,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Custom Types\Bounds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClasses\Creators\Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

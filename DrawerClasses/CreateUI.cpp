@@ -68,13 +68,19 @@ app::GameObject* DrawUI::Selectable(const std::string& name)
 
 	app::Image* imageObject = (app::Image*)app::GameObject_AddComponent((app::GameObject*)gameObject, imageType, NULL);
 	app::Selectable* newObject = (app::Selectable*)app::GameObject_AddComponent((app::GameObject*)gameObject, selectableType, NULL);
-	app::Selectable__ctor(newObject, NULL);
+	app::ColorBlock colors = app::ColorBlock();
+	colors.m_ColorMultiplier = 1.2f;
+	colors.m_FadeDuration = 0.1f;
+	colors.m_DisabledColor = tem::Vector4(0.5f, 0.5f, 0.5f, 1.0f).ToColor();
+	colors.m_HighlightedColor = tem::Vector4(0.8f, 0.8f, 0.8f, 1.0f).ToColor();
+	colors.m_NormalColor = tem::Vector4(0.4f, 0.4f, 0.4f, 1.0f).ToColor();
+	colors.m_PressedColor = tem::Vector4(1.0f, 1.0f, 1.0f, 1.0f).ToColor();
 	app::Selectable_set_interactable(newObject, true, NULL);
-	app::Selectable_set_image(newObject, imageObject, NULL);
-	app::Selectable_set_targetGraphic(newObject, (app::Graphic*)gameObject, NULL);
-	newObject->fields.m_Colors.m_NormalColor = tem::Vector4(0.4f, 0.4f, 0.4f, 1.0f).ToColor();
-	newObject->fields.m_Colors.m_HighlightedColor = tem::Vector4(0.7f, 0.7f, 0.7f, 1.0f).ToColor();
-	newObject->fields.m_Colors.m_PressedColor = tem::Vector4(1.0f, 1.0f, 1.0f, 1.0f).ToColor();
+	app::Selectable_set_colors(newObject, colors, NULL);
+	app::Selectable__ctor(newObject, NULL);
+	app::Selectable_set_colors(newObject, colors, NULL);
+	//app::Selectable_set_image(newObject, imageObject, NULL);
+	app::Selectable_set_targetGraphic(newObject, (app::Graphic*)imageObject, NULL);
 
 	app::LayoutElement* newLayoutElement = (app::LayoutElement*)app::GameObject_AddComponent((app::GameObject*)gameObject, typeLayoutElement, NULL);
 	app::LayoutElement_set_minHeight(newLayoutElement, 32, NULL);
@@ -551,7 +557,7 @@ TreeItemStruct DrawUI::CreateTreeItem(const std::string& name)
 
 	treeStruct.ChildrenTree = DrawUI::VerticalLayoutGroup("TreeItemChildren", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
 	treeStruct.TreeItemChildrenLayout = (app::VerticalLayoutGroup*)app::GameObject_GetComponent(treeStruct.ChildrenTree, typeVerticalLayoutGroup, NULL);
-	app::RectOffset_set_left(treeStruct.TreeItemChildrenLayout->fields._._.m_Padding, 12.0f, NULL);
+	app::RectOffset_set_left(treeStruct.TreeItemChildrenLayout->fields._._.m_Padding, 12.0, NULL);
 
 	TransformSetParent(treeItemHeader, treeStruct.TreeItemObject);
 	TransformSetParent(treeStruct.ChildrenTree, treeStruct.TreeItemObject);

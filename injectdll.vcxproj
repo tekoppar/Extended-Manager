@@ -237,6 +237,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseClasses\Gizmo\GizmoEvents.cpp" />
+    <ClCompile Include="BaseClasses\Creators\Collision.cpp" />
     <ClCompile Include="Moon Helpers\Scenes\SceneStructure\Component.cpp" />
     <ClCompile Include="BaseClasses\Gizmo\Gizmo.cpp" />
     <ClCompile Include="BaseClasses\Creators\MeshUtility.cpp" />
@@ -301,6 +302,7 @@
     <ClCompile Include="DrawerClasses\UIElements\TreeItem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseClasses\Creators\Collision.h" />
     <ClInclude Include="Custom Types\Bounds.h" />
     <ClInclude Include="Moon Helpers\Scenes\SceneStructure\Component.h" />
     <ClInclude Include="Custom Types\TemMath.h" />

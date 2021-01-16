@@ -7,6 +7,7 @@
 #include "UIEvents.h"
 #include "GizmoEvents.h"
 #include "Tem.h"
+#include "Collision.h"
 #include "json.hpp"
 
 namespace tem {
@@ -33,41 +34,27 @@ namespace tem {
 		CollisionEditActionType ActiveActionType = CollisionEditActionType::None;
 		CollisionToolType ActiveTool = CollisionToolType::Selection;
 		app::SphereCollider* SelectedObject = nullptr;
-		std::vector<app::SphereCollider*> AllColliders = std::vector<app::SphereCollider*>();
-		std::vector<tem::Vector3> Positions = std::vector<tem::Vector3>();
-		app::Mesh* mesh = nullptr;
-		app::MeshCollider* Collider = nullptr;
-		app::GameObject* colliderPreview = nullptr;
-		app::MeshFilter* meshFilterPreview = nullptr;
-		app::MeshRenderer* meshRenderer = nullptr;
-		app::Material* meshPreviewMat = nullptr;
+		int ActiveCollision = -1;
+		std::vector<tem::Collision> AllCollisions = std::vector<tem::Collision>();
 		app::GameObject* HorizontalToolbar = nullptr;
 		std::vector<app::GameObject*> ToolbarButtonsObjects;
 		std::vector<app::Button*> ToolbarButtons;
 		bool HitCollisionHandle = false;
+		app::GameObject* MasterCollisionObject = nullptr;
 
 		CollisionCreator()
 		{
 			this->SelectedObject = nullptr;
-			this->AllColliders = std::vector<app::SphereCollider*>();
-			this->Positions = std::vector<tem::Vector3>();
-			this->mesh = nullptr;
-			this->Collider = nullptr;
-			this->colliderPreview = nullptr;
-			this->meshFilterPreview = nullptr;
-			this->meshRenderer = nullptr;
-			this->meshPreviewMat = nullptr;
+			this->ActiveCollision = -1;
+			this->AllCollisions = std::vector<tem::Collision>();
 			this->ActiveActionType = CollisionEditActionType::None;
 			this->ActiveTool = CollisionToolType::Selection;
+			MasterCollisionObject = nullptr;
 		}
 
-		void SetupRenderer();
+		void SetupRenderer(tem::Collision& collision);
 		virtual void Update() override;
 		virtual void Cleanup() override;
-		bool ShouldDrawCollision();
-		void AddPosition(tem::Vector3 position);
-		void DrawCollision();
-		void AddSphereHandle(tem::Vector3 position);
 		void LoadCollision(tem::CollisionCreator newCollision);
 		void AddCollisionToolbar();
 

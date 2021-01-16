@@ -66,7 +66,8 @@ namespace tem {
 	{
 		j = nlohmann::json{ {"Object", p.Object} };
 		for (auto& [key, value] : p.SceneChildren) {
-			j["SceneChildren"][std::to_string(key)] = value;
+			if (value.Object.SceneIndexHierarchy[1] > 299)
+				j["SceneChildren"][std::to_string(key)] = value;
 		}
 	}
 

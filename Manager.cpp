@@ -64,7 +64,7 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "Gizmo.h"
 #include "UIEvents.h"
 
-static bool MANAGER_INITIALIZED = false;
+static int MANAGER_INITIALIZED = -1;
 static bool WRITE_THREAD_EXITED = false;
 static bool EXITING_THREAD = false;
 static bool READ_THREAD_DONE = false;
@@ -108,6 +108,8 @@ void InitializeDLL()
 {
 	if (app::Graphic_CrossFadeColor == nullptr && app::Graphic_CrossFadeColor_1 == nullptr && (*app::List_1_UnityEngine_Collider__Add__MethodInfo) == nullptr || (*app::AreaMapUI__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo)->static_fields->Instance == nullptr)
 		return;
+
+	MANAGER_INITIALIZED = 0;
 
 	MDV::MoonGameWorld = (*app::GameWorld__TypeInfo)->static_fields->Instance;// GetGameWorld(hProcess);
 	MDV::MoonGameController = (*app::GameController__TypeInfo)->static_fields->Instance; // GetGameController(hProcess);
@@ -224,12 +226,12 @@ void InitializeDLL()
 
 	app::PlayerInput* playerInput = (*app::PlayerInput__TypeInfo)->static_fields->Instance;
 
-	MANAGER_INITIALIZED = true;
+	MANAGER_INITIALIZED = 1;
 }
 
 void __fastcall Mine_CClassFunction(void* __this, int edx)
 {
-	if (MANAGER_INITIALIZED == false)
+	if (MANAGER_INITIALIZED == -1)
 	{
 		if (READ_THREAD_DONE == true)
 			InitializeDLL();
@@ -243,7 +245,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 		totalFrames++;
 		raceManager.totalFrames = totalFrames;
 
-		if (MANAGER_INITIALIZED == true && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
+		if (MANAGER_INITIALIZED == 1 && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
 		{
 			//app::SceneRoot* sceneRoot = app::ScenesManager_RegisterSceneByName(sceneManager, string_new("Test1234"), false, true, NULL);
 			app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
@@ -794,11 +796,11 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						nlohmann::json j = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "EditorWorld.json"));
 						tem::SceneList::RootHierarchy = j.get<tem::SceneHierarchy>();
 						std::vector<app::RuntimeSceneMetaData*> scenesToLoad = tem::SceneList::GetScenesToLoad();
-						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToDisableScene = 1500;
-						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToPreventUnloading = 1500;
+						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToDisableScene = 2500;
+						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToPreventUnloading = 2500;
 						TemSceneHelper::SceneManager->fields.Settings->fields.AllowInstantSceneUnloads = false;
-						TemSceneHelper::SceneManager->fields.Settings->fields.DistanceMovedAwayFromSceneBeforeDisabling = 1500;
-						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityBeforeConsideredUneeded = 1500;
+						TemSceneHelper::SceneManager->fields.Settings->fields.DistanceMovedAwayFromSceneBeforeDisabling = 2500;
+						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityBeforeConsideredUneeded = 2500;
 
 						TemSceneHelper::LoadScenes(scenesToLoad);
 						MessagesManager.MessagesFutures[message.second.Type] = std::async(TemSceneHelper::IsScenesLoaded, scenesToLoad, true);
@@ -826,9 +828,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					}
 				}
 				break;
-
-				case MessageType::AddCollisionPosition: tem::CollisionCreator::Instance.AddPosition(app::MoonInput_get_mousePosition(NULL)); break;
-
 			}
 
 			if (futureExists == false)
@@ -1049,12 +1048,12 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 						}
 						if (newMessage.Type == MessageType::NextAnimation)
 						{
-							if (MANAGER_INITIALIZED == true)
+							if (MANAGER_INITIALIZED == 1)
 								app::SeinPlayAnimationController_StopAnimation(MDV::SeinPlayAnimationController, NULL);
 						}
 						if (newMessage.Type == MessageType::GetSeinFaces)
 						{
-							if (MANAGER_INITIALIZED == true)
+							if (MANAGER_INITIALIZED == 1)
 							{
 								int faces = app::SeinCharacter_get_FacingDirection(MDV::MoonSein, NULL);
 								MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetSeinFaces)) + "|" + std::to_string(faces));
