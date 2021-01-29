@@ -48,6 +48,7 @@ namespace tem {
 		bool IsDragging = false;
 		bool EditingEnabled = false;
 		bool DoOncePerFrame = false;
+		bool FreezeOri = false;
 		tem::Vector3 PreviouisMousePosition = tem::Vector3();
 		tem::Vector3 PreviousRotation = tem::Vector3();
 		int FrameDelay = 0;
@@ -76,6 +77,8 @@ namespace tem {
 		int ZRotationInstanceId = -1;
 
 		void CreateMoveGizmo();
+		void ToggleFreeze();
+		void SetFreeze(bool value);
 	};
 }
 

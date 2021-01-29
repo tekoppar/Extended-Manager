@@ -12,6 +12,7 @@ namespace tem {
 	public:
 		std::vector<app::SphereCollider*> AllColliders = std::vector<app::SphereCollider*>();
 		std::vector<tem::Vector3> Positions = std::vector<tem::Vector3>();
+		bool FaceDirection = false;
 		app::Mesh* mesh = nullptr;
 		app::MeshCollider* Collider = nullptr;
 		app::GameObject* colliderPreview = nullptr;
@@ -29,6 +30,7 @@ namespace tem {
 			meshFilterPreview = nullptr;
 			meshRenderer = nullptr;
 			meshPreviewMat = nullptr;
+			FaceDirection = false;
 		}
 
 		Collision(std::vector<app::SphereCollider*> collisions, std::vector<tem::Vector3> positions)
@@ -41,10 +43,12 @@ namespace tem {
 			meshFilterPreview = nullptr;
 			meshRenderer = nullptr;
 			meshPreviewMat = nullptr;
+			FaceDirection = false;
 		}
 
 		bool ShouldDrawCollision();
 		void AddPosition(tem::Vector3 position);
+		void ClonePositionIndex(int index);
 		void DrawCollision();
 		void AddSphereHandle(tem::Vector3 position, int index);
 		void UpdateSphereHandles();

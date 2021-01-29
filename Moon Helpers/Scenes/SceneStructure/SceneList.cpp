@@ -23,6 +23,7 @@ namespace tem {
 	app::Type* tem::SceneList::ComponentType = nullptr;
 	tem::SceneHierarchy* tem::SceneList::ActiveHiearchy = nullptr;
 	tem::SceneHierarchy tem::SceneList::RootHierarchy = tem::SceneHierarchy(tem::SceneObject(false, false, "Scene Roots", "", 0x0, "", std::vector<tem::Component>(), std::vector<int>{999}, 999), std::unordered_map<int, tem::SceneHierarchy>());
+	tem::SceneData tem::SceneList::RootSceneData = tem::SceneData();
 	std::unordered_map<std::string, std::uintptr_t> tem::SceneList::SpecialSceneHierarchyMap;
 	std::unordered_map<int, std::uintptr_t> tem::SceneList::SpecialSceneHierarchyIndexMap;
 
@@ -58,15 +59,46 @@ namespace tem {
 	{
 		if (hierarchy->Object.IsCustomObject == true && hierarchy->Object.ClonedSceneNameHierarchy.size() > 0)
 		{
+			TemLogger::Add(hierarchy->Object.Name + " is custom object, starting to cloning: " + tem::StringVectorToString(hierarchy->Object.ClonedSceneNameHierarchy, ","), LogType::Normal);
 			app::GameObject* cloneGameObject = tem::SceneList::GetGameObjectFromHierarchyName(hierarchy->Object.ClonedSceneNameHierarchy);
-			app::GameObject* doesCloneExist = tem::SceneList::GetGameObjectFromHierarchyIndex(hierarchy->Object.SceneIndexHierarchy);
+			//app::GameObject* doesCloneExist = tem::SceneList::GetGameObjectFromHierarchyIndex(hierarchy->Object.SceneIndexHierarchy); //need to change since I can't check if an object already exists or not using indexes when they're not loaded in the same order as they're saved
 
-			if (cloneGameObject != nullptr && doesCloneExist == nullptr)
+			if (cloneGameObject != nullptr)
 			{
-				app::GameObject_SetMoonHidden2ToHierarchy(cloneGameObject, false, NULL);
-				app::GameObject_SetActive(cloneGameObject, true, NULL);
-				app::GameObject_set_active(cloneGameObject, true, NULL);
-				//app::GameObject_SetActiveRecursively(cloneGameObject, true, NULL);
+				std::vector<app::GameObject*> foundChildren = GetChildrenByName(TransformGetParent(cloneGameObject), hierarchy->Object.ClonedSceneNameHierarchy[hierarchy->Object.ClonedSceneNameHierarchy.size() - 1]);
+
+				if (foundChildren.size() > 1 && hierarchy->Object.ClonedPosition.Equals(tem::Vector3(0.0f)) == false)
+				{
+					for (int i = 0; i < foundChildren.size(); i++)
+					{
+						if (hierarchy->Object.ClonedPosition.NearlyEqual(TransformGetPosition(foundChildren[i])) == true)
+							cloneGameObject = foundChildren[i];
+					}
+				}
+
+				app::Type* entityPlaceholderType = GetType("", "EntityPlaceholder");
+				if (app::GameObject_HasComponent(cloneGameObject, entityPlaceholderType, NULL))
+				{
+					app::EntityPlaceholder* placeHolder = (app::EntityPlaceholder*)GetComponentByType(cloneGameObject, "", "EntityPlaceholder");
+					app::SceneManagerScene* sceneManagerTemp = tem::SceneList::GetSceneManagerSceneFromHierarchy(hierarchy->Object.SceneIndexHierarchy);
+
+					if (tem::PtrInRange(sceneManagerTemp) == true && sceneManagerTemp->klass->_0.name == "SceneManagerScene")
+						app::EntityPlaceholder_RegisterSceneRoot(placeHolder, sceneManagerTemp->fields.SceneRoot, NULL);
+
+					if (app::GameObject_get_moonReady(cloneGameObject, NULL) == true)
+						app::GameObject_set_moonReady(cloneGameObject, false, NULL);
+
+					if (app::GameObject_get_active(cloneGameObject, NULL) == true)
+						app::GameObject_set_active(cloneGameObject, false, NULL);
+				}
+				else
+				{
+					if (app::GameObject_get_moonReady(cloneGameObject, NULL) == false)
+						app::GameObject_set_moonReady(cloneGameObject, true, NULL);
+
+					if (app::GameObject_get_active(cloneGameObject, NULL) == false)
+						app::GameObject_set_active(cloneGameObject, true, NULL);
+				}
 
 				app::GameObject* clone = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)cloneGameObject, NULL);
 				app::String* oName = app::Object_1_get_name((app::Object_1*)clone, NULL);
@@ -86,20 +118,32 @@ namespace tem {
 
 				TransformSetLocalPosition(clone, tem::Vector3(0.0f));
 				TransformSetPosition(clone, TransformGetPosition(cloneGameObject));
-				app::GameObject_SetActive(clone, true, NULL);
-				app::GameObject_SetActiveRecursively(clone, true, NULL);
-				app::GameObject_SetMoonHidden2ToHierarchy(clone, false, NULL);
-				tem::SceneHierarchy* parent = tem::SceneList::GetSceneHierarchyPtrFromIndex(parentHierarchy);
-				parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.Parent = (std::uintptr_t)parent;
-				parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.IsCustomObject = true;
-				parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.ClonedSceneNameHierarchy = hierarchy->Object.ClonedSceneNameHierarchy;
+				hierarchy->Object.ClonedPosition = TransformGetPosition(cloneGameObject);
+				
+				if (app::GameObject_get_moonReady(clone, NULL) == false)
+					app::GameObject_set_moonReady(clone, true, NULL);
+
+				if (app::GameObject_get_active(clone, NULL) == false)
+					app::GameObject_set_active(clone, true, NULL);
+
+				//tem::SceneHierarchy* parent = tem::SceneList::GetSceneHierarchyPtrFromIndex(parentHierarchy);
+				//parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.Parent = (std::uintptr_t)parent;
+				//parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.IsCustomObject = true;
+				//parent->SceneChildren[parent->SceneChildrenNameMap[hierarchy->Object.Name]].Object.ClonedSceneNameHierarchy = hierarchy->Object.ClonedSceneNameHierarchy;
+			}
+			else
+			{
+				//if (doesCloneExist == nullptr)
+				TemLogger::Add("Failed to clone object: " + tem::StringVectorToString(hierarchy->Object.ClonedSceneNameHierarchy, ","), LogType::Error);
+				/*else
+				TemLogger::Add("Clone already exists: " + tem::StringVectorToString(hierarchy->Object.ClonedSceneNameHierarchy, ","), LogType::Error);*/
 			}
 		}
 
-		for (auto& child : hierarchy->SceneChildren)
+		for (int i = 0; i < hierarchy->SceneChildren.size(); i++)
 		{
-			hierarchy->SceneChildren[child.first].Object.Parent = (std::uintptr_t)hierarchy;
-			LoadHierarchyP(&child.second);
+			hierarchy->SceneChildren[i].Object.Parent = (std::uintptr_t)hierarchy;
+			LoadHierarchyP(&hierarchy->SceneChildren[i]);
 		}
 		return true;
 	}
@@ -112,44 +156,20 @@ namespace tem {
 
 	bool tem::SceneList::SetLoadedHierarchyDataP(tem::SceneHierarchy* hierarchy)
 	{
+		TemLogger::Add("Checking if " + hierarchy->Object.Name + " is a custom object");
 		if (hierarchy->Object.IsCustomObject == true || hierarchy->Object.HasChanged == true)
 		{
-			TemLogger::Add("Loading " + hierarchy->Object.Name);
+			TemLogger::Add(hierarchy->Object.Name + " is a custom object, starting to set saved data");
 			for (tem::Component& component : hierarchy->Object.SceneComponents)
 			{
-				for (auto& field : component.Fields)
-				{
-					if (field.HasChanged == true)
-					{
-						hierarchy->Object.SetComponentDataField(component.ClassName, field);
-						TemLogger::Add("Setting field " + field.Name + " to value " + field.FieldValue);
-						field.HasChanged = true;
-					}
-				}
-				for (std::size_t i = 0; i < component.Properties.size(); i++)
-				{
-					tem::ClassProperty& prop = component.Properties[i];
-					if (prop.HasChanged == true)
-					{
-						if (prop.Name != "localPosition")
-						{
-							if (prop.Name == "position" && component.Properties.size() > 2 && component.Properties[i + 1].Name == "localPosition")
-							{
-								hierarchy->Object.SetComponentDataProperty(component.ClassName, component.Properties[i + 1]);
-								TemLogger::Add("Setting property " + component.Properties[i + 1].Name + " to value " + component.Properties[i + 1].PropertyValue);
-							}
-							hierarchy->Object.SetComponentDataProperty(component.ClassName, prop);
-							TemLogger::Add("Setting property " + prop.Name + " to value " + prop.PropertyValue);
-						}
-						prop.HasChanged = true;
-					}
-				}
+				hierarchy->Object.SetComponentData(component.ClassName, component.ClassName, component.ClassName, false);
+				component.ObjectData.HasChanged = true;
 			}
 		}
 
-		for (auto& child : hierarchy->SceneChildren)
+		for (int i = 0; i < hierarchy->SceneChildren.size(); i++)
 		{
-			SetLoadedHierarchyDataP(&child.second);
+			SetLoadedHierarchyDataP(&hierarchy->SceneChildren[i]);
 		}
 
 		return true;
@@ -214,24 +234,37 @@ namespace tem {
 
 		if (cloneGameObject != nullptr && parent != nullptr)
 		{
-			app::GameObject_SetActive(cloneGameObject, true, NULL);
-			app::GameObject_SetMoonHidden2ToHierarchy(cloneGameObject, false, NULL);
+			if (app::GameObject_get_active(cloneGameObject, NULL) == false)
+				app::GameObject_set_active(cloneGameObject, true, NULL);
+
+			//app::GameObject_SetMoonHidden2ToHierarchy(cloneGameObject, false, NULL);
 			app::GameObject* clone = (app::GameObject*)app::Object_1_Instantiate_2((app::Object_1*)cloneGameObject, NULL);
 
 			std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)clone, NULL));
 			app::Object_1_set_name((app::Object_1*)clone, string_new((name + "clone").data()), NULL);
-			TransformSetParent(clone, TransformGetParent(cloneGameObject));
-			TransformSetLocalPosition(clone, tem::Vector3(0.0f));
-			app::GameObject_SetActive(clone, true, NULL);
-			app::GameObject_SetMoonHidden2ToHierarchy(clone, false, NULL);
+			
+			if (name.find("Placeholder") != std::string::npos)
+			{
+				parent->VerifyHierarchy();
+				ConstructSceneHierarchy(parent->Object.SceneIndexHierarchy, 2);
+			}
 
-			int newIndex = parent->SceneChildren.size();
+			TransformSetParent(clone, TransformGetParent(cloneGameObject), true);
+			TransformSetLocalPosition(clone, tem::Vector3(0.0f));
+			TransformSetPosition(clone, TransformGetPosition(cloneGameObject));
+
+			if (app::GameObject_get_active(clone, NULL) == false)
+				app::GameObject_set_active(clone, true, NULL);
+
+			//app::GameObject_SetMoonHidden2ToHierarchy(clone, false, NULL);
+			int newIndex = parent->SceneChildren.size(); //TransformGetObjectIndex(clone);//
 			std::vector<int> newHierarchyIndex = indexes;
 			newHierarchyIndex.erase(newHierarchyIndex.end() - 1);
 			newHierarchyIndex.push_back(newIndex);
 			tem::SceneList::ConstructSceneHierarchy(newHierarchyIndex, 2);
 
 			parent->SceneChildren[newIndex].Object.IsCustomObject = true;
+			parent->SceneChildren[newIndex].Object.ClonedPosition = TransformGetPosition(cloneGameObject);
 			parent->SceneChildren[newIndex].Object.ClonedSceneNameHierarchy = GetSceneHierarchyIndexFromGameObject(cloneGameObject);
 			return parent;
 		}
@@ -361,6 +394,7 @@ namespace tem {
 			if (exists.size() > 0 && exists == sceneIndexHierarchy)
 			{
 				hierarchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(exists);
+				hierarchy->VerifyHierarchy();
 			}
 			else
 			{
@@ -379,6 +413,14 @@ namespace tem {
 				{
 					child.Object.Parent = reinterpret_cast<std::uintptr_t>(parentHierarchy);
 					child.Object.ParentName = parentHierarchy->Object.Name;
+
+					if (parentHierarchy->SceneChildren.find(child.Object.HierarchyIndex) == parentHierarchy->SceneChildren.end() && child.Object.SceneIndexHierarchy.size() > 2)
+					{
+						child.Object.HierarchyIndex = parentHierarchy->SceneChildren.size();
+						child.Object.SceneIndexHierarchy.erase(child.Object.SceneIndexHierarchy.end() - 1);
+						child.Object.SceneIndexHierarchy.push_back(child.Object.HierarchyIndex);
+					}
+
 					parentHierarchy->SceneChildren[child.Object.HierarchyIndex] = child;
 
 					hierarchy = &parentHierarchy->SceneChildren[child.Object.HierarchyIndex];
@@ -594,6 +636,60 @@ namespace tem {
 			return nullptr;
 	}
 
+	app::SceneManagerScene* tem::SceneList::GetSceneManagerSceneFromHierarchy(std::vector<int> hierarchy)
+	{
+		if (hierarchy.size() > 1 && hierarchy[0] == 999)
+			hierarchy.erase(hierarchy.begin());
+
+		if (hierarchy.size() < 1 || (hierarchy.size() == 1 && (hierarchy[0] == 999 || hierarchy[0] == -1)))
+			return nullptr;
+
+		if (hierarchy[0] <= 300)
+		{
+			app::RuntimeSceneMetaData* runtime = TemSceneHelper::SceneManager->fields.AllScenes->fields._items->vector[hierarchy[0]];
+			app::SceneManagerScene* sceneManagerScene = app::ScenesManager_GetFromCurrentScenes(TemSceneHelper::SceneManager, runtime, NULL);
+
+			if (tem::PtrInRange(sceneManagerScene) == false && tem::PtrInRange(runtime) == true)
+				sceneManagerScene = app::ScenesManager_GetSceneManagerScene(TemSceneHelper::SceneManager, runtime->fields.Scene, NULL);
+
+			if (tem::PtrInRange(sceneManagerScene) == false && tem::PtrInRange(runtime) == true)
+			{
+				app::ScenesManager_AdditivelyLoadSceneFile(TemSceneHelper::SceneManager, runtime, false, true, false, false, NULL);
+				sceneManagerScene = app::ScenesManager_GetSceneManagerScene(TemSceneHelper::SceneManager, runtime->fields.Scene, NULL);
+			}
+
+			return sceneManagerScene;
+		}
+
+		return nullptr;
+	}
+
+	app::SceneManagerScene* tem::SceneList::GetSceneManagerSceneFromHierarchyName(std::vector<std::string> hierarchy)
+	{
+		if (hierarchy.size() > 1 && hierarchy[0] == "Scene Roots")
+			hierarchy.erase(hierarchy.begin());
+
+		if (hierarchy.size() < 1 || (hierarchy.size() == 1 && (hierarchy[0] == "Scene Roots" || hierarchy[0] == "")))
+			return nullptr;
+
+		app::RuntimeSceneMetaData* runtime = app::ScenesManager_GetSceneInformation(TemSceneHelper::SceneManager, string_new(hierarchy[0].data()), NULL);
+		app::SceneManagerScene* sceneManagerScene = app::ScenesManager_GetFromCurrentScenes(TemSceneHelper::SceneManager, runtime, NULL);
+
+		if (tem::PtrInRange(sceneManagerScene) == false && tem::PtrInRange(runtime) == true)
+			sceneManagerScene = app::ScenesManager_GetSceneManagerScene(TemSceneHelper::SceneManager, runtime->fields.Scene, NULL);
+
+		if (tem::PtrInRange(sceneManagerScene) == false && tem::PtrInRange(runtime) == true)
+		{
+			app::ScenesManager_AdditivelyLoadSceneFile(TemSceneHelper::SceneManager, runtime, false, true, false, false, NULL);
+			sceneManagerScene = app::ScenesManager_GetSceneManagerScene(TemSceneHelper::SceneManager, runtime->fields.Scene, NULL);
+		}
+
+		if (tem::PtrInRange(sceneManagerScene) == true && tem::PtrInRange(sceneManagerScene->fields.SceneRoot) == true)
+			return sceneManagerScene;
+
+		return nullptr;
+	}
+
 	app::GameObject* tem::SceneList::GetGameObjectFromHierarchyName(std::vector<std::string> hierarchy, app::GameObject* object)
 	{
 		std::vector<std::string> tempHierarchy = hierarchy;
@@ -664,25 +760,24 @@ namespace tem {
 		std::vector<app::RuntimeSceneMetaData*> scenes;
 		bool existsAlready = false;
 
-		for (auto& child : tem::SceneList::RootHierarchy.SceneChildren)
+		std::vector<std::string> sceneNames;
+		tem::SceneHierarchy::GetScenesToLoad(sceneNames, tem::SceneList::RootHierarchy);
+
+		for (std::string& sceneName : sceneNames)
 		{
-			if (SpecialSceneHierarchyMap.find(child.second.Object.Name) == SpecialSceneHierarchyMap.end())
+			app::RuntimeSceneMetaData* runtime = app::ScenesManager_GetSceneInformation(TemSceneHelper::SceneManager, string_new(sceneName.data()), NULL);
+
+			if (runtime != nullptr)
 			{
-				app::RuntimeSceneMetaData* runtime = app::ScenesManager_GetSceneInformation(TemSceneHelper::SceneManager, string_new(child.second.Object.Name.data()), NULL);
-
-				if (runtime != nullptr)
+				for (auto& scene : scenes)
 				{
-					for (auto& scene : scenes)
-					{
-						if (runtime == scene)
-							existsAlready = true;
-					}
-
-					if (existsAlready == false)
-						scenes.push_back(runtime);
+					if (runtime == scene)
+						existsAlready = true;
 				}
+
+				if (existsAlready == false)
+					scenes.push_back(runtime);
 			}
-			existsAlready = false;
 		}
 
 		return scenes;

@@ -455,6 +455,34 @@ app::Component_1* GetComponentByType(app::GameObject* object, std::string Namesp
 	return component;
 }
 
+std::vector<app::GameObject*> GetChildrenByName(app::GameObject* parent, std::string name)
+{
+	app::Transform* parentTransform = app::GameObject_get_transform(parent, NULL);
+	int childCount = app::Transform_GetChildCount(parentTransform, NULL);
+	std::vector<app::GameObject*> foundChildren;
+	app::String* nameS = string_new(name.data());
+
+	for (int i = 0; i < childCount; i++)
+	{
+		app::Transform* childTransform = app::Transform_GetChild(parentTransform, i, NULL);
+
+		if (tem::PtrInRange(childTransform) == true)
+		{
+			app::GameObject* childObject = app::Component_1_get_gameObject((app::Component_1*)childTransform, NULL);
+
+			if (tem::PtrInRange(childObject) == true)
+			{
+				app::String* oName = app::Object_1_get_name((app::Object_1*)childObject, NULL);
+				
+				if (app::String_Equals_1(nameS, oName, NULL) == true)
+					foundChildren.push_back(childObject);
+			}
+		}
+	}
+
+	return foundChildren;
+}
+
 app::GameObject* CreateNewCanvas()
 {
 	app::GameObject* canvasObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
@@ -644,7 +672,7 @@ void TransformSetQuatRotation(app::GameObject* object, tem::Vector3 eulersAngles
 
 }
 
-void TransformSetParent(app::GameObject* object, app::GameObject* parent)
+void TransformSetParent(app::GameObject* object, app::GameObject* parent, bool setAsLastSibling)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
 
@@ -652,8 +680,13 @@ void TransformSetParent(app::GameObject* object, app::GameObject* parent)
 	if (parent != NULL)
 		parentTransform = app::GameObject_get_transform((app::GameObject*)parent, NULL);
 
-	app::Transform_SetParent_1((app::Transform*)objectTransform, (parent == NULL ? NULL : parentTransform), true, NULL);
-	app::Transform_SetAsLastSibling((app::Transform*)objectTransform, NULL);
+	if (object != nullptr && parent != nullptr)
+		app::Transform_SetParent_1((app::Transform*)objectTransform, (parent == NULL ? NULL : parentTransform), true, NULL);
+	else
+		TemLogger::Add("Failed to set parent, one of the transforms is missing a game object.", LogType::Warning);
+	
+	if (setAsLastSibling == true)
+		app::Transform_SetAsLastSibling((app::Transform*)objectTransform, NULL);
 }
 
 app::GameObject* TransformGetParent(app::GameObject* object)
@@ -753,13 +786,19 @@ app::Material* CreateNewMaterial(std::string shader)
 {
 	app::String* standardMatS = string_new(shader.data());
 	app::Shader* standardShader = app::Shader_Find(standardMatS, NULL);
-	app::Material* newMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)(*app::Material__TypeInfo));
-	app::Material__ctor(newMaterial, standardShader, NULL);
-	app::Color newColor = app::Color();
-	newColor.a = 0.0f, newColor.b = 1.0f, newColor.g = 1.0f, newColor.r = 1.0f;
-	app::Material_set_color(newMaterial, newColor, NULL);
 
-	return newMaterial;
+	if (tem::PtrInRange(standardShader) == true)
+	{
+		app::Material* newMaterial = (app::Material*)il2cpp_object_new((Il2CppClass*)(*app::Material__TypeInfo));
+		app::Material__ctor(newMaterial, standardShader, NULL);
+		app::Color newColor = app::Color();
+		newColor.a = 0.0f, newColor.b = 1.0f, newColor.g = 1.0f, newColor.r = 1.0f;
+		app::Material_set_color(newMaterial, newColor, NULL);
+
+		return newMaterial;
+	}
+	else
+		return nullptr;
 }
 
 void MeshRendererSetColor(app::GameObject* object, app::Color color)

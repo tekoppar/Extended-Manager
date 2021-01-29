@@ -16,8 +16,11 @@ namespace tem {
 	{
 		HasChanged = false;
 		Name = "";
+		Namespace = "";
+		ClassName = "";
 		ReturnType = tem::VariableType::Null;
 		PropertyValue = "";
+		Parent = nullptr;
 	}
 
 	ClassProperty::ClassProperty(PropertyInfo* Property)
@@ -27,6 +30,9 @@ namespace tem {
 
 		if (Property->get != nullptr)
 		{
+			Il2CppClass* typeClass = il2cpp_class_from_type(Property->get->return_type);
+			Namespace = typeClass->namespaze;
+			ClassName = typeClass->name;
 			ReturnType = tem::VariableType::Null;
 			PropertyValue = "";
 		}
@@ -34,7 +40,11 @@ namespace tem {
 		{
 			ReturnType = tem::VariableType::Null;
 			PropertyValue = "";
+			Namespace = "";
+			ClassName = "";
 		}
+
+		Parent = nullptr;
 	}
 
 	std::string tem::ClassProperty::ToJsonString()
@@ -55,6 +65,20 @@ namespace tem {
 		return nullptr;
 	}
 
+	Il2CppObject* tem::ClassProperty::GetPropertyObject(void* object, PropertyInfo* Property)
+	{
+		if (Property->get != nullptr && Property->get->klass->byval_arg.data.klassIndex != -1)
+		{
+			Il2CppTypeEnum typeEnum = Property->get->return_type->type;
+			if (typeEnum == Il2CppTypeEnum::IL2CPP_TYPE_CLASS)
+			{
+				return PropertyHelper::InvokePropertyMethod(object, Property);
+			}
+		}
+
+		return nullptr;
+	}
+
 	void tem::ClassProperty::GetPropertyValue(void* object, PropertyInfo* Property)
 	{
 		if (Property->get != nullptr && Property->get->klass->byval_arg.data.klassIndex != -1)
@@ -70,8 +94,8 @@ namespace tem {
 					if (typeClass != nullptr)
 					{
 						app::Type* typeType = GetType(typeClass->namespaze, typeClass->name);
-						bool isEnum = false;
 
+						bool isEnum = false;
 						if (typeType != nullptr)
 							isEnum = app::Type_get_IsEnum(typeType, NULL);
 
@@ -89,7 +113,10 @@ namespace tem {
 								app::String* enumValue = app::Enum_GetName(typeType, object, (*app::Enum_GetName__MethodInfo));
 
 								if (enumValue == nullptr || enumValue == 0x0)
-									PropertyValue = "";
+								{
+									int enumInt = *(int*)value;
+									PropertyValue = std::to_string(enumInt);
+								}
 								else
 									PropertyValue = il2cppi_to_string(enumValue);
 							}
@@ -106,7 +133,8 @@ namespace tem {
 						case 188:
 						{
 							app::Boolean* boolean = (app::Boolean*)iL2object;
-							PropertyValue = std::to_string(boolean->m_value);
+							bool boolValue = (bool*)objectUnboxed;
+							PropertyValue = std::to_string(boolValue);
 							ReturnType = tem::VariableType::Bool;
 						}
 						break;
@@ -159,6 +187,14 @@ namespace tem {
 						break;
 
 						case 313: PropertyValue = il2cppi_to_string((app::String*)iL2object); ReturnType = tem::VariableType::String; break;
+						case 334:
+						{
+							app::Type* typeValue = reinterpret_cast<app::Type*>(objectUnboxed);
+							PropertyValue = il2cppi_to_string(app::Type_ToString(typeValue, NULL));
+							ReturnType = tem::VariableType::String;
+						}
+						break;
+
 						case 338:
 						{
 							app::UInt16* int16 = reinterpret_cast<app::UInt16*>(objectUnboxed);
@@ -199,6 +235,22 @@ namespace tem {
 						}
 						break;
 
+						case 4502:
+						{
+							app::Color* colorValue = reinterpret_cast<app::Color*>(objectUnboxed);
+							PropertyValue = tem::Vector4(colorValue).ToString();
+							ReturnType = tem::VariableType::Color;
+						}
+						break;
+
+						case 4642:
+						{
+							app::Matrix4x4* vectorValue = reinterpret_cast<app::Matrix4x4*>(objectUnboxed);
+							PropertyValue = tem::Matrix4x4(vectorValue).ToString();
+							ReturnType = tem::VariableType::Matrix4x4;
+						}
+						break;
+
 						case 4643:
 						{
 							app::Vector3* vectorValue = reinterpret_cast<app::Vector3*>(objectUnboxed);
@@ -231,16 +283,43 @@ namespace tem {
 						}
 						break;
 
-						/*case 5082:
+						case 5711:
 						{
-							app::Transform* transform = reinterpret_cast<app::Transform*>(iL2object);
-							app::GameObject* gameObject = app::Component_1_get_gameObject((app::Component_1*)transform, NULL);
-							app::String* oName = app::Object_1_get_name((app::Object_1*)gameObject, NULL);
-							PropertyValue = il2cppi_to_string(oName);
+							app::AnimatorStateInfo* AnimatorStateInfoValue = reinterpret_cast<app::AnimatorStateInfo*>(objectUnboxed);
+							PropertyValue = tem::AnimatorStateInfo(AnimatorStateInfoValue).ToString();
 							ReturnType = tem::VariableType::String;
 						}
-						break;*/
+						break;
+
+						case 7350:
+						{
+							app::AnimationContext* AnimationContextValue = reinterpret_cast<app::AnimationContext*>(objectUnboxed);
+							PropertyValue = tem::AnimationContext(AnimationContextValue).ToString();
+							ReturnType = tem::VariableType::String;
+						}
+						break;
+
+						case 16033:
+						{
+							app::DropPickup_SharedUpdateData* SharedUpdateDataValue = reinterpret_cast<app::DropPickup_SharedUpdateData*>(objectUnboxed);
+							PropertyValue = tem::SharedUpdateData(SharedUpdateDataValue).ToString();
+							ReturnType = tem::VariableType::String;
+						}
+						break;
+
+						case 16366:
+						{
+							app::ApplyForceToPhysicsSystem_ExplosionSettings* ExplosionSettingsValue = reinterpret_cast<app::ApplyForceToPhysicsSystem_ExplosionSettings*>(objectUnboxed);
+							PropertyValue = tem::ExplosionSettings(ExplosionSettingsValue).ToString();
+							ReturnType = tem::VariableType::String;
+						}
+						break;
 					}
+				}
+				else
+				{
+					PropertyValue = "NULL";
+					ReturnType = tem::VariableType::String;
 				}
 			}
 		}
@@ -269,18 +348,16 @@ namespace tem {
 	{
 		std::vector<PropertyInfo*> properties;
 		auto Class = GetClass<>(Namespace, name);
-		void* it = nullptr;
-		for (int i = 0; i < Class->property_count; i++)
-		{
-			PropertyInfo* Property = const_cast<PropertyInfo*>(il2cpp_class_get_properties(Class, &it));
-			properties.push_back(Property);
-		}
 
-		if (Class->parent != nullptr)
+		if (Class != NULL)
 		{
-			std::vector<PropertyInfo*> parentProperties = tem::PropertyHelper::GetPropertiesFromClass(Class->parent->namespaze, Class->parent->name);
-			if (parentProperties.size() > 0)
-				properties.insert(properties.end(), parentProperties.begin(), parentProperties.end());
+			void* it = nullptr;
+			for (int i = 0; i < Class->property_count; i++)
+			{
+				PropertyInfo* Property = const_cast<PropertyInfo*>(il2cpp_class_get_properties(Class, &it));
+				properties.push_back(Property);
+			}
+			return properties;
 		}
 
 		return properties;
@@ -313,52 +390,95 @@ namespace tem {
 		auto declaringClass = tem::TemFramework::GetDeclaringClassFromMethod(declaringType, Property->get->name);
 		//Il2CppException** mExec = nullptr;
 
-		if (isInterface == false && isReturnTypeInterface == false && Property->get != nullptr && Property->get->klass != nullptr && Property->get->klass->byval_arg.data.klassIndex != -1 && (baseClass != nullptr || declaringClass != nullptr))
+		if (tem::PtrInRange(il2object) == false)
 		{
-			std::string className = declaringClass->name;
-			bool isIllegal = vector::contains(tem::TemFramework::IllegalClasses, className);
+			TemLogger::Add("object was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (tem::PtrInRange(il2object->klass) == false) {
+			TemLogger::Add("object klass was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (il2object->klass->initialized == 0) {
+			TemLogger::Add("klass is not initialized, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (returnTypeClass->klass->native_size < 0) {
+			TemLogger::Add("return type native size is less then 0, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		/*if (isInterface == true || isReturnTypeInterface == true) {
+			TemLogger::Add("return type or object is interface, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}*/
+		if (tem::PtrInRange((void*)Property->get) == false) {
+			TemLogger::Add("property get was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (tem::PtrInRange(Property->get->klass) == false) {
+			TemLogger::Add("property get klass was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (Property->get->klass->byval_arg.data.klassIndex == -1) {
+			TemLogger::Add("property get klass index was -1, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (tem::PtrInRange(baseClass) == false && tem::PtrInRange(declaringClass) == false) {
+			TemLogger::Add("base and declaring class was nullptr,  not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->klass) == false)) {
+			TemLogger::Add("declaring type was nullptr and class is not assignable,  not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
 
-			if (isIllegal == true)
+		std::string className = declaringClass->name;
+		bool isIllegal = vector::contains(tem::TemFramework::IllegalClasses, className);
+
+		if (isIllegal == true)
+			return nullptr;
+
+		try
+		{
+			Il2CppException* exec = nullptr;
+			const MethodInfo* virtualMethod = il2cpp_object_get_virtual_method(il2object, Property->get);
+
+			void* params = (void*)Property->get->parameters;
+			Il2CppObject* returnObject = nullptr;
+			int objectSize = il2cpp_object_get_size(il2object);
+
+			if (std::string(Property->parent->name) == "AnimationCurve" && std::string(Property->name) == "Item" && objectSize == 24)
 				return nullptr;
 
-			try
+			if (isVirtualMethod == false && (virtualMethod == nullptr || virtualMethod->methodPointer == Property->get->methodPointer))
 			{
-				Il2CppException* exec = nullptr;
-				const MethodInfo* virtualMethod = il2cpp_object_get_virtual_method(il2object, Property->get);
-
-				void* params = (void*)Property->get->parameters;
-				Il2CppObject* returnObject = nullptr;
-
-				if (isVirtualMethod == false && (virtualMethod == nullptr || virtualMethod->methodPointer == Property->get->methodPointer))
+				//il2cpp_runtime_object_init_exception((Il2CppObject*)object, &exec);
+				try { returnObject = il2cpp_runtime_invoke(Property->get, object, &params, &exec); }
+				catch (...)
 				{
-					//il2cpp_runtime_object_init_exception((Il2CppObject*)object, mExec);
-					try { returnObject = il2cpp_runtime_invoke(Property->get, object, &params, &exec); }
-					catch (...)
+					std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
+					if (binFile.is_open())
 					{
-						std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
-						if (binFile.is_open())
-						{
-							std::string errorMessage = "Il2CppExceptionWrapper occured\r\n";
-							binFile.write(errorMessage.c_str(), errorMessage.size());
-						}
+						std::string errorMessage = "Il2CppExceptionWrapper occured\r\n";
+						binFile.write(errorMessage.c_str(), errorMessage.size());
 					}
 				}
-				else
-					return nullptr;
-
-				if (returnObject != nullptr && returnObject->klass != nullptr)
-				{
-					return returnObject;
-				}
 			}
-			catch (Il2CppExceptionWrapper e)
+			else
+				return nullptr;
+
+			if (tem::PtrInRange(returnObject) == true && tem::PtrInRange(returnObject->klass) == true)
 			{
-				std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
-				if (binFile.is_open())
-				{
-					std::string errorMessage = "Il2CppExceptionWrapper occured:" + il2cppi_to_string(e.ex->message) + "\r\n";
-					binFile.write(errorMessage.c_str(), errorMessage.size());
-				}
+				return returnObject;
+			}
+		}
+		catch (Il2CppExceptionWrapper e)
+		{
+			std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
+			if (binFile.is_open())
+			{
+				std::string errorMessage = "Il2CppExceptionWrapper occured:" + il2cppi_to_string(e.ex->message) + "\r\n";
+				binFile.write(errorMessage.c_str(), errorMessage.size());
 			}
 		}
 
@@ -367,8 +487,11 @@ namespace tem {
 
 	void tem::PropertyHelper::InvokePropertySetterMethod(void* object, PropertyInfo* Property, std::string value)
 	{
-		if (Property->set == nullptr || object == nullptr)
+		if (Property->set == nullptr || object == nullptr || value == "NULL")
+		{
+			TemLogger::Add("Property/object/value was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
+		}
 
 		Il2CppClass* declaringType = il2cpp_method_get_declaring_type(Property->set);
 		const Il2CppType* returnType = il2cpp_method_get_return_type(Property->set);
@@ -382,72 +505,110 @@ namespace tem {
 		auto declaringClass = tem::TemFramework::GetDeclaringClassFromMethod(declaringType, Property->set->name);
 		Il2CppException** mExec = nullptr;
 
-		if (isInterface == false && isReturnTypeInterface == false && Property->set != nullptr && Property->set->klass != nullptr && Property->set->klass->byval_arg.data.klassIndex != -1 && (baseClass != nullptr || declaringClass != nullptr))
+		if (tem::PtrInRange(il2object) == false)
 		{
-			try
+			TemLogger::Add("object was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (tem::PtrInRange(il2object->klass) == false) {
+			TemLogger::Add("object klass was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (il2object->klass->initialized == 0) {
+			TemLogger::Add("klass is not initialized, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		/*if (returnTypeClass->klass->native_size < 0) {
+			TemLogger::Add("return type native size is less then 0, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}*/
+		/*if (isInterface == true || isReturnTypeInterface == true) {
+			TemLogger::Add("return type or object is interface, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}*/
+		if (tem::PtrInRange(Property->set->klass) == false) {
+			TemLogger::Add("property set klass was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (Property->set->klass->byval_arg.data.klassIndex == -1) {
+			TemLogger::Add("property set klass index was -1, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (tem::PtrInRange(baseClass) == false && tem::PtrInRange(declaringClass) == false) {
+			TemLogger::Add("base and declaring class was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->klass) == false)) {
+			TemLogger::Add("declaring type was nullptr and class is not assignable, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+
+		try
+		{
+			Il2CppException* exec = nullptr;
+			const MethodInfo* virtualMethod = il2cpp_object_get_virtual_method(il2object, Property->set);
+
+			std::vector<void*> values;
+			for (int i = 0; i < Property->set->parameters_count; i++)
 			{
-				Il2CppException* exec = nullptr;
-				const MethodInfo* virtualMethod = il2cpp_object_get_virtual_method(il2object, Property->set);
-
-				std::vector<void*> values;
-				for (int i = 0; i < Property->set->parameters_count; i++)
+				switch (Property->set->parameters[i].parameter_type->data.klassIndex)
 				{
-					switch (Property->set->parameters[i].parameter_type->data.klassIndex)
-					{
-						case 188: values.push_back((void*)tem::StringToValue<app::Boolean*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 192: values.push_back((void*)tem::StringToValue<app::Char*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 270: values.push_back((void*)tem::StringToValue<app::Int16*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 271: values.push_back((void*)tem::StringToValue<app::Int32*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 272: values.push_back((void*)tem::StringToValue<app::Int64*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 311: values.push_back((void*)tem::StringToValue<app::Single*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 313: values.push_back((void*)tem::StringToValue<app::String*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 338: values.push_back((void*)tem::StringToValue<app::UInt16*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 339: values.push_back((void*)tem::StringToValue<app::UInt32*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 340: values.push_back((void*)tem::StringToValue<app::UInt64*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-							//case 382: values.push_back((void*)tem::StringToValue<app::IntPtr*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4490: values.push_back((void*)tem::StringToValue<app::Bounds*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4643:values.push_back((void*)tem::StringToValue<app::Vector3*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4644:values.push_back((void*)tem::StringToValue<app::Quaternion*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-							//case 5082: values.push_back((void*)tem::StringToValue<app::String*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4803: values.push_back((void*)tem::StringToValue<app::Rect*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4872: values.push_back((void*)tem::StringToValue<app::Vector2*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-						case 4875: values.push_back((void*)tem::StringToValue<app::Vector4*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
-					}
+					case 188: values.push_back((void*)tem::StringToValue<app::Boolean*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 192: values.push_back((void*)tem::StringToValue<app::Char*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 270: values.push_back((void*)tem::StringToValue<app::Int16*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 271: values.push_back((void*)tem::StringToValue<app::Int32*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 272: values.push_back((void*)tem::StringToValue<app::Int64*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 311: values.push_back((void*)tem::StringToValue<app::Single*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 313: values.push_back((void*)tem::StringToValue<app::String*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 338: values.push_back((void*)tem::StringToValue<app::UInt16*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 339: values.push_back((void*)tem::StringToValue<app::UInt32*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 340: values.push_back((void*)tem::StringToValue<app::UInt64*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+						//case 382: values.push_back((void*)tem::StringToValue<app::IntPtr*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4490: values.push_back((void*)tem::StringToValue<app::Bounds*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4642: values.push_back((void*)tem::StringToValue<app::Matrix4x4*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4643:values.push_back((void*)tem::StringToValue<app::Vector3*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4644:values.push_back((void*)tem::StringToValue<app::Quaternion*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+						//case 5082: values.push_back((void*)tem::StringToValue<app::String*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4803: values.push_back((void*)tem::StringToValue<app::Rect*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4872: values.push_back((void*)tem::StringToValue<app::Vector2*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
+					case 4875: values.push_back((void*)tem::StringToValue<app::Vector4*>(value, Property->set->parameters[i].parameter_type->data.klassIndex)); break;
 				}
+			}
 
-				if (values.size() > 0)
+			if (values.size() > 0)
+			{
+				void** params = values.data();
+				Il2CppObject* returnObject = nullptr;
+
+				if (isVirtualMethod == false && (virtualMethod == nullptr || virtualMethod->methodPointer == Property->set->methodPointer))
 				{
-					void** params = values.data();
-					Il2CppObject* returnObject = nullptr;
-
-					if (isVirtualMethod == false && (virtualMethod == nullptr || virtualMethod->methodPointer == Property->set->methodPointer))
+					il2cpp_runtime_object_init_exception((Il2CppObject*)object, mExec);
+					try { returnObject = il2cpp_runtime_invoke(Property->set, object, params, &exec); }
+					catch (...)
 					{
-						il2cpp_runtime_object_init_exception((Il2CppObject*)object, mExec);
-						try { returnObject = il2cpp_runtime_invoke(Property->set, object, params, &exec); }
-						catch (...)
+						std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
+						if (binFile.is_open())
 						{
-							std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
-							if (binFile.is_open())
-							{
-								std::string errorMessage = "Il2CppExceptionWrapper occured\r\n";
-								binFile.write(errorMessage.c_str(), errorMessage.size());
-							}
+							std::string errorMessage = "Il2CppExceptionWrapper occured\r\n";
+							binFile.write(errorMessage.c_str(), errorMessage.size());
 						}
 					}
-					else
-						return;
+
+					TemLogger::Add("Property " + std::string(Property->name) + " was set to: " + value);
 				}
 				else
 					return;
 			}
-			catch (Il2CppExceptionWrapper e)
+			else
+				return;
+		}
+		catch (Il2CppExceptionWrapper e)
+		{
+			std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
+			if (binFile.is_open())
 			{
-				std::ofstream binFile("C:\\moon\\manager_error.log", std::ios_base::app | std::ios::out | std::ios::binary);
-				if (binFile.is_open())
-				{
-					std::string errorMessage = "Il2CppExceptionWrapper occured:" + il2cppi_to_string(e.ex->message) + "\r\n";
-					binFile.write(errorMessage.c_str(), errorMessage.size());
-				}
+				std::string errorMessage = "Il2CppExceptionWrapper occured:" + il2cppi_to_string(e.ex->message) + "\r\n";
+				binFile.write(errorMessage.c_str(), errorMessage.size());
 			}
 		}
 	}

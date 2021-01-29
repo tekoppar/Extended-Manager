@@ -52,9 +52,9 @@ namespace tem {
 		}
 		AllCollisions.clear();
 
-
-		app::Object_1_Destroy_1((app::Object_1*)SelectedObject, NULL);
+		app::Object_1_Destroy_1((app::Object_1*)MasterCollisionObject, NULL);
 		SelectedObject = nullptr;
+		MasterCollisionObject = nullptr;
 	}
 
 	void tem::CollisionCreator::AddCollisionToolbar()
@@ -66,63 +66,83 @@ namespace tem {
 		tem::SceneList::SpecialSceneHierarchyIndexMap[750] = (std::uintptr_t)MasterCollisionObject;
 		tem::SceneList::ConstructSceneHierarchy({ 999, 750 }, 1);
 
-		HorizontalToolbar = DrawUI::HorizontalLayoutGroup("HorizontalToolbar", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+		DropdownHorizontal = DrawUI::CreateDropdownHorizontal("HorizontalToolbar", ManagerPath + "Icons\\toolicons\\Tex_drawing_t.png");
+		tem::UIEvents::Instance->OnClickEvents[DropdownHorizontal.FoldSelectableObject] = this;
 
-		app::Type* typeButton = GetType("UnityEngine.UI", "Button");
+		app::Type* typeSelectable = GetType("UnityEngine.UI", "Selectable");
 		app::Type* typeImage = GetType("UnityEngine.UI", "Image");
 		app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
 
-		app::GameObject* buttonObject = DrawUI::Button("Selection");
-		ToolbarButtonsObjects.push_back(buttonObject);
-		app::Texture2D* image = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_select_t.png", 64, 64);
-		ToolbarButtons.push_back((app::Button*)app::GameObject_GetComponent(buttonObject, typeButton, NULL));
-		DrawUI::SetImageInObject(buttonObject, image);
-		app::Button_ButtonClickedEvent* clickEvent = app::Button_get_onClick((app::Button*)&ToolbarButtons[ToolbarButtons.size() - 1], NULL);
-		tem::UIEvents::Instance->OnClickEvents[buttonObject] = this;
+		app::GameObject* selectableObject = DrawUI::Selectable("Selection");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image0 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_select_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image0);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
 
-		buttonObject = DrawUI::Button("MoveCollision");
-		ToolbarButtonsObjects.push_back(buttonObject);
-		app::Texture2D* image2 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_move_t.png", 64, 64);
-		ToolbarButtons.push_back((app::Button*)app::GameObject_GetComponent(buttonObject, typeButton, NULL));
-		DrawUI::SetImageInObject(buttonObject, image2);
-		app::Button_ButtonClickedEvent* clickEvent2 = app::Button_get_onClick((app::Button*)&ToolbarButtons[ToolbarButtons.size() - 1], NULL);
-		tem::UIEvents::Instance->OnClickEvents[buttonObject] = this;
+		selectableObject = DrawUI::Selectable("MoveCollision");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image1 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_move_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image1);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
 
-		buttonObject = DrawUI::Button("EditCollision");
-		ToolbarButtonsObjects.push_back(buttonObject);
-		app::Texture2D* image3 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_pencil_t.png", 64, 64);
-		ToolbarButtons.push_back((app::Button*)app::GameObject_GetComponent(buttonObject, typeButton, NULL));
-		DrawUI::SetImageInObject(buttonObject, image3);
-		app::Button_ButtonClickedEvent* clickEvent3 = app::Button_get_onClick((app::Button*)&ToolbarButtons[ToolbarButtons.size() - 1], NULL);
-		tem::UIEvents::Instance->OnClickEvents[buttonObject] = this;
+		selectableObject = DrawUI::Selectable("EditCollision");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image2 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_pencil_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image2);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
 
-		buttonObject = DrawUI::Button("AddCollision");
-		ToolbarButtonsObjects.push_back(buttonObject);
-		app::Texture2D* image4 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_hammer_t.png", 64, 64);
-		ToolbarButtons.push_back((app::Button*)app::GameObject_GetComponent(buttonObject, typeButton, NULL));
-		DrawUI::SetImageInObject(buttonObject, image4);
-		app::Button_ButtonClickedEvent* clickEvent4 = app::Button_get_onClick((app::Button*)&ToolbarButtons[ToolbarButtons.size() - 1], NULL);
-		tem::UIEvents::Instance->OnClickEvents[buttonObject] = this;
+		selectableObject = DrawUI::Selectable("AddCollision");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image3 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_hammer_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image3);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
 
-		buttonObject = DrawUI::Button("SplitCollision");
-		ToolbarButtonsObjects.push_back(buttonObject);
-		app::Texture2D* image5 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_split_t.png", 64, 64);
-		ToolbarButtons.push_back((app::Button*)app::GameObject_GetComponent(buttonObject, typeButton, NULL));
-		DrawUI::SetImageInObject(buttonObject, image5);
-		app::Button_ButtonClickedEvent* clickEvent5 = app::Button_get_onClick((app::Button*)&ToolbarButtons[ToolbarButtons.size() - 1], NULL);
-		tem::UIEvents::Instance->OnClickEvents[buttonObject] = this;
+		selectableObject = DrawUI::Selectable("SplitCollision");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image4 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_split_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image4);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
 
-		for (app::Button* button : ToolbarButtons)
+		selectableObject = DrawUI::Selectable("FlipFaceDirectionUp");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image5 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_flipup_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image5);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
+
+		selectableObject = DrawUI::Selectable("FlipFaceDirectionDown");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image6 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_flipdown_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image6);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
+
+		selectableObject = DrawUI::Selectable("AddCollisionHandle");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		app::Texture2D* image7 = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_add_handle_t.png", 64, 64);
+		ToolbarSelectables.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image7);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
+
+		for (app::Selectable* selectable : ToolbarSelectables)
 		{
-			TransformSetParent(app::Component_1_get_gameObject((app::Component_1*)button, NULL), HorizontalToolbar);
+			TransformSetParent(app::Component_1_get_gameObject((app::Component_1*)selectable, NULL), DropdownHorizontal.DropdownChildren);
 		}
 
-		RectTransformSetPivot(HorizontalToolbar, tem::Vector2(0.0f, 0.0f));
-		TransformSetLocalPosition(HorizontalToolbar, tem::Vector3(0.0f, 0.0f, 0.0f));// tem::Vector3(TransformGetPosition(newCanvas)));
-		RectTransformSetSize(HorizontalToolbar, tem::Vector2(100, 32));
-		TransformSetLocalPosition(HorizontalToolbar, tem::Vector3(0.0f, 0.0f, 0.0f));
+		RectTransformSetPivot(DropdownHorizontal.DropdownObject, tem::Vector2(0.0f, 0.0f));
+		TransformSetLocalPosition(DropdownHorizontal.DropdownObject, tem::Vector3(0.0f, 0.0f, 0.0f));// tem::Vector3(TransformGetPosition(newCanvas)));
+		RectTransformSetSize(DropdownHorizontal.DropdownObject, tem::Vector2(100, 32));
+		TransformSetLocalPosition(DropdownHorizontal.DropdownObject, tem::Vector3(0.0f, 0.0f, 0.0f));
 
-		tem::UIEvents::Instance->AddObjectToCanvas(HorizontalToolbar);
+		tem::UIEvents::Instance->AddObjectToCanvas(DropdownHorizontal.DropdownObject);
+
+		app::GameObject_set_active(ToolbarSelectablesObjects[5], false, NULL);
+		app::GameObject_set_active(ToolbarSelectablesObjects[6], true, NULL);
 	}
 
 	void tem::CollisionCreator::SetupRenderer(tem::Collision& collision)
@@ -162,18 +182,16 @@ namespace tem {
 
 		Gizmo::Instance.AllRegisteredObjects.push_back(static_cast<GizmoEvents*>(this));
 
-		tem::Vector3 oirPos = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonSein, NULL));
-		TransformSetPosition(collision.colliderPreview, oirPos);
+		tem::Vector3 oriPos = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonSein, NULL));
+		TransformSetPosition(collision.colliderPreview, oriPos);
 		TransformSetLocalPosition(collision.colliderPreview, tem::Vector3(0.0f));
-		TransformSetPosition(collision.colliderPreview, oirPos);
+		TransformSetPosition(collision.colliderPreview, oriPos);
 		TransformSetParent(collision.colliderPreview, MasterCollisionObject);
 	}
 
 	void tem::CollisionCreator::GizmoClicked()
 	{
 		this->IsUsingGizmo = true;
-		this->ActiveActionType = tem::CollisionEditActionType::None;
-		this->ActiveTool = tem::CollisionToolType::Selection;
 	}
 
 	void tem::CollisionCreator::GizmoDone()
@@ -184,10 +202,7 @@ namespace tem {
 	void tem::CollisionCreator::GizmoMoved(tem::Vector3 position, tem::AxisType axis)
 	{
 		this->IsUsingGizmo = true;
-		this->ActiveTool = tem::CollisionToolType::Selection;
-		this->ActiveActionType = tem::CollisionEditActionType::None;
-
-		if (SelectedObject != nullptr && ActiveCollision != -1)
+		if (SelectedObject != nullptr && ActiveCollision != -1 && (ActiveTool == tem::CollisionToolType::Selection || ActiveTool == tem::CollisionToolType::Moving || ActiveTool == tem::CollisionToolType::Drawing))
 		{
 			app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
 			std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
@@ -221,6 +236,8 @@ namespace tem {
 			collision.Positions.clear();
 		}
 
+		if ((*app::DebugRenderer__TypeInfo)->static_fields->s_enabled == false)
+			(*app::DebugRenderer__TypeInfo)->static_fields->s_enabled = true;
 
 		AllCollisions = newCollision.AllCollisions;
 
@@ -272,28 +289,19 @@ namespace tem {
 				{
 					AllCollisions[ActiveCollision].AddPosition(app::MoonInput_get_mousePosition(NULL));
 				}
-				/*else if (SelectedObject != nullptr && ActiveTool == tem::CollisionToolType::Moving)
-				{
-					tem::Vector3 mousePos = app::MoonInput_get_mousePosition(NULL);
-					app::Vector3 worldVec3 = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(mousePos.X, mousePos.Y, 29.0f).ToMoon(), NULL);
-					tem::Vector3 worldTem = tem::Vector3(worldVec3);
-					worldTem.Z = 0.0f;
-					app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
-					TransformSetPosition(temp, worldTem);
-					std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
-					sutil::ReplaceS(name, "HandleCollision", "");
-					int index = std::stoi(name);
-					this->Positions[index] = worldTem;
-					DrawCollision();
-				}*/
 			}
 			break;
 
 			case tem::EventType::MouseLeave:
 			{
-				for (int i = 0; i < ToolbarButtonsObjects.size(); i++)
+				if (DropdownHorizontal.FoldSelectableObject == ptr)
 				{
-					if (ToolbarButtonsObjects[i] == ptr)
+					ActiveActionType = tem::CollisionEditActionType::None;
+				}
+
+				for (int i = 0; i < ToolbarSelectablesObjects.size(); i++)
+				{
+					if (ToolbarSelectablesObjects[i] == ptr)
 					{
 						ActiveActionType = tem::CollisionEditActionType::None;
 					}
@@ -303,9 +311,15 @@ namespace tem {
 
 			case tem::EventType::MouseEnter:
 			{
-				for (int i = 0; i < ToolbarButtonsObjects.size(); i++)
+				if (DropdownHorizontal.FoldSelectableObject == ptr)
 				{
-					if (ToolbarButtonsObjects[i] == ptr)
+					tem::UIEvents::IsOverUIElement = true;
+					ActiveActionType = tem::CollisionEditActionType::UIHover;
+				}
+
+				for (int i = 0; i < ToolbarSelectablesObjects.size(); i++)
+				{
+					if (ToolbarSelectablesObjects[i] == ptr)
 					{
 						tem::UIEvents::IsOverUIElement = true;
 						ActiveActionType = tem::CollisionEditActionType::UIHover;
@@ -323,49 +337,19 @@ namespace tem {
 					ActiveActionType = tem::CollisionEditActionType::DrawingCollision;
 
 				HitCollisionHandle = false;
-				if (IsUsingGizmo == false)
+				if (IsUsingGizmo == false && (ActiveTool == tem::CollisionToolType::Selection || ActiveTool == tem::CollisionToolType::Moving || ActiveTool == tem::CollisionToolType::Drawing))
 				{
 					tem::Vector3 position = app::MoonInput_get_mousePosition(NULL);
 
 					if (MasterCollisionObject != nullptr)
 					{
-						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, tem::Vector3(TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL))).Z).ToMoon(), NULL); //29.0f
+						tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL); //29.0f
 						app::RaycastHit hit = app::RaycastHit();
 						bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);
 
 						if (hitSomething == true)
-						{
-							for (int i = 0; i < AllCollisions.size(); i++)
-							{
-								for (app::SphereCollider* collider : AllCollisions[i].AllColliders)
-								{
-									int instanceId = app::Object_1_GetInstanceID((app::Object_1*)collider, NULL);
-
-									if (instanceId == hit.m_Collider)
-									{
-										SelectedObject = collider;
-										HitCollisionHandle = true;
-										ActiveCollision = i;
-
-										app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
-										std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
-										sutil::ReplaceS(name, "HandleCollision", "");
-										int index = std::stoi(name);
-
-										Gizmo::Instance.SetGizmoPosition(AllCollisions[i].Positions[index]);
-
-										MDV::SelectedObject = nullptr;
-										if (MDV::PreviewObject != nullptr)
-										{
-											app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::PreviewObject, "UnityEngine", "MeshRenderer");
-											app::Renderer_SetMaterial((app::Renderer*)meshRenderer, NULL, NULL);
-											app::Object_1_Destroy_1((app::Object_1*)MDV::PreviewObject, NULL);
-											MDV::PreviewObject = nullptr;
-										}
-									}
-								}
-							}
-						}
+							CheckIfHitHandle(hit.m_Collider);
 						else
 						{
 							SelectedObject = nullptr;
@@ -384,11 +368,22 @@ namespace tem {
 			break;
 			case tem::EventType::PointerEvent:
 			{
-				for (int i = 0; i < ToolbarButtonsObjects.size(); i++)
+
+				if (DropdownHorizontal.FoldSelectableObject == ptr)
 				{
-					if (ToolbarButtonsObjects[i] == ptr)
+					DropdownHorizontal.ExpandDropdown();
+					if (DropdownHorizontal.IsFolded)
+						ActiveTool = tem::CollisionToolType::None;
+					else
+						ActiveTool = tem::CollisionToolType::Selection;
+				}
+
+				for (int i = 0; i < ToolbarSelectablesObjects.size(); i++)
+				{
+					if (ToolbarSelectablesObjects[i] == ptr)
 					{
-						(*app::DebugRenderer__TypeInfo)->static_fields->s_enabled = true;
+						if ((*app::DebugRenderer__TypeInfo)->static_fields->s_enabled == false)
+							(*app::DebugRenderer__TypeInfo)->static_fields->s_enabled = true;
 
 						switch (i)
 						{
@@ -396,7 +391,7 @@ namespace tem {
 							case 1: ActiveTool = tem::CollisionToolType::Moving; break;
 							case 2: ActiveTool = tem::CollisionToolType::Drawing; break;
 							case 3: ActiveTool = tem::CollisionToolType::NewCollision; AllCollisions.push_back(tem::Collision()); SetupRenderer(AllCollisions[AllCollisions.size() - 1]); ActiveCollision = AllCollisions.size() - 1; break;
-							case 4: 
+							case 4:
 							{
 								if (ActiveCollision != -1 && SelectedObject != nullptr)
 								{
@@ -422,6 +417,23 @@ namespace tem {
 								}
 							}
 							break;
+
+							case 5:
+							case 6: ToggleFaceDirection(); break;
+							case 7:
+							{
+								if (ActiveCollision != -1 && SelectedObject != nullptr)
+								{
+									app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
+									std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
+									sutil::ReplaceS(name, "HandleCollision", "");
+									int index = std::stoi(name);
+
+									if (index > 0)
+										AllCollisions[ActiveCollision].ClonePositionIndex(index);
+								}
+							}
+							break;
 						}
 
 						if (ActiveTool != tem::CollisionToolType::None && ActiveCollision != -1)
@@ -434,49 +446,19 @@ namespace tem {
 					return;
 
 				HitCollisionHandle = false;
-				if (IsUsingGizmo == false)
+				if (IsUsingGizmo == false && (ActiveTool == tem::CollisionToolType::Selection || ActiveTool == tem::CollisionToolType::Moving || ActiveTool == tem::CollisionToolType::Drawing))
 				{
 					tem::Vector3 position = app::MoonInput_get_mousePosition(NULL);
 
 					if (MasterCollisionObject != nullptr)
 					{
-						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+						tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL); //29.0f
 						app::RaycastHit hit = app::RaycastHit();
 						bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);
 
 						if (hitSomething == true)
-						{
-							for (int i = 0; i < AllCollisions.size(); i++)
-							{
-								for (app::SphereCollider* collider : AllCollisions[i].AllColliders)
-								{
-									int instanceId = app::Object_1_GetInstanceID((app::Object_1*)collider, NULL);
-
-									if (instanceId == hit.m_Collider)
-									{
-										SelectedObject = collider;
-										HitCollisionHandle = true;
-										ActiveCollision = i;
-
-										app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
-										std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
-										sutil::ReplaceS(name, "HandleCollision", "");
-										int index = std::stoi(name);
-
-										Gizmo::Instance.SetGizmoPosition(AllCollisions[i].Positions[index]);
-
-										MDV::SelectedObject = nullptr;
-										if (MDV::PreviewObject != nullptr)
-										{
-											app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::PreviewObject, "UnityEngine", "MeshRenderer");
-											app::Renderer_SetMaterial((app::Renderer*)meshRenderer, NULL, NULL);
-											app::Object_1_Destroy_1((app::Object_1*)MDV::PreviewObject, NULL);
-											MDV::PreviewObject = nullptr;
-										}
-									}
-								}
-							}
-						}
+							CheckIfHitHandle(hit.m_Collider);
 					}
 					else
 						AddCollisionToolbar();
@@ -488,6 +470,75 @@ namespace tem {
 				}
 			}
 			break;
+		}
+	}
+
+	void tem::CollisionCreator::ToggleFaceDirection()
+	{
+		if (ActiveCollision != -1)
+		{
+			if (AllCollisions[ActiveCollision].FaceDirection)
+			{
+				app::GameObject_set_active(ToolbarSelectablesObjects[5], false, NULL);
+				app::GameObject_set_active(ToolbarSelectablesObjects[6], true, NULL);
+			}
+			else
+			{
+				app::GameObject_set_active(ToolbarSelectablesObjects[5], true, NULL);
+				app::GameObject_set_active(ToolbarSelectablesObjects[6], false, NULL);
+			}
+
+			AllCollisions[ActiveCollision].FaceDirection = !AllCollisions[ActiveCollision].FaceDirection;
+		}
+	}
+
+	void tem::CollisionCreator::SetFaceDirection(bool direction)
+	{
+		if (ActiveCollision != -1)
+		{
+			app::GameObject_set_active(ToolbarSelectablesObjects[5], !direction, NULL);
+			app::GameObject_set_active(ToolbarSelectablesObjects[6], direction, NULL);
+		}
+	}
+
+	void tem::CollisionCreator::CheckIfHitHandle(int hitInstanceID)
+	{
+		for (int i = 0; i < AllCollisions.size(); i++)
+		{
+			for (int i2 = 0; i2 < AllCollisions[i].AllColliders.size(); i2++)
+			{
+				if (tem::PtrInRange(AllCollisions[i].AllColliders[i2]) == true)
+				{
+					int instanceId = app::Object_1_GetInstanceID((app::Object_1*)AllCollisions[i].AllColliders[i2], NULL);
+
+					if (instanceId == hitInstanceID)
+					{
+						SelectedObject = AllCollisions[i].AllColliders[i2];
+						HitCollisionHandle = true;
+						ActiveCollision = i;
+						SetFaceDirection(AllCollisions[i].FaceDirection);
+
+						app::GameObject* temp = app::Component_1_get_gameObject((app::Component_1*)SelectedObject, NULL);
+						std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)temp, NULL));
+						sutil::ReplaceS(name, "HandleCollision", "");
+						int index = std::stoi(name);
+
+						Gizmo::Instance.SetGizmoPosition(AllCollisions[i].Positions[index]);
+
+						AllCollisions[ActiveCollision].DrawCollision();
+						AllCollisions[ActiveCollision].UpdateSphereHandles();
+
+						MDV::SelectedObject = nullptr;
+						if (MDV::PreviewObject != nullptr)
+						{
+							app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(MDV::PreviewObject, "UnityEngine", "MeshRenderer");
+							app::Renderer_SetMaterial((app::Renderer*)meshRenderer, NULL, NULL);
+							app::Object_1_Destroy_1((app::Object_1*)MDV::PreviewObject, NULL);
+							MDV::PreviewObject = nullptr;
+						}
+					}
+				}
+			}
 		}
 	}
 

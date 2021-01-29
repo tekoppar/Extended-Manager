@@ -18,6 +18,19 @@ public:
 	void ExpandTree();
 };
 
+class DropdownHorizontal
+{
+public:
+	app::GameObject* DropdownObject = nullptr;
+	app::GameObject* DropdownChildren = nullptr;
+	app::HorizontalLayoutGroup* DropdownChildrenLayout = nullptr;
+	app::GameObject* FoldSelectableObject = nullptr;
+	app::Selectable* FoldSelectable = nullptr;
+	bool IsFolded = true;
+
+	void ExpandDropdown();
+};
+
 class TemButton;
 
 class DrawUI {
@@ -36,6 +49,7 @@ public:
 	static app::GameObject* TreeItem(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
 	static app::GameObject* VerticalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
 	static app::GameObject* HorizontalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+	static DropdownHorizontal CreateDropdownHorizontal(const std::string& name, const std::string& imagePath);
 	static app::GameObject* RectMask2D(const std::string& name, float minWidth = 10, float minHeight = 10, float preferedWidth = 100, float preferedHeight = 100);
 	static app::GameObject* Text(const std::string& name, const std::string& text, int fontSize, app::Color color);
 	static app::GameObject* Scrollbar(app::GameObject* rectHandle, const std::string& name, app::Color color, app::Color colorHandle, bool horizontal = true);

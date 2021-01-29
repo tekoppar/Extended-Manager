@@ -225,13 +225,17 @@ app::GameObject* DebugDrawer::CreateDebugObject(app::Color color, tem::Vector3 p
 	return debugParent;
 }
 
-app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::Vector3 position, tem::Vector3 scale)
+app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::Vector2 position, tem::Vector2 scale)
 {
 	app::String* debugParentName = string_new("DebugCollider");
 	app::GameObject* debugParent = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
 	app::GameObject__ctor(debugParent, debugParentName, NULL);
 
 	app::Material* debugMaterial = CreateNewMaterial("Hidden/ColliderPreviewShader");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
+	
+	if (tem::PtrInRange(debugMaterial) == false)
+		return nullptr;
+
 	app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
@@ -268,7 +272,7 @@ app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::V
 	TransformSetParent(debugObject, debugParent);
 	//TransformSetRotation(debugObject, tem::Vector3(-90, 0, 0));
 	TransformSetPosition(debugParent, position); //tem::Vector3(0, 15 / 2, 0) + 
-	TransformSetLocalPosition(debugObject, tem::Vector3(scale.X / 2.0f * -1.0f, scale.Y / 2.0f, 0.0f));
+	TransformSetLocalPosition(debugObject, tem::Vector3(scale.x / 2.0f * -1.0f, scale.y / 2.0f, 0.0f));
 
 	debugObjects.push_back(debugParent);
 

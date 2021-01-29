@@ -5,6 +5,7 @@
 #include "Component.h"
 #include "SceneObject.h"
 #include "SceneHierarchy.h"
+#include "SceneData.h"
 #include "json.hpp"
 
 namespace tem {
@@ -14,6 +15,8 @@ namespace tem {
 	void from_json(const nlohmann::json& j, tem::SceneObject& p);
 	void to_json(nlohmann::json& j, const tem::SceneHierarchy& p);
 	void from_json(const nlohmann::json& j, tem::SceneHierarchy& p);
+	void to_json(nlohmann::json& j, const tem::SceneData& p);
+	void from_json(const nlohmann::json& j, tem::SceneData& p);
 }
 
 #endif

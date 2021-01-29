@@ -50,6 +50,7 @@ app::GameObject* GetComponentByPath(app::GameObject* object, std::vector<std::st
 std::vector<app::GameObject*> GetComponentsByName(app::GameObject* object, std::string scenePath);
 app::GameObject* GetComponentByName(app::GameObject* object, std::string componentName);
 app::GameObject* GetComponentByNameContainsType(app::GameObject* object, std::string componentName, app::Type* type);
+std::vector<app::GameObject*> GetChildrenByName(app::GameObject* parent, std::string name);
 
 //template<typename Return = app::Object*>
 //Return* GetObjectByType(std::string Namespace, std::string Name);
@@ -75,7 +76,7 @@ void TransformSetEulerAngles(app::GameObject* object, tem::Vector3 angles);
 tem::Vector3 TransformGetEulerAngles(app::GameObject* object);
 tem::Vector3 TransformGetRotation(app::GameObject* object);
 void TransformSetQuatRotation(app::GameObject* object, tem::Vector3 eulersAngles);
-void TransformSetParent(app::GameObject* object, app::GameObject* parent);
+void TransformSetParent(app::GameObject* object, app::GameObject* parent, bool setAsLastSibling = false);
 app::GameObject* TransformGetParent(app::GameObject* object);
 void TransformSetParentFromObject(app::GameObject* object, app::GameObject* child);
 int TransformGetObjectIndex(app::GameObject* object);

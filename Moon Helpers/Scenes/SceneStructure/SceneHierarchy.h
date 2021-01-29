@@ -24,6 +24,8 @@ namespace tem {
 		bool HasChild(int index);
 		int GetChildIndex(std::string name, int index);
 		SceneHierarchy* GetChildByName(std::string name);
+		bool VerifyHierarchy();
+		static void GetScenesToLoad(std::vector<std::string>& scenesToLoad, SceneHierarchy& current);
 
 		SceneHierarchy();
 		SceneHierarchy(tem::SceneObject object, std::unordered_map<int, SceneHierarchy> children);

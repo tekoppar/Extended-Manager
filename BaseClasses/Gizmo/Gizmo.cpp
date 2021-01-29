@@ -39,9 +39,25 @@ namespace tem {
 		app::Type* typeImage = GetType("UnityEngine.UI", "Image");
 		app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
 
-		app::GameObject* selectableObject = DrawUI::Selectable("Selection");
+		app::GameObject* selectableObject = DrawUI::Selectable("Freeze");
 		ToolbarSelectablesObjects.push_back(selectableObject);
-		app::Texture2D* image = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_select_t.png", 64, 64);
+		app::Texture2D* image = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_freeze_t.png", 64, 64);
+		ToolbarSelectable.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
+		tem::UIEvents::Instance->AddObjectToCanvas(selectableObject);
+
+		selectableObject = DrawUI::Selectable("Unfreeze");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		image = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_unfreeze_t.png", 64, 64);
+		ToolbarSelectable.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
+		DrawUI::SetImageInObject(selectableObject, image);
+		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
+		tem::UIEvents::Instance->AddObjectToCanvas(selectableObject);
+
+		selectableObject = DrawUI::Selectable("Selection");
+		ToolbarSelectablesObjects.push_back(selectableObject);
+		image = DrawUI::LoadImageFromPath(ManagerPath + "Icons\\toolicons\\Tex_select_t.png", 64, 64);
 		ToolbarSelectable.push_back((app::Selectable*)app::GameObject_GetComponent(selectableObject, typeSelectable, NULL));
 		DrawUI::SetImageInObject(selectableObject, image);
 		tem::UIEvents::Instance->OnClickEvents[selectableObject] = this;
@@ -70,12 +86,12 @@ namespace tem {
 		XAxisRotation = MeshUtility::CreateMeshObjectFromFile(ManagerPath + "models\\gizmo_ring_x.obj");
 		YAxisRotation = MeshUtility::CreateMeshObjectFromFile(ManagerPath + "models\\gizmo_ring_y.obj");
 		ZAxisRotation = MeshUtility::CreateMeshObjectFromFile(ManagerPath + "models\\gizmo_ring_z.obj");
-		app::GameObject_set_layer(XAxisGizmo, 11, NULL);
-		app::GameObject_set_layer(YAxisGizmo, 11, NULL);
-		app::GameObject_set_layer(XYAxisGizmo, 11, NULL);
-		app::GameObject_set_layer(XAxisRotation, 11, NULL);
-		app::GameObject_set_layer(YAxisRotation, 11, NULL);
-		app::GameObject_set_layer(ZAxisRotation, 11, NULL);
+		app::GameObject_set_layer(XAxisGizmo, 1, NULL);
+		app::GameObject_set_layer(YAxisGizmo, 1, NULL);
+		app::GameObject_set_layer(XYAxisGizmo, 1, NULL);
+		app::GameObject_set_layer(XAxisRotation, 1, NULL);
+		app::GameObject_set_layer(YAxisRotation, 1, NULL);
+		app::GameObject_set_layer(ZAxisRotation, 1, NULL);
 
 		TransformSetParent(XAxisGizmo, GizmoHandle);
 		TransformSetLocalPosition(XAxisGizmo, tem::Vector3(0.0f, 0.0f, -3.0f));
@@ -270,16 +286,17 @@ namespace tem {
 			tem::Vector3 mousePosition = app::Input_get_mousePosition(NULL);
 			tem::Vector3 mouseDelta = PreviouisMousePosition - mousePosition;
 
+			if (app::CharacterPlatformMovement_get_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, NULL) != FreezeOri)
+				SetFreeze(FreezeOri);
+
 			if (isLeftMouseHeld || isMiddleMouseHeld)
 			{
-				app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, true, NULL);
-				app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, true, NULL);
-
 				tem::Vector3 position = app::MoonInput_get_mousePosition(NULL);
-				app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+				tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+				app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, position.ToMoon(), NULL);// tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 				app::RaycastHit hit = app::RaycastHit();
 				bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);
-				tem::Vector3 newAxisPos = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+				tem::Vector3 newAxisPos = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 
 				if (true == false && isMiddleMouseHeld == true && (mouseDelta.X > 0.1f || mouseDelta.Y > 0.1f))
 				{
@@ -363,7 +380,9 @@ namespace tem {
 						if (GizmoMode == GizmoMode::Move)
 						{
 							TransformSetPosition(MDV::SelectedObject, tem::Vector3(oldPos.X, oldPos.Y, TransformGetPosition(MDV::SelectedObject).z));
-							tem::SceneList::ActiveHiearchy->Object.FieldPropertyHasChanged(MDV::SelectedObject, "Transform", "position", oldPos.ToString());
+							
+							if (tem::SceneList::ActiveHiearchy != nullptr)
+								tem::SceneList::ActiveHiearchy->Object.FieldPropertyHasChanged(MDV::SelectedObject, "Transform", "position", oldPos.ToString());
 						}
 					}
 
@@ -379,9 +398,6 @@ namespace tem {
 				}
 				Gizmo::IsDragging = false;
 				Selected = tem::AxisType::NONE;
-
-				app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, false, NULL);
-				app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, false, NULL);
 			}
 
 			PreviouisMousePosition = mousePosition;
@@ -405,10 +421,11 @@ namespace tem {
 					{
 						DoOncePerFrame = true;
 						tem::Vector3 position = app::MoonInput_get_mousePosition(NULL);
-						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+						tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+						app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 						app::RaycastHit hit = app::RaycastHit();
 						bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);
-						tem::Vector3 newAxisPos = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+						tem::Vector3 newAxisPos = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 
 						tem::Vector3 gizmoPos = TransformGetPosition(GizmoHandle);
 						float signedAngle = tem::Angle(gizmoPos, newAxisPos);
@@ -453,12 +470,19 @@ namespace tem {
 						switch (i)
 						{
 							case 0:
+							case 1:
+							{
+								ToggleFreeze();
+							}
+							break;
+
+							case 2:
 							{
 								GizmoMode = tem::GizmoMode::Selection;
 							}
 							break;
 
-							case 1:
+							case 3:
 							{
 								GizmoMode = tem::GizmoMode::Move;
 								app::GameObject_set_active(XAxisGizmo, true, NULL);
@@ -467,7 +491,7 @@ namespace tem {
 							}
 							break;
 
-							case 2:
+							case 4:
 							{
 								GizmoMode = tem::GizmoMode::Rotate;
 								app::GameObject_set_active(XAxisRotation, true, NULL);
@@ -482,5 +506,32 @@ namespace tem {
 			}
 			break;
 		}
+	}
+
+	void tem::Gizmo::ToggleFreeze()
+	{
+		if (FreezeOri == false)
+		{
+			app::GameObject_set_active(ToolbarSelectablesObjects[0], false, NULL);
+			app::GameObject_set_active(ToolbarSelectablesObjects[1], true, NULL);
+			app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, true, NULL);
+			app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, true, NULL);
+		}
+		else
+		{
+			app::GameObject_set_active(ToolbarSelectablesObjects[0], true, NULL);
+			app::GameObject_set_active(ToolbarSelectablesObjects[1], false, NULL);
+			app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, false, NULL);
+			app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, false, NULL);
+		}
+		FreezeOri = !FreezeOri;
+	}
+
+	void tem::Gizmo::SetFreeze(bool value)
+	{
+		app::GameObject_set_active(ToolbarSelectablesObjects[0], !value, NULL);
+		app::GameObject_set_active(ToolbarSelectablesObjects[1], value, NULL);
+		app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, value, NULL);
+		app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, value, NULL);
 	}
 }

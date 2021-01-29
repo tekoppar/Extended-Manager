@@ -19,18 +19,16 @@ namespace tem {
 	Component::Component()
 	{
 		this->ClassName = "";
-		this->Fields = std::vector<tem::ClassField>();
-		this->Properties = std::vector<tem::ClassProperty>();
+		this->ObjectData = tem::ObjectData();
 	}
 
-	Component::Component(std::string className, std::vector<tem::ClassField> fields, std::vector<tem::ClassProperty> properties)
+	Component::Component(std::string className, tem::ObjectData objectData)
 	{
 		this->ClassName = className;
-		this->Fields = fields;
-		this->Properties = properties;
+		this->ObjectData = objectData;
 	}
 
-	int Component::HasField(std::string name)
+	/*int Component::HasField(std::string name)
 	{
 		for (int i = 0; i < Fields.size(); i++)
 		{
@@ -39,13 +37,13 @@ namespace tem {
 		}
 
 		return -1;
-	}
+	}*/
 
 	void Component::FillFields(app::Component_1* component, std::vector<FieldInfo*> fields)
 	{
 		for (FieldInfo* field : fields)
 		{
-			int index = HasField(field->name);
+			int index = 0; //HasField(field->name);
 
 			if (index == -1)
 			{
@@ -57,14 +55,14 @@ namespace tem {
 					classField.IsStatic = app::FieldInfo_1_get_IsStatic(field1, NULL);
 
 				classField.GetFieldValue((std::uintptr_t)component, field);
-				this->Fields.push_back(classField);
+				//this->Fields.push_back(classField);
 			}
-			else
-				Fields[index].GetFieldValue((std::uintptr_t)component, field);
+			//else
+				//Fields[index].GetFieldValue((std::uintptr_t)component, field);
 		}
 	}
 
-	int Component::HasProperty(std::string name)
+	/*int Component::HasProperty(std::string name)
 	{
 		for (int i = 0; i < Properties.size(); i++)
 		{
@@ -73,71 +71,33 @@ namespace tem {
 		}
 
 		return -1;
-	}
+	}*/
 
 	void Component::FillProperties(app::Component_1* component, std::vector<PropertyInfo*> properties)
 	{
 		for (PropertyInfo* Property : properties)
 		{
-			int index = HasProperty(Property->name);
+			int index = 0;// HasProperty(Property->name);
 			
 			if (index == -1)
 			{
 				tem::ClassProperty CProperty = tem::ClassProperty(Property);
 				CProperty.GetPropertyValue(component, Property);
-				this->Properties.push_back(CProperty);
+				//this->Properties.push_back(CProperty);
 			}
-			else
-				Properties[index].GetPropertyValue(component, Property);
+			//else
+				//Properties[index].GetPropertyValue(component, Property);
 		}
 	}
 
 	std::string Component::ToJsonString()
 	{
-		std::string json = "{\"ClassName\":\"" + this->ClassName + "\",\"Fields\":[";
-		for (int i = 0; i < this->Fields.size(); i++)
-		{
-			tem::ClassField field = this->Fields[i];
-			json += field.ToJsonString();
-			if (this->Fields.size() - 1 > i)
-				json += ",";
-		}
-
-		json += "],\"Properties\":[";
-
-		for (int i = 0; i < this->Properties.size(); i++)
-		{
-			tem::ClassProperty Property = this->Properties[i];
-			json += Property.ToJsonString();
-			if (this->Properties.size() - 1 > i)
-				json += ",";
-		}
-
-		return json + "]}";
+		return "{\"ClassName\":\"" + this->ClassName + "\",\"ObjectData\":" + ObjectData.ToJsonString() + "}";
 	}
 
 	std::string Component::SaveJsonComponent()
 	{
-		std::string json = "{\"" + this->ClassName + "\":[[";
-		for (int i = 0; i < this->Fields.size(); i++)
-		{
-			tem::ClassField field = this->Fields[i];
-			json += field.SaveJsonField();
-			if (this->Fields.size() - 1 > i)
-				json += ",";
-		}
-
-		json += "],[";
-
-		for (int i = 0; i < this->Properties.size(); i++)
-		{
-			tem::ClassProperty Property = this->Properties[i];
-			json += Property.SaveJsonProperty();
-			if (this->Properties.size() - 1 > i)
-				json += ",";
-		}
-
-		return json + "]]}";
+		return "{\"ClassName\":\"" + this->ClassName + "\",\"ObjectData\":" + ObjectData.ToJsonString() + "}";
 	}
 
 	app::Component_1* Component::GetComponentByNameFromObject(app::GameObject* object, std::string name)

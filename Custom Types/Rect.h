@@ -52,8 +52,7 @@ namespace tem {
 		Rect(std::string& other)
 		{
 			std::string temp = other;
-			sutil::ReplaceS(temp, ",", ".");
-			auto content = sutil::SplitTem(temp, ";");
+			auto content = sutil::SplitTem(temp, ",");
 			X = 0.0f;
 			Y = 0.0f;
 			Width = 0.0f;

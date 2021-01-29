@@ -32,13 +32,13 @@ namespace tem {
 		static tem::CollisionCreator Instance;
 
 		CollisionEditActionType ActiveActionType = CollisionEditActionType::None;
-		CollisionToolType ActiveTool = CollisionToolType::Selection;
+		CollisionToolType ActiveTool = CollisionToolType::None;
 		app::SphereCollider* SelectedObject = nullptr;
 		int ActiveCollision = -1;
 		std::vector<tem::Collision> AllCollisions = std::vector<tem::Collision>();
-		app::GameObject* HorizontalToolbar = nullptr;
-		std::vector<app::GameObject*> ToolbarButtonsObjects;
-		std::vector<app::Button*> ToolbarButtons;
+		DropdownHorizontal DropdownHorizontal;
+		std::vector<app::GameObject*> ToolbarSelectablesObjects;
+		std::vector<app::Selectable*> ToolbarSelectables;
 		bool HitCollisionHandle = false;
 		app::GameObject* MasterCollisionObject = nullptr;
 
@@ -63,6 +63,11 @@ namespace tem {
 		virtual void GizmoEvents::GizmoDone() override;
 
 		virtual void tem::OnEvents::OnEvent(tem::EventType type, void* ptr);
+
+	private:
+		void SetFaceDirection(bool direction);
+		void ToggleFaceDirection();
+		void CheckIfHitHandle(int hitInstanceID);
 	};
 
 	void to_json(nlohmann::json& j, const tem::CollisionCreator& p);

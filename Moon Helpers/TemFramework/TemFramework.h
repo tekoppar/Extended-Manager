@@ -3,9 +3,41 @@
 #ifndef _TEMFRAMEWORK_H
 #define _TEMFRAMEWORK_H
 
+#include "FieldHelper.h"
+#include "PropertyHelper.h"
 #include "tem.h"
 
 namespace tem {
+
+	class ObjectData
+	{
+	public:
+		bool HasChanged = false;
+		std::string Namespace = "";
+		std::string ClassName = "";
+		std::string Name = "";
+		std::vector<tem::ClassField> Fields = std::vector<tem::ClassField>();
+		std::vector<tem::ClassProperty> Properties = std::vector<tem::ClassProperty>();
+		std::vector<tem::ObjectData> NestedObjects = std::vector<tem::ObjectData>();
+		tem::ObjectData* Parent = nullptr;
+
+		static std::vector<std::uintptr_t> NestedPointers;
+
+		ObjectData();
+
+		void FillObjectData(std::uintptr_t objectPtr, bool IsParent = false);
+		int HasProperty(std::string name);
+		int HasField(std::string name);
+		int HasObject(std::string name);
+		std::string ToJsonString();
+		bool SetObjectData(std::string componentName, std::string fieldPropName, std::string value);
+		void UpdateObjectData(std::vector<std::string> namePath, std::string fieldPropName, std::string value);
+		void SetObjectData(std::uintptr_t objectPtr, std::vector<std::string> namePath, std::string parentNamespace, std::string parentClassName);
+		bool ShouldSave() const;
+
+		static void SetObjectData(std::vector<std::string> namePath, std::uintptr_t objectPtr, std::string Namespace, std::string Name, std::string fieldPropName, std::string value);
+	};
+
 	class TemFramework
 	{
 	public:
@@ -14,11 +46,17 @@ namespace tem {
 		static bool IsMethodVirtual(Il2CppClass* objectClass, Il2CppClass* returnClass, std::string methodName);
 		static app::MethodBase* GetBaseMethodFromMethod(Il2CppClass* Class, std::string methodName);
 		static Il2CppClass* GetDeclaringClassFromMethod(Il2CppClass* Class, std::string methodName);
+		static bool IsClassStruct(app::Type* type);
+		static bool IsClassStruct(Il2CppClass* Class);
+		static bool IsClassStruct(std::string Namespace, std::string Name);
 	};
 
 	template<typename Return>
 	Return* StringToValue(std::string value, int type)
 	{
+		if (value == "NULL")
+			return nullptr;
+
 		switch (type)
 		{
 			default:

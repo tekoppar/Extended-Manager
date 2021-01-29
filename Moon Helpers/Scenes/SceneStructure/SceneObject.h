@@ -18,10 +18,8 @@ namespace tem {
 		std::vector<tem::Component> SceneComponents;
 		int HierarchyIndex;
 		std::vector<int> SceneIndexHierarchy;
-		std::vector<tem::ClassField> Fields;
-		std::vector<tem::ClassProperty> Properties;
 		std::vector<std::string> ClonedSceneNameHierarchy;
-		//tem::TreeItem TreeItem;
+		tem::Vector3 ClonedPosition;
 
 		bool HasComponent(std::string className);
 
@@ -31,14 +29,9 @@ namespace tem {
 
 		void GetObjectData();
 		void GetObjectData(app::GameObject* object);
-		void GetObjectDataGameObject(app::GameObject* object);
 		void FieldPropertyHasChanged(app::GameObject* object, std::string componentName, std::string fieldPropertyName, std::string value);
-		void SetComponentDataField(std::string componentName, tem::ClassField field);
-		void SetComponentDataProperty(std::string componentName, tem::ClassProperty prop);
 		void SetComponentData(std::string componentName, std::string fieldPropName, std::string value, bool isField);
 		void SetComponentData(app::GameObject* object, std::string componentName, std::string fieldPropPath, std::string fieldPropName, std::string value, bool isField);
-		tem::ClassProperty* FindProperty(std::string name, std::vector<tem::ClassProperty> &properties);
-		tem::ClassField* FindField(std::string name, std::vector<tem::ClassField> &fields);
 
 		bool operator==(const SceneObject& other) const
 		{

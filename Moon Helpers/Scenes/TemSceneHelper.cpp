@@ -81,8 +81,13 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 	bool isSceneEnabled = false;
 	std::vector<app::SceneManagerScene*> managerScenes;
 
-	while (managerScenes.size() <= scenes.size() && timeSpan.count() < 14 * 1000)
+	TemLogger::Add("Checking if scenes loaded");
+
+	while (managerScenes.size() <= scenes.size())
 	{
+		if (timeSpan.count() > 5 * 1000)
+			break;
+
 		LastTime = std::chrono::high_resolution_clock::now();
 		timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
 
@@ -105,8 +110,11 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 		}
 	}
 
-	while (scenes.size() > 0 && timeSpan.count() < 14 * 1000)
+	while (scenes.size() > 0)
 	{
+		if (timeSpan.count() > 10 * 1000)
+			break;
+
 		LastTime = std::chrono::high_resolution_clock::now();
 		timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
 
@@ -120,7 +128,7 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 					if (managerScenes[0]->fields.SceneRoot->fields.m_state != app::SceneState__Enum::SceneState__Enum_Enabling || managerScenes[0]->fields.SceneRoot->fields.m_state != app::SceneState__Enum::SceneState__Enum_Enabled)
 					{
 						app::ScenesManager_EnableDisabledScene(TemSceneHelper::SceneManager, managerScenes[0], true, NULL);
-						app::SceneRoot_set_HighPriorityEnabling(managerScenes[0]->fields.SceneRoot, true, NULL);
+						//app::SceneRoot_set_HighPriorityEnabling(managerScenes[0]->fields.SceneRoot, true, NULL);
 						//app::SceneRoot_EnableSceneImmediate(managerScenes[0]->fields.SceneRoot, NULL);
 						//managerScenes[0]->fields.KeepLoadedForCheckpoint = true;
 						//managerScenes[0]->fields.PreventUnloading = true;
@@ -190,9 +198,15 @@ bool TemSceneHelper::IsScenesLoaded(std::vector< app::RuntimeSceneMetaData*> sce
 		}
 	}*/
 	if (timeSpan.count() > 14 * 1000)
+	{
+		TemLogger::Add("Scenes failed to load in time.", LogType::Error);
 		return false;
+	}
 	else
+	{
+		TemLogger::Add("Scenes loaded in time.", LogType::Normal);
 		return true;
+	}
 }
 
 bool TemSceneHelper::ResetScenes(std::vector<app::RuntimeSceneMetaData*> scenes)

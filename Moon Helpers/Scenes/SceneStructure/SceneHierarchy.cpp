@@ -15,6 +15,7 @@
 #include "Component.h"
 #include "SceneObject.h"
 #include "SceneList.h"
+#include "TemSceneHelper.h"
 
 #include "SceneHierarchy.h"
 
@@ -34,26 +35,9 @@ namespace tem {
 
 	std::string tem::SceneHierarchy::ToJsonString()
 	{
-		std::string hierarchyString = "{\"Object\":{\"Name\":\"" + Object.Name + "\",\"ClassName\":\"" + Object.ClassName + "\",\"ParentName\":\"" + Object.ParentName + "\",\"Fields\":[";
+		std::string hierarchyString = "{\"Object\":{\"Name\":\"" + Object.Name + "\",\"ClassName\":\"" + Object.ClassName + "\",\"ParentName\":\"" + Object.ParentName + "\",";
 
-		for (int i = 0; i < Object.Fields.size(); i++)
-		{
-			tem::ClassField field = Object.Fields[i];
-			hierarchyString += field.ToJsonString();
-			if (Object.Fields.size() - 1 > i)
-				hierarchyString += ",";
-		}
-
-		hierarchyString += "],\"Properties\":[";
-		for (int i = 0; i < Object.Properties.size(); i++)
-		{
-			tem::ClassProperty prop = Object.Properties[i];
-			hierarchyString += prop.ToJsonString();
-			if (Object.Properties.size() - 1 > i)
-				hierarchyString += ",";
-		}
-
-		hierarchyString += "],\"SceneComponents\":[";
+		hierarchyString += "\"SceneComponents\":[";
 		for (std::size_t i = 0; i < Object.SceneComponents.size(); i++)
 		{
 			tem::Component component = Object.SceneComponents[i];
@@ -121,26 +105,9 @@ namespace tem {
 			index++;
 		}
 
-		std::string hierarchyString = "{\"Object\":{\"HierarchyIndex\":" + std::to_string(Object.HierarchyIndex) + ",\"SceneIndexHierarchy\":[" + tem::IntVectorToString(Object.SceneIndexHierarchy, ",") + "],\"ClonedSceneNameHierarchy\":[" + sceneNamedMap + "],\"Name\":\"" + Object.Name + "\",\"ClassName\":\"" + Object.ClassName + "\",\"ParentName\":\"" + Object.ParentName + "\",\"Fields\":[";
+		std::string hierarchyString = "{\"Object\":{\"HierarchyIndex\":" + std::to_string(Object.HierarchyIndex) + ",\"SceneIndexHierarchy\":[" + tem::IntVectorToString(Object.SceneIndexHierarchy, ",") + "],\"ClonedSceneNameHierarchy\":[" + sceneNamedMap + "],\"Name\":\"" + Object.Name + "\",\"ClassName\":\"" + Object.ClassName + "\",\"ParentName\":\"" + Object.ParentName + "\",";
 
-		for (int i = 0; i < Object.Fields.size(); i++)
-		{
-			tem::ClassField field = Object.Fields[i];
-			hierarchyString += field.ToJsonString();
-			if (Object.Fields.size() - 1 > i)
-				hierarchyString += ",";
-		}
-
-		hierarchyString += "],\"Properties\":[";
-		for (int i = 0; i < Object.Properties.size(); i++)
-		{
-			tem::ClassProperty prop = Object.Properties[i];
-			hierarchyString += prop.ToJsonString();
-			if (Object.Properties.size() - 1 > i)
-				hierarchyString += ",";
-		}
-
-		hierarchyString += "],\"SceneComponents\":[";
+		hierarchyString += "\"SceneComponents\":[";
 		for (std::size_t i = 0; i < Object.SceneComponents.size(); i++)
 		{
 			tem::Component component = Object.SceneComponents[i];
@@ -245,5 +212,106 @@ namespace tem {
 			return nullptr;
 		else
 			return &SceneChildren[SceneChildrenNameMap[name]];
+	}
+
+	void tem::SceneHierarchy::GetScenesToLoad(std::vector<std::string>& scenesToLoad, SceneHierarchy& current)
+	{
+		for (auto& child : current.SceneChildren)
+		{
+			if (child.second.Object.IsCustomObject == true)
+			{
+				if (child.second.Object.ClonedSceneNameHierarchy.size() > 1 && vector::contains(scenesToLoad, child.second.Object.ClonedSceneNameHierarchy[0]) == false)
+					scenesToLoad.push_back(child.second.Object.ClonedSceneNameHierarchy[0]);
+			}
+
+			tem::SceneHierarchy::GetScenesToLoad(scenesToLoad, child.second);
+		}
+	}
+
+	bool tem::SceneHierarchy::VerifyHierarchy()
+	{
+		if (this->Object.SceneIndexHierarchy.size() == 0)
+			return false;
+
+		if (this->Object.SceneIndexHierarchy[1] > 299 && this->Object.ClonedSceneNameHierarchy.size() == 0)
+		{
+			tem::SceneHierarchy* parentPtr = reinterpret_cast<tem::SceneHierarchy*>(this->Object.Parent);
+			bool isCustomChild = false;
+			while (tem::PtrInRange(parentPtr) == true && tem::PtrInRange(parentPtr->Object.Parent) == true && parentPtr->Object.Parent != (std::uintptr_t)parentPtr)
+			{
+				if (parentPtr->Object.IsCustomObject)
+					isCustomChild = true;
+
+				parentPtr = reinterpret_cast<tem::SceneHierarchy*>(parentPtr->Object.Parent);
+			}
+
+			if (isCustomChild == false)
+				TemLogger::Add(this->Object.Name + " is a custom object but missing cloned scene hierarchy", LogType::Warning);
+		}
+
+		bool sceneIsLoaded = false;
+		for (int i = 0; i < TemSceneHelper::SceneManager->fields.ActiveScenes->fields._size; i++)
+		{
+			if (TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.MetaData->fields.LinearId == this->Object.SceneIndexHierarchy[1])
+				sceneIsLoaded = true;
+		}
+
+		if (sceneIsLoaded == false)
+			return true;
+
+		app::GameObject* foundObject = tem::SceneList::GetGameObjectFromHierarchyIndex(this->Object.SceneIndexHierarchy);
+		if (foundObject != nullptr)
+		{
+			std::string childName = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)foundObject, NULL));
+
+			if (childName == this->Object.Name)
+			{
+				std::unordered_map<int, SceneHierarchy> newChildren;
+				std::unordered_map<std::string, int> newSceneChildrenNameMap;
+				for (auto& child : SceneChildren)
+				{
+					if (child.second.VerifyHierarchy() == true)
+					{
+						newChildren[child.first] = child.second;
+						newSceneChildrenNameMap[child.second.Object.Name] = child.first;
+					}
+					else
+						TemLogger::Add("Removing child hierarchy: " + child.second.Object.Name + " from parent: " + child.second.Object.ParentName, LogType::Warning);
+				}
+
+				SceneChildrenNameMap = newSceneChildrenNameMap;
+				SceneChildren = newChildren;
+				return true;
+			}
+		}
+
+		foundObject = tem::SceneList::GetGameObjectFromHierarchyName(this->Object.ClonedSceneNameHierarchy);
+		if (foundObject != nullptr)
+		{
+			std::string childName = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)foundObject, NULL));
+
+			if (this->Object.Name.find(childName) != std::string::npos)
+			{
+				std::unordered_map<int, SceneHierarchy> newChildren;
+				std::unordered_map<std::string, int> newSceneChildrenNameMap;
+				for (auto& child : SceneChildren)
+				{
+					if (child.second.VerifyHierarchy() == true)
+					{
+						newChildren[child.first] = child.second;
+						newSceneChildrenNameMap[child.second.Object.Name] = child.first;
+					}
+					else
+						TemLogger::Add("Removing child hierarchy: " + child.second.Object.Name + " from parent: " + child.second.Object.ParentName, LogType::Warning);
+				}
+
+				SceneChildrenNameMap = newSceneChildrenNameMap;
+				SceneChildren = newChildren;
+				return true;
+			}
+
+		}
+
+		return false;
 	}
 }

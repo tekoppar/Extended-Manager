@@ -175,8 +175,13 @@ namespace tem {
 		bool movedMouse = false;
 		void* clickedObjectPtr = nullptr;
 		app::GameObject* mouseEnterObject = nullptr;
-		tem::UIEvents::IsOverUIElement = false;
 
+		/*tem::Vector3 position = app::MoonInput_get_mousePosition(NULL);
+		tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+		app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL); //29.0f
+		app::RaycastHit hit = app::RaycastHit();
+		bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);*/
+		
 		if (EventSystem != nullptr) 
 		{
 			if (StandaloneInputModule == nullptr)
@@ -200,17 +205,14 @@ namespace tem {
 					if (CurrentHoveredObject != nullptr && CurrentHoveredObject != StandaloneInputModule->fields.m_CurrentFocusedGameObject)
 					{
 						if (tem::UIEvents::Instance->OnClickEvents.find(StandaloneInputModule->fields.m_CurrentFocusedGameObject) != tem::UIEvents::Instance->OnClickEvents.end())
-						{
 							tem::UIEvents::Instance->OnClickEvents[StandaloneInputModule->fields.m_CurrentFocusedGameObject]->OnEvent(tem::EventType::MouseEnter, StandaloneInputModule->fields.m_CurrentFocusedGameObject);
-						}
 
-						if (OldHoveredEvent > 0x1000000 && tem::UIEvents::Instance->OnClickEvents[reinterpret_cast<void*>(OldHoveredEvent)] == nullptr)
+						if (tem::PtrInRange(OldHoveredEvent) == true && tem::UIEvents::Instance->OnClickEvents[reinterpret_cast<void*>(OldHoveredEvent)] == nullptr)
 							tem::UIEvents::Instance->OnClickEvents.erase(reinterpret_cast<void*>(OldHoveredEvent));
 
-						if (OldHoveredEvent > 0x1000000 && tem::UIEvents::Instance->OnClickEvents.find(reinterpret_cast<void*>(OldHoveredEvent)) != tem::UIEvents::Instance->OnClickEvents.end())
-						{
+						if (tem::PtrInRange(OldHoveredEvent) == true && tem::UIEvents::Instance->OnClickEvents.find(reinterpret_cast<void*>(OldHoveredEvent)) != tem::UIEvents::Instance->OnClickEvents.end())
 							tem::UIEvents::Instance->OnClickEvents[reinterpret_cast<void*>(OldHoveredEvent)]->OnEvent(tem::EventType::MouseLeave, CurrentHoveredObject);
-						}
+
 						tem::OnEvents* event = tem::UIEvents::Instance->OnClickEvents[CurrentHoveredObject];
 						OldHoveredEvent = (std::uintptr_t)&event;
 						CurrentHoveredObject = StandaloneInputModule->fields.m_CurrentFocusedGameObject;
@@ -225,7 +227,10 @@ namespace tem {
 					}
 				}
 				else
+				{
 					CurrentHoveredObject = nullptr;
+					tem::UIEvents::IsOverUIElement = false;
+				}
 			}
 		}
 

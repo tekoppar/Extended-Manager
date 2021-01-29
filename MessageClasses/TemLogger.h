@@ -16,6 +16,13 @@ public:
 	std::vector<std::string> Temp;
 	bool IsWriting = false;
 
+	TemLogger()
+	{
+		Lines.push_back("\n\r");
+	}
+
+	void Cleanup();
+
 	static void Add(std::string log, LogType type = LogType::Normal);
 
 private:

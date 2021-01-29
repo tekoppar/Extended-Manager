@@ -17,6 +17,12 @@ void TreeItemStruct::ExpandTree()
 	IsFolded = !IsFolded;
 }
 
+void DropdownHorizontal::ExpandDropdown()
+{
+	app::GameObject_set_active(DropdownChildren, IsFolded, NULL);
+	IsFolded = !IsFolded;
+}
+
 std::vector<TemButton*> DrawUI::AllTemButtons = std::vector<TemButton*>();
 std::vector<app::Texture2D*> DrawUI::AllTexture2D;
 std::vector<std::string> DrawUI::AllTexture2DNames;
@@ -71,7 +77,7 @@ app::GameObject* DrawUI::Selectable(const std::string& name)
 	app::ColorBlock colors = app::ColorBlock();
 	colors.m_ColorMultiplier = 1.2f;
 	colors.m_FadeDuration = 0.1f;
-	colors.m_DisabledColor = tem::Vector4(0.5f, 0.5f, 0.5f, 1.0f).ToColor();
+	colors.m_DisabledColor = tem::Vector4(0.7f, 0.7f, 0.7f, 1.0f).ToColor();
 	colors.m_HighlightedColor = tem::Vector4(0.8f, 0.8f, 0.8f, 1.0f).ToColor();
 	colors.m_NormalColor = tem::Vector4(0.4f, 0.4f, 0.4f, 1.0f).ToColor();
 	colors.m_PressedColor = tem::Vector4(1.0f, 1.0f, 1.0f, 1.0f).ToColor();
@@ -529,6 +535,49 @@ app::GameObject* DrawUI::Dropdown(const std::string& name)
 {
 	this->onClickMethod();
 }*/
+
+DropdownHorizontal DrawUI::CreateDropdownHorizontal(const std::string& name, const std::string& imagePath)
+{
+	DropdownHorizontal dropdownHorizontal = DropdownHorizontal();
+	app::Type* typeSelectable = GetType("UnityEngine.UI", "Selectable");
+	app::Type* typeVerticalLayoutGroup = GetType("UnityEngine.UI", "VerticalLayoutGroup");
+	app::Type* typeHorizontalLayoutGroup = GetType("UnityEngine.UI", "HorizontalLayoutGroup");
+	app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
+	app::Type* typeContentSizeFitter = GetType("UnityEngine.UI", "ContentSizeFitter");
+
+	dropdownHorizontal.DropdownObject = (app::GameObject*)il2cpp_object_new((Il2CppClass*)(*app::GameObject__TypeInfo));
+	app::String* gameObjectname = string_new(name.data());
+	app::GameObject__ctor(dropdownHorizontal.DropdownObject, gameObjectname, NULL);
+	app::VerticalLayoutGroup* newObject = (app::VerticalLayoutGroup*)app::GameObject_AddComponent((app::GameObject*)dropdownHorizontal.DropdownObject, typeVerticalLayoutGroup, NULL);
+	app::HorizontalOrVerticalLayoutGroup_set_childControlWidth((app::HorizontalOrVerticalLayoutGroup*)newObject, true, NULL);
+	app::HorizontalOrVerticalLayoutGroup_set_childControlHeight((app::HorizontalOrVerticalLayoutGroup*)newObject, true, NULL);
+	app::HorizontalOrVerticalLayoutGroup_set_childForceExpandWidth((app::HorizontalOrVerticalLayoutGroup*)newObject, false, NULL);
+	app::HorizontalOrVerticalLayoutGroup_set_childForceExpandHeight((app::HorizontalOrVerticalLayoutGroup*)newObject, false, NULL);
+
+	app::ContentSizeFitter* newContentSizeFitter = (app::ContentSizeFitter*)app::GameObject_AddComponent((app::GameObject*)dropdownHorizontal.DropdownObject, typeContentSizeFitter, NULL);
+	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
+	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
+
+	app::LayoutGroup_set_childAlignment((app::LayoutGroup*)newObject, app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft, NULL);
+
+	dropdownHorizontal.FoldSelectableObject = DrawUI::Selectable("FoldSelectable");
+	app::Texture2D* image = DrawUI::LoadImageFromPath(imagePath, 64, 64);
+	DrawUI::SetImageInObject(dropdownHorizontal.FoldSelectableObject, image);
+
+	TransformSetParent(dropdownHorizontal.FoldSelectableObject, dropdownHorizontal.DropdownObject);
+	RectTransformSetMinMax(dropdownHorizontal.DropdownObject, tem::Vector2(0.0f, 1.0f), tem::Vector2(0.0f, 1.0f));
+	RectTransformSetPivot(dropdownHorizontal.DropdownObject, tem::Vector2(0.0f, 1.0f));
+
+	dropdownHorizontal.DropdownChildren = DrawUI::HorizontalLayoutGroup("DropdownChildren", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+	dropdownHorizontal.DropdownChildrenLayout = (app::HorizontalLayoutGroup*)app::GameObject_GetComponent(dropdownHorizontal.DropdownChildren, typeHorizontalLayoutGroup, NULL);
+
+	TransformSetParent(dropdownHorizontal.DropdownChildren, dropdownHorizontal.DropdownObject);
+
+	dropdownHorizontal.FoldSelectable = (app::Selectable*)app::GameObject_GetComponent(dropdownHorizontal.FoldSelectableObject, typeSelectable, NULL);
+	app::GameObject_set_active(dropdownHorizontal.DropdownChildren, false, NULL);
+
+	return dropdownHorizontal;
+}
 
 TreeItemStruct DrawUI::CreateTreeItem(const std::string& name)
 {

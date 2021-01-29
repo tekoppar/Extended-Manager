@@ -15,14 +15,10 @@
 #include "json.hpp"
 #include "Tem.h"
 
-tem::Vector3 tem::Vector3::Forward = tem::Vector3(0.0f, 0.0f, 1.0f);
-tem::Vector3 tem::Vector3::Back = tem::Vector3(0.0f, 0.0f, -1.0f);
-tem::Vector3 tem::Vector3::Down = tem::Vector3(0.0f, -1.0f, 0.0f);
-tem::Vector3 tem::Vector3::Left = tem::Vector3(-1.0f, 0.0f, 0.0f);
-tem::Vector3 tem::Vector3::Right = tem::Vector3(1.0f, 0.0f, 0.0f);
-tem::Vector3 tem::Vector3::Up = tem::Vector3(0.0f, 1.0f, 0.0f);
-
 namespace tem {
+	std::uintptr_t tem::LOWPTRVALUE = 0x2000000000;
+	std::uintptr_t tem::HIGHPTRVALUE = 833575384373521;
+
 	void to_json(nlohmann::json& j, const tem::Vector4& p)
 	{
 		j = nlohmann::json{ {"r", p.X}, {"g", p.Y}, {"b", p.Z}, {"a", p.A} };

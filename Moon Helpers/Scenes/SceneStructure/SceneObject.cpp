@@ -19,7 +19,6 @@
 #include "SceneObject.h"
 
 namespace tem {
-
 	SceneObject::SceneObject()
 	{
 		this->IsCustomObject = false;
@@ -31,6 +30,7 @@ namespace tem {
 		this->SceneComponents = std::vector<tem::Component>();
 		this->SceneIndexHierarchy = std::vector<int>();
 		this->HierarchyIndex = -1;
+		this->ClonedPosition = tem::Vector3(0.0f);
 	}
 
 	SceneObject::SceneObject(bool isCustomObject, bool hasChanged, std::string name, std::string parentName, std::uintptr_t parent,
@@ -45,6 +45,8 @@ namespace tem {
 		this->SceneComponents = sceneComponents;
 		this->SceneIndexHierarchy = sceneIndexHierarchy;
 		this->HierarchyIndex = hierarchyIndex;
+		this->ClonedSceneNameHierarchy = std::vector<std::string>();
+		this->ClonedPosition = tem::Vector3(0.0f);
 	}
 
 	void tem::SceneObject::GetObjectData()
@@ -56,9 +58,6 @@ namespace tem {
 		if (object == nullptr)
 			return;
 
-		this->Fields = tem::FieldHelper::FillFields(object, tem::FieldHelper::GetFieldsFromClass(object->klass->_0.namespaze, object->klass->_0.name));
-		this->Properties = tem::PropertyHelper::FillProperties(object, tem::PropertyHelper::GetPropertiesFromClass(object->klass->_0.namespaze, object->klass->_0.name));
-
 		app::Transform* transform = app::GameObject_get_transform(object, NULL);
 		app::Component_1__Array* components = app::GameObject_GetComponents(object, tem::SceneList::ComponentType, NULL);
 		int count = app::Array_System_Collections_ICollection_get_Count((app::Array*)components, NULL);
@@ -70,9 +69,10 @@ namespace tem {
 				std::string comonentClassName = components->vector[i]->klass->_0.name;
 				if (this->SceneComponents[i].ClassName == comonentClassName)
 				{
-					tem::ClassField::NestedPointers = std::vector<std::uintptr_t>();
-					this->SceneComponents[i].FillFields(components->vector[i], tem::FieldHelper::GetFieldsFromClass(components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name));
-					this->SceneComponents[i].FillProperties(components->vector[i], tem::PropertyHelper::GetPropertiesFromClass(components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name));
+					this->SceneComponents[i].ObjectData.Namespace = components->vector[i]->klass->_0.namespaze;
+					this->SceneComponents[i].ObjectData.Name = components->vector[i]->klass->_0.name;
+					this->SceneComponents[i].ObjectData.FillObjectData((std::uintptr_t)components->vector[i]);
+					tem::ObjectData::NestedPointers.clear();
 				}
 			}
 		}
@@ -80,14 +80,14 @@ namespace tem {
 
 	void tem::SceneObject::GetObjectData(app::GameObject* object)
 	{
+		if (this->SceneIndexHierarchy.size() == 0)
+			return;
+
 		std::vector<int> hierarchyIndex = this->SceneIndexHierarchy;
 		hierarchyIndex.erase(hierarchyIndex.begin());
 
 		if (object == nullptr)
 			return;
-
-		//this->Fields = tem::FieldHelper::FillFields(object, tem::FieldHelper::GetFieldsFromClass(object->klass->_0.namespaze, object->klass->_0.name));
-		//this->Properties = tem::PropertyHelper::FillProperties(object, tem::PropertyHelper::GetPropertiesFromClass(object->klass->_0.namespaze, object->klass->_0.name));
 
 		app::Transform* transform = app::GameObject_get_transform(object, NULL);
 		app::Component_1__Array* components = app::GameObject_GetComponents(object, tem::SceneList::ComponentType, NULL);
@@ -100,8 +100,14 @@ namespace tem {
 				std::string comonentClassName = components->vector[i]->klass->_0.name;
 				if (this->SceneComponents[i].ClassName == comonentClassName)
 				{
-					this->SceneComponents[i].FillFields(components->vector[i], tem::FieldHelper::GetFieldsFromClass(components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name));
-					this->SceneComponents[i].FillProperties(components->vector[i], tem::PropertyHelper::GetPropertiesFromClass(components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name));
+					if (this->SceneComponents[i].ObjectData.Namespace != components->vector[i]->klass->_0.namespaze)
+						this->SceneComponents[i].ObjectData.Namespace = components->vector[i]->klass->_0.namespaze;
+
+					if (this->SceneComponents[i].ObjectData.Name != components->vector[i]->klass->_0.name || this->SceneComponents[i].ObjectData.ClassName != components->vector[i]->klass->_0.name)
+						this->SceneComponents[i].ObjectData.Name = this->SceneComponents[i].ObjectData.ClassName = components->vector[i]->klass->_0.name;
+
+					this->SceneComponents[i].ObjectData.FillObjectData((std::uintptr_t)components->vector[i]);
+					tem::ObjectData::NestedPointers.clear();
 				}
 			}
 		}
@@ -112,7 +118,17 @@ namespace tem {
 		if (object == nullptr)
 			return;
 
- 		app::Transform* transform = app::GameObject_get_transform(object, NULL);
+		for (int i = 0; i < SceneComponents.size(); i++)
+		{
+			if (SceneComponents[i].ClassName == componentName)
+			{
+				bool wasSet = SceneComponents[i].ObjectData.SetObjectData(componentName, fieldPropertyName, value);
+
+				if (wasSet == false)
+					TemLogger::Add("Failed to set " + fieldPropertyName + " to " + value + " in " + componentName);
+			}
+		}
+ 		/*app::Transform* transform = app::GameObject_get_transform(object, NULL);
 		app::Component_1__Array* components = app::GameObject_GetComponents(object, tem::SceneList::ComponentType, NULL);
 		int count = app::Array_System_Collections_ICollection_get_Count((app::Array*)components, NULL);
 
@@ -143,76 +159,7 @@ namespace tem {
 					}
 				}
 			}
-		}
-
-	}
-
-	void tem::SceneObject::GetObjectDataGameObject(app::GameObject* object)
-	{
-		std::vector<int> hierarchyIndex = this->SceneIndexHierarchy;
-		hierarchyIndex.erase(hierarchyIndex.begin());
-
-		if (object == nullptr)
-			return;
-
-		this->Fields = tem::FieldHelper::FillFields(object, tem::FieldHelper::GetFieldsFromClass(object->klass->_0.namespaze, object->klass->_0.name));
-		this->Properties = tem::PropertyHelper::FillProperties(object, tem::PropertyHelper::GetPropertiesFromClass(object->klass->_0.namespaze, object->klass->_0.name));
-	}
-
-	void tem::SceneObject::SetComponentDataField(std::string componentName, tem::ClassField field)
-	{
-		std::vector<int> hierarchyIndex = this->SceneIndexHierarchy;
-		hierarchyIndex.erase(hierarchyIndex.begin());
-		app::GameObject* object = tem::SceneList::GetGameObjectFromHierarchyIndex(hierarchyIndex);
-
-		if (object == nullptr)
-			return;
-
-		app::Transform* transform = app::GameObject_get_transform(object, NULL);
-		app::Component_1__Array* components = app::GameObject_GetComponents(object, tem::SceneList::ComponentType, NULL);
-		int count = app::Array_System_Collections_ICollection_get_Count((app::Array*)components, NULL);
-
-		if (components->vector[0] == nullptr)
-			return;
-
-		for (int i = 0; i < count; i++)
-		{
-			if (components->vector[i] != nullptr)
-			{
-				if (components->vector[i]->klass->_0.name != NULL && std::string(components->vector[i]->klass->_0.name) == componentName)
-					field.SetFieldValue((std::uintptr_t)components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, field.Name, field.FieldValue, &field);
-			}
-			else
-				return;
-		}
-	}
-
-	void tem::SceneObject::SetComponentDataProperty(std::string componentName, tem::ClassProperty prop)
-	{
-		std::vector<int> hierarchyIndex = this->SceneIndexHierarchy;
-		hierarchyIndex.erase(hierarchyIndex.begin());
-		app::GameObject* object = tem::SceneList::GetGameObjectFromHierarchyIndex(hierarchyIndex);
-
-		if (object == nullptr)
-			return;
-
-		app::Transform* transform = app::GameObject_get_transform(object, NULL);
-		app::Component_1__Array* components = app::GameObject_GetComponents(object, tem::SceneList::ComponentType, NULL);
-		int count = app::Array_System_Collections_ICollection_get_Count((app::Array*)components, NULL);
-
-		if (components->vector[0] == nullptr)
-			return;
-
-		for (int i = 0; i < count; i++)
-		{
-			if (components->vector[i] != nullptr)
-			{
-				if (components->vector[i]->klass->_0.name != NULL && std::string(components->vector[i]->klass->_0.name) == componentName)
-					prop.SetPropertyValue(components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, prop.Name, prop.PropertyValue, &prop);
-			}
-			else
-				return;
-		}
+		}*/
 	}
 
 	void tem::SceneObject::SetComponentData(std::string componentName, std::string fieldPropName, std::string value, bool isField)
@@ -236,47 +183,17 @@ namespace tem {
 		{
 			if (component.ClassName == componentName)
 			{
-				if (isField == true)
+				for (int i = 0; i < count; i++)
 				{
-					if (component.Fields.size() > 0)
+					if (components->vector[i] != nullptr && tem::PtrInRange(components->vector[i]->klass) == true && components->vector[i]->klass->_0.name != NULL && componentName == components->vector[i]->klass->_0.name)
 					{
-						tem::ClassField field;
-						for (int i = 0; i < component.Fields.size(); i++)
-						{
-							if (component.Fields[i].Name == fieldPropName)
-								field = component.Fields[i];
-						}
-
-						for (int i = 0; i < count; i++)
-						{
-							if (components->vector[i] != nullptr && components->vector[i]->klass->_0.name != NULL && componentName == components->vector[i]->klass->_0.name)
-							{
-								field.SetFieldValue((std::uintptr_t)components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, fieldPropName, value, &field);
-								field.FieldValue = value;
-								this->HasChanged = true;
-								return;
-							}
-						}
-					}
-				}
-				else
-				{
-					tem::ClassProperty Property;
-					for (int i = 0; i < component.Properties.size(); i++)
-					{
-						if (component.Properties[i].Name == fieldPropName)
-							Property = component.Properties[i];
-					}
-
-					for (int i = 0; i < count; i++)
-					{
-						if (components->vector[i] != nullptr && components->vector[i]->klass->_0.name != NULL && componentName == components->vector[i]->klass->_0.name)
-						{
-							Property.SetPropertyValue(components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, fieldPropName, value, &Property);
-							Property.PropertyValue = value;
-							this->HasChanged = true;
-							return;
-						}
+						component.ObjectData.ClassName = components->vector[i]->klass->_0.name;
+						component.ObjectData.Namespace = components->vector[i]->klass->_0.namespaze;
+						std::vector<std::string> namePath = { };
+						component.ObjectData.SetObjectData((std::uintptr_t)components->vector[i], namePath, component.ObjectData.Namespace, component.ObjectData.ClassName);
+						component.ObjectData.HasChanged = true;
+						this->HasChanged = true;
+						return;
 					}
 				}
 			}
@@ -309,152 +226,24 @@ namespace tem {
 				isNestedField = true;
 		}
 
-		if (componentName == "GameObject")
+		for (int i = 0; i < SceneComponents.size(); i++)
 		{
-			if (isField == true)
+			if (SceneComponents[i].ClassName == componentName)
 			{
-				tem::ClassField* field = nullptr;
-
-				if (fieldHierarchy.size() > 0)
+				for (int i = 0; i < count; i++)
 				{
-					for (int i = 0; i < Fields.size(); i++)
+					if (tem::PtrInRange(components->vector[i]) == true && tem::PtrInRange(components->vector[i]->klass) == true && tem::PtrInRange(&components->vector[i]->klass->_0) == true && componentName == components->vector[i]->klass->_0.name)
 					{
-						if (fieldHierarchy.size() > 0 && Fields[i].Name == fieldHierarchy[0])
-						{
+						if (fieldHierarchy[0] == componentName)
 							fieldHierarchy.erase(fieldHierarchy.begin());
 
-							if (fieldHierarchy.size() > 0)
-							{
-								field = Fields[i].GetNestedField(fieldHierarchy);
-								break;
-							}
-							else
-							{
-								field = &Fields[i];
-								break;
-							}
-						}
-					}
-				}
-				else
-					field = FindField(fieldPropName, Fields);
-
-				if (field == nullptr)
-					return;
-
-				if (isNestedField == true)
-				{
-					field->SetNestedFieldValue((std::uintptr_t)object, object->klass->_0.namespaze, object->klass->_0.name, sutil::SplitTem(fieldPropPath, "."), value);
-				}
-				else
-				{
-					field->SetFieldValue((std::uintptr_t)object, object->klass->_0.namespaze, object->klass->_0.name, fieldPropName, value, field);
-				}
-				field->FieldValue = value;
-				this->HasChanged = true;
-				return;
-			}
-			else
-			{
-				tem::ClassProperty* Property = FindProperty(fieldPropName, Properties);
-
-				if (Property == nullptr)
-					return;
-
-				Property->SetPropertyValue((void*)object, object->klass->_0.namespaze, object->klass->_0.name, fieldPropName, value, Property);
-				Property->PropertyValue = value;
-				this->HasChanged = true;
-				return;
-			}
-		}
-		else
-		{
-			for (tem::Component &component : SceneComponents)
-			{
-				if (component.ClassName == componentName)
-				{
-					if (isField == true)
-					{
-						tem::ClassField* field = nullptr;
-
-						if (fieldHierarchy.size() > 0)
-						{
-							for (int i = 0; i < component.Fields.size(); i++)
-							{
-								if (fieldHierarchy.size() > 0 && component.Fields[i].Name == fieldHierarchy[0])
-								{
-									fieldHierarchy.erase(fieldHierarchy.begin());
-
-									if (fieldHierarchy.size() > 0)
-										field = component.Fields[i].GetNestedField(fieldHierarchy);
-									else
-										field = &component.Fields[i];
-
-									break;
-								}
-							}
-						}
-						else
-							field = FindField(fieldPropName, component.Fields);
-
-						if (field == nullptr)
-							return;
-
-						for (int i = 0; i < count; i++)
-						{
-							if (components->vector[i] != nullptr && components->vector[i]->klass->_0.name != NULL && componentName == components->vector[i]->klass->_0.name)
-							{
-								if (isNestedField == true)
-									field->SetNestedFieldValue((std::uintptr_t)components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, sutil::SplitTem(fieldPropPath, "."), value);
-								else
-									field->SetFieldValue((std::uintptr_t)components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, fieldPropName, value, field);
-
-								field->FieldValue = value;
-								this->HasChanged = true;
-								return;
-							}
-						}
-					}
-					else
-					{
-						tem::ClassProperty* Property = FindProperty(fieldPropName, component.Properties);
-
-						for (int i = 0; i < count; i++)
-						{
-							if (components->vector[i] != nullptr && components->vector[i]->klass->_0.name != NULL && componentName == components->vector[i]->klass->_0.name)
-							{
-								Property->SetPropertyValue(components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, fieldPropName, value, Property);
-								Property->PropertyValue = value;
-								this->HasChanged = true;
-								return;
-							}
-						}
+						tem::ObjectData::SetObjectData(fieldHierarchy, (std::uintptr_t)components->vector[i], components->vector[i]->klass->_0.namespaze, components->vector[i]->klass->_0.name, fieldPropName, value);
+						SceneComponents[i].ObjectData.UpdateObjectData(fieldHierarchy, fieldPropName, value);
+						SceneComponents[i].ObjectData.HasChanged = true;
 					}
 				}
 			}
 		}
-	}
-
-	tem::ClassProperty* tem::SceneObject::FindProperty(std::string name, std::vector<tem::ClassProperty> &properties)
-	{
-		for (int i = 0; i < properties.size(); i++)
-		{
-			if (properties[i].Name == name)
-				return &properties[i];
-		}
-
-		return nullptr;
-	}
-
-	tem::ClassField* tem::SceneObject::FindField(std::string name, std::vector<tem::ClassField> &fields)
-	{
-		for (int i = 0; i < fields.size(); i++)
-		{
-			if (fields[i].Name == name)
-				return &fields[i];
-		}
-
-		return nullptr;
 	}
 
 	bool tem::SceneObject::HasComponent(std::string className)

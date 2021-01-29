@@ -10,15 +10,19 @@ namespace tem {
     {
     public:
         bool HasChanged = false;
-        std::string Name;
-        tem::VariableType ReturnType;
-        std::string PropertyValue;
+        std::string Name = "";
+        std::string Namespace = "";
+        std::string ClassName = "";
+        tem::VariableType ReturnType = tem::VariableType::Null;
+        std::string PropertyValue = "";
+        void* Parent = nullptr;
 
         ClassProperty();
         ClassProperty(PropertyInfo* Property);
 
         tem::ClassProperty* GetPropertyByName(std::string name);
         void GetPropertyValue(void* object, PropertyInfo* Property);
+        static Il2CppObject* GetPropertyObject(void* object, PropertyInfo* Property);
         void SetPropertyValue(void* object, std::string Namespace, std::string name, std::string fieldPropName, std::string value, ClassProperty* Property);
         std::string ToJsonString();
         std::string SaveJsonProperty();

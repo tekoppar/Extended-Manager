@@ -5,6 +5,7 @@
 
 #include "Adresses.h"
 #include "SceneHierarchy.h"
+#include "SceneData.h"
 
 namespace tem {
 	class MethodParameter
@@ -36,6 +37,7 @@ namespace tem {
 	public:
 		static app::Type* ComponentType;
 		static tem::SceneHierarchy RootHierarchy;
+		static tem::SceneData RootSceneData;
 		static tem::SceneHierarchy* ActiveHiearchy;
 		static std::unordered_map<int, std::uintptr_t> SpecialSceneHierarchyIndexMap;
 		static std::unordered_map<std::string, std::uintptr_t> SpecialSceneHierarchyMap;
@@ -55,6 +57,8 @@ namespace tem {
 		static void ConstructSceneHierarchy(std::vector<int> sceneIndexHierarchy, int maxDepth);
 		static void ConstructSceneHierarchy(std::vector<std::string> sceneIndexHierarchy, int maxDepth);
 		static std::vector<app::RuntimeSceneMetaData*> GetScenesToLoad();
+		static app::SceneManagerScene* GetSceneManagerSceneFromHierarchy(std::vector<int> hierarchy);
+		static app::SceneManagerScene* GetSceneManagerSceneFromHierarchyName(std::vector<std::string> hierarchy);
 
 	private:
 		static std::vector<int> DoesHierarchyExists(std::vector<int> indexes);

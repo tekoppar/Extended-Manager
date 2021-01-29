@@ -106,10 +106,14 @@ app::String* string_new(const char* str)
 
 void InitializeDLL()
 {
-	if (app::Graphic_CrossFadeColor == nullptr && app::Graphic_CrossFadeColor_1 == nullptr && (*app::List_1_UnityEngine_Collider__Add__MethodInfo) == nullptr || (*app::AreaMapUI__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo)->static_fields->Instance == nullptr)
+	if (app::Graphic_CrossFadeColor == nullptr && app::Graphic_CrossFadeColor_1 == nullptr && (*app::List_1_UnityEngine_Collider__Add__MethodInfo) == nullptr ||
+		(*app::AreaMapUI__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo) == nullptr || (*app::GameWorld__TypeInfo)->static_fields->Instance == nullptr)
 		return;
 
 	MANAGER_INITIALIZED = 0;
+	Il2CppClass* assemblyClass = GetClass("System.Reflection", "Assembly");
+	tem::LOWPTRVALUE = ((std::uintptr_t)assemblyClass->image) - 2199999999;
+	tem::HIGHPTRVALUE = ((std::uintptr_t)assemblyClass->image) + 2791794593265;
 
 	MDV::MoonGameWorld = (*app::GameWorld__TypeInfo)->static_fields->Instance;// GetGameWorld(hProcess);
 	MDV::MoonGameController = (*app::GameController__TypeInfo)->static_fields->Instance; // GetGameController(hProcess);
@@ -121,8 +125,9 @@ void InitializeDLL()
 
 	auto rectClass = GetClass<>("UnityEngine", "Rect");
 	il2cpp_runtime_class_init((Il2CppClass*)rectClass);
-	app::Type* scenesManagerType = GetType("", "ScenesManager");
-	app::Object_1__Array* arr22 = app::Object_1_FindObjectsOfType(scenesManagerType, NULL);
+
+	sceneManager = (*app::Scenes__TypeInfo)->static_fields->Manager;
+	TemSceneHelper::SceneManager = sceneManager;
 
 	tem::UIEvents::Instance = new tem::UIEvents();
 	tem::Gizmo::Instance.SetupGizmo();
@@ -130,9 +135,6 @@ void InitializeDLL()
 	tem::CollisionCreator::Instance = tem::CollisionCreator();
 	tem::CollisionCreator::Instance.AddCollisionToolbar();
 	MDV::AllObjectsToCallUpdate.push_back(&tem::CollisionCreator::Instance);
-
-	sceneManager = (app::ScenesManager*)arr22->vector[0];
-	TemSceneHelper::SceneManager = sceneManager;
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -219,7 +221,7 @@ void InitializeDLL()
 	scenes.push_back(raceScene);
 	TemSceneHelper::LoadScenes(scenes);
 	HasLoadedScenes = std::async(TemSceneHelper::IsScenesLoaded, scenes, false);
-	MDV::User.Initialize();
+	//MDV::User.Initialize();
 
 	app::SimpleFPS* simpleFPS = (*app::SimpleFPS__TypeInfo)->static_fields->Instance;
 	app::Behaviour_set_enabled((app::Behaviour*)simpleFPS, false, NULL);
@@ -261,6 +263,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 			MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::ManagerInitialized)));
 			AnimationHelper::GetAnimations();
+			raceManager.racePath = managerPath + "\\RaceSettings\\";
 			raceManager.SetupManager();
 			SetupsAreDone = true;
 
@@ -349,7 +352,6 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				case MessageType::EndThread:
 				{
 #ifdef TEMSOCKET
-
 					TemSocket::IsConnected = false;
 #endif
 					SeinCharacterHelper::RestoreSeinAbilities();
@@ -370,7 +372,17 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				}
 				break;
 
-				case MessageType::GetQuestByName: if (tem::ObjectCreator::temScene1RuntimeMetaData == nullptr) { tem::ObjectCreator creator; creator.CreateObject("", "SceneManagerScene"); } break;
+				case MessageType::CreateScene: 
+				{
+					if (tem::ObjectCreator::temScene1RuntimeMetaData == nullptr)
+					{
+						auto values = sutil::SplitTem(message.second.Content, "|");
+						tem::SceneList::RootSceneData = tem::SceneData(values[0], tem::Vector3(values[1]), tem::Vector2(values[2]), tem::Rect(values[3]));
+						tem::SceneList::RootSceneData.LoadScene();
+					}
+				}
+				break;
+				
 				case MessageType::RunRace:
 				{
 					raceManager.CheckHash();
@@ -507,22 +519,26 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				case MessageType::UpdateHitbox:
 				{
 					auto splitContent = sutil::SplitTem(message.second.Content, "|");
-					tem::Vector3 position = splitContent[0];
-					tem::Vector3 scale = splitContent[1];
-					position.X = position.X - (scale.X * -1);
-					position.Y = position.Y - scale.Y;
+					tem::Vector4 values = splitContent[0];
+					tem::Vector2 scale = tem::Vector2(values.Z, values.A);
+					values.X = values.X - (scale.x * -1);
+					values.Y = values.Y - scale.y;
 
 					if (HitboxDebug == nullptr)
 					{
-						HitboxDebug = DebugDrawer::Instance.CreateDebugObjectDetached(GraphColors::Blue, position, scale);
-						TransformSetScale(HitboxDebug, tem::Vector3(scale.X, scale.Y, 1.0f));
-						TransformSetLocalPosition(HitboxDebug, tem::Vector3(scale.X / 2.0f * -1.0f, scale.Y / 2.0f, 0.0f));
-						TransformSetPosition(HitboxDebug, position);
+						HitboxDebug = DebugDrawer::Instance.CreateDebugObjectDetached(GraphColors::Blue, tem::Vector2(values.X, values.Y), tem::Vector2(values.Z, values.A));
+
+						if (tem::PtrInRange(HitboxDebug) == true)
+						{
+							TransformSetScale(HitboxDebug, tem::Vector3(scale.x, scale.y, 1.0f));
+							TransformSetLocalPosition(HitboxDebug, tem::Vector3(scale.x / 2.0f * -1.0f, scale.y / 2.0f, 0.0f));
+							TransformSetPosition(HitboxDebug, values);
+						}
 					}
 					else
 					{
-						TransformSetScale(HitboxDebug, tem::Vector3(scale.X, scale.Y, 1.0f));
-						TransformSetPosition(HitboxDebug, position);
+						TransformSetScale(HitboxDebug, tem::Vector3(scale.x, scale.x, 1.0f));
+						TransformSetPosition(HitboxDebug, values);
 					}
 				}
 				break;
@@ -665,13 +681,12 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					if (MDV::SelectedObject != nullptr)
 					{
 						app::GameObject_set_moonReady(MDV::SelectedObject, true, NULL);
-						app::GameObject_SetActive(MDV::SelectedObject, true, NULL);
 						app::GameObject_set_active(MDV::SelectedObject, true, NULL);
 
 						tem::SceneList::ActiveHiearchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(sceneHierarchy);
 						tem::Gizmo::Instance.SetGizmoPosition(TransformGetPosition(MDV::SelectedObject));
 
-						if (MDV::PreviewObject != nullptr && MDV::PreviewObject != MDV::SelectedObject)
+						if (tem::PtrInRange(MDV::PreviewObject) == true && MDV::PreviewObject != MDV::SelectedObject)
 						{
 							app::Object_1_Destroy_1((app::Object_1*)MDV::PreviewObject, NULL);
 							MDV::PreviewObject = nullptr;
@@ -735,6 +750,19 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						tem::SceneHierarchy* hierarchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(sceneHierarchy);
 						MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::ExpandSceneHierarchy)) + "|" + message.second.Content + "|" + hierarchy->ToString());
 					}
+					else if (sceneHierarchy.size() == 1 && sceneHierarchy[0] == 999)
+					{
+						for (int i = 0; i < TemSceneHelper::SceneManager->fields.ActiveScenes->fields._size; i++)
+						{
+							if (TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.SceneRoot != nullptr)
+							{
+								tem::SceneList::ConstructSceneHierarchy({ 999, TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.MetaData->fields.LinearId }, 1);
+							}
+						}
+						tem::SceneList::ConstructSceneHierarchy({ 999, 750 }, 1);
+
+						MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::ExpandSceneHierarchy)) + "|" + message.second.Content + "|" + tem::SceneList::RootHierarchy.ToString());
+					}
 				}
 				break;
 
@@ -754,15 +782,15 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 				case MessageType::GetFieldsPropertiesGameObject:
 				{
-					std::vector<int> sceneHierarchy = tem::StringToIntVector(message.second.Content, ",");
+					/*std::vector<int> sceneHierarchy = tem::StringToIntVector(message.second.Content, ",");
 					MDV::SelectedObject = tem::SceneList::GetGameObjectFromHierarchyIndex(sceneHierarchy);
 					tem::SceneHierarchy* hierarchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(sceneHierarchy);
 
 					if (MDV::SelectedObject != nullptr)
 					{
-						hierarchy->Object.GetObjectDataGameObject(MDV::SelectedObject);
+						//hierarchy->Object.GetObjectDataGameObject(MDV::SelectedObject);
 						MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetFieldsPropertiesGameObject)) + "|" + hierarchy->ToString() + "|" + message.second.Content);
-					}
+					}*/
 				}
 				break;
 
@@ -782,10 +810,12 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 				case MessageType::SaveEditorWorld:
 				{
+					nlohmann::json j_scenedata(tem::SceneList::RootSceneData);
+					sutil::Write(ManagerPath + "WorldEditor\\EditorWorldScene.json", j_scenedata.dump());
 					nlohmann::json j_umap(tem::SceneList::RootHierarchy);
-					sutil::Write(ManagerPath + "EditorWorld.json", j_umap.dump());
+					sutil::Write(ManagerPath + "WorldEditor\\EditorWorld.json", j_umap.dump());
 					nlohmann::json j_collision(tem::CollisionCreator::Instance);
-					sutil::Write(ManagerPath + "EditorCollision.json", j_collision.dump());
+					sutil::Write(ManagerPath + "WorldEditor\\EditorCollision.json", j_collision.dump());
 				}
 				break;
 
@@ -793,7 +823,14 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				{
 					if (futureIsReady == false)
 					{
-						nlohmann::json j = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "EditorWorld.json"));
+						if (std::filesystem::exists(ManagerPath + "WorldEditor\\EditorWorldScene.json") == true)
+						{
+							nlohmann::json jSceneData = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "WorldEditor\\EditorWorldScene.json"));
+							tem::SceneList::RootSceneData = jSceneData.get<tem::SceneData>();
+							tem::SceneList::RootSceneData.LoadScene();
+						}
+
+						nlohmann::json j = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "WorldEditor\\EditorWorld.json"));
 						tem::SceneList::RootHierarchy = j.get<tem::SceneHierarchy>();
 						std::vector<app::RuntimeSceneMetaData*> scenesToLoad = tem::SceneList::GetScenesToLoad();
 						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToDisableScene = 2500;
@@ -801,12 +838,13 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						TemSceneHelper::SceneManager->fields.Settings->fields.AllowInstantSceneUnloads = false;
 						TemSceneHelper::SceneManager->fields.Settings->fields.DistanceMovedAwayFromSceneBeforeDisabling = 2500;
 						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityBeforeConsideredUneeded = 2500;
+						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityToEnableScene = 1800;
+						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityToLoad = 2000;
 
 						TemSceneHelper::LoadScenes(scenesToLoad);
 						MessagesManager.MessagesFutures[message.second.Type] = std::async(TemSceneHelper::IsScenesLoaded, scenesToLoad, true);
 						MessagesManager.SetTimeout(45 * 1000, message.second.Type);
 						message.second.Timeout = 45 * 1000;
-						//MessagesManager.Messages[i].Timeout = 15 * 1000;
 						futureExists = true;
 					}
 					else
@@ -818,10 +856,37 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 							MessagesManager.RemoveMessage(message.second.Type);
 							MessagesManager.MessagesFutures.erase(message.second.Type);
 							futureExists = false;
-							
+
+							std::vector<app::RuntimeSceneMetaData*> scenesToLoad = tem::SceneList::GetScenesToLoad();
+							TemLogger::Add("Scenes needs to be activated and enabled: " + std::to_string(scenesToLoad.size()), LogType::Normal);
+							for (auto& sceneLoad : scenesToLoad)
+							{
+								app::SceneManagerScene* managerScene = app::ScenesManager_GetSceneManagerScene(TemSceneHelper::SceneManager, sceneLoad->fields.Scene, NULL);
+
+								if (managerScene != nullptr && managerScene->fields.SceneRoot != nullptr)
+								{
+									app::GameObject* object = app::Component_1_get_gameObject((app::Component_1*)managerScene->fields.SceneRoot, NULL);
+
+									if (object != nullptr)
+									{
+										TemLogger::Add("Activating and enabling scene: " + il2cppi_to_string(managerScene->fields.MetaData->fields.Scene), LogType::Normal);
+										
+										if (app::GameObject_get_moonReady(object, NULL) == false)
+											app::GameObject_set_moonReady(object, true, NULL);
+
+										if (app::GameObject_get_active(object, NULL) == false)
+											app::GameObject_set_active(object, true, NULL);
+									}
+									else
+										TemLogger::Add("Loaded scene object was nullptr failed to activate it.", LogType::Error);
+								}
+								else
+									TemLogger::Add("Loaded scene object was nullptr failed to activate it.", LogType::Error);
+							}
+
 							HasLoadedWorldData = std::async(tem::SceneList::LoadHierarchy);
 
-							nlohmann::json jCollision = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "EditorCollision.json"));
+							nlohmann::json jCollision = nlohmann::json::parse(sutil::ReadFile(ManagerPath + "WorldEditor\\EditorCollision.json"));
 							tem::CollisionCreator newCollisionCreator = jCollision.get<tem::CollisionCreator>();
 							tem::CollisionCreator::Instance.LoadCollision(newCollisionCreator);
 						}
@@ -1091,6 +1156,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 				object->Cleanup();
 		}
 	}
+	TemLogger::Logger.Cleanup();
 	MDV::AllObjectsToCallUpdate.clear();
 
 	graphDrawer.Destroy();

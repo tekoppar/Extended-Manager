@@ -39,7 +39,6 @@ namespace tem {
 		Collider->fields._._.m_transformCached = true;
 		std::vector<tem::Vector3> uvVertexs;
 
-
 		tem::Vector3 pos1 = Positions[0];
 		tem::Vector3 pos2 = Positions[0];
 		pos2 += tem::Vector3(0.0f, 0.0f, 1.0f);
@@ -63,7 +62,7 @@ namespace tem {
 
 		int leftTop = 0, leftBot = 1, rightTop = 2, rightBot = 3;
 
-		if (Positions[0].X < Positions[1].X)
+		if (FaceDirection == false)
 		{
 			trianglesArr->vector[0] = leftTop;
 			trianglesArr->vector[1] = leftBot;
@@ -91,6 +90,8 @@ namespace tem {
 
 		int triangleArrIndex = 5;
 		int verticesArrIndex = 3;
+		pos1 = pos3;
+		pos2 = pos4;
 		if (Positions.size() >= 3)
 		{
 			for (int i = 2; i < Positions.size(); i++)
@@ -114,7 +115,7 @@ namespace tem {
 				verticesArrIndex++;
 				verticesArr->vector[verticesArrIndex] = localPos4.ToMoon();
 
-				if (pos1.X < pos3.X)
+				if (FaceDirection == false)
 				{
 					triangleArrIndex++;
 					trianglesArr->vector[triangleArrIndex] = leftTop;
@@ -206,24 +207,35 @@ namespace tem {
 		app::SphereCollider_set_radius(collider, 0.25f, NULL);
 		position.Z = -0.7f;
 		app::SphereCollider_set_center(collider, position.ToMoon(), NULL);
-		AllColliders.push_back(collider);
+		AllColliders.insert(AllColliders.begin() + index, collider);
+		TransformSetParent(newHandle, colliderPreview);
 
 		app::List_1_UnityEngine_Collider__Add(debug->fields.m_cachedDamageColliders, (app::Collider*)collider, (*app::List_1_UnityEngine_Collider__Add__MethodInfo));
-
-		TransformSetParent(newHandle, colliderPreview);
 	}
 
 	void tem::Collision::AddPosition(tem::Vector3 position)
 	{
 		if (tem::UIEvents::IsOverUIElement == false)
 		{
-			app::Vector3 worldVec3 = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+			tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+			app::Vector3 worldVec3 = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 			tem::Vector3 worldTem = tem::Vector3(worldVec3);
 			worldTem.Z = 0.0f;
 
 			Positions.push_back(worldTem);
 			AddSphereHandle(worldTem, Positions.size() - 1);
 			DrawCollision();
+		}
+	}
+
+	void tem::Collision::ClonePositionIndex(int index)
+	{
+		if (index < Positions.size())
+		{
+			Positions.insert(Positions.begin() + (index - 1), Positions[index]);
+			AddSphereHandle(Positions[index], index - 1);
+			DrawCollision();
+			UpdateSphereHandles();
 		}
 	}
 
@@ -241,7 +253,8 @@ namespace tem {
 				return false;
 		}
 
-		app::Vector3 worldVec3 = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, 29.0f).ToMoon(), NULL);
+		tem::Vector3 cameraPosition = TransformGetPosition(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonCamera, NULL));
+		app::Vector3 worldVec3 = app::Camera_ScreenToWorldPoint_1(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL);
 		tem::Vector3 worldTem = tem::Vector3(worldVec3);
 
 		float signedAngle = app::Vector3_SignedAngle(worldVec3, Positions[Positions.size() - 1].ToMoon(), tem::Vector3::Up.ToMoon(), NULL);
@@ -266,16 +279,21 @@ namespace tem {
 			tem::Vector3 fixedPos = Positions[i];
 			fixedPos.Z = -0.7f;
 			app::SphereCollider_set_center(AllColliders[i], fixedPos.ToMoon(), NULL);
+
+			app::DebugRendererSettings* debug = (*app::DebugRendererSettings__TypeInfo)->static_fields->s_instance;
+			if (app::List_1_UnityEngine_Collider__Contains(debug->fields.m_cachedDamageColliders, (app::Collider*)AllColliders[i], (*app::List_1_UnityEngine_Collider__Contains__MethodInfo)) == false)
+				app::List_1_UnityEngine_Collider__Add(debug->fields.m_cachedDamageColliders, (app::Collider*)AllColliders[i], (*app::List_1_UnityEngine_Collider__Add__MethodInfo));
 		}
 	}
 
 	void to_json(nlohmann::json& j, const tem::Collision& p)
 	{
-		j = nlohmann::json{ {"Positions", p.Positions } };
+		j = nlohmann::json{ {"FaceDirection", p.FaceDirection }, {"Positions", p.Positions } };
 	}
 
 	void from_json(const nlohmann::json& j, tem::Collision& p)
 	{
+		j.at("FaceDirection").get_to(p.FaceDirection);
 		j.at("Positions").get_to(p.Positions);
 	}
 }

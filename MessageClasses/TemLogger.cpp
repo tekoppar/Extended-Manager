@@ -29,13 +29,29 @@ std::string TemLogger::GetClockString()
 
 void TemLogger::Add(std::string log, LogType type)
 {
+	/*if (type != LogType::Normal && MDV::CanCallMethods == true)
+	{
+		app::MoonDebug* moonDebug = (*app::MoonDebug__TypeInfo)->static_fields->m_instance;
+		app::String* errorMessage = string_new(log.data());
+		switch (type)
+		{
+			case LogType::Warning: app::MoonDebug_AddMessage(app::MoonDebugMessageType__Enum::MoonDebugMessageType__Enum_Warning ,errorMessage, (app::Object_1*)moonDebug, NULL); break;
+			case LogType::Error: app::MoonDebug_AddMessage(app::MoonDebugMessageType__Enum::MoonDebugMessageType__Enum_Error, errorMessage, (app::Object_1*)moonDebug, NULL); break;
+		}
+	}*/
+
 	if (TemLogger::Logger.IsWriting == false)
-		TemLogger::Logger.Lines.push_back(TemLogger::LogTypeMap[static_cast<int>(type)] + "\t" + TemLogger::GetClockString() + "\t" + log);
+		TemLogger::Logger.Lines.push_back(TemLogger::LogTypeMap[static_cast<int>(type)] + " \t " + TemLogger::GetClockString() + " \t " + log);
 	else
-		TemLogger::Logger.Temp.push_back(TemLogger::LogTypeMap[static_cast<int>(type)] + "\t" + TemLogger::GetClockString() + "\t" + log);
+		TemLogger::Logger.Temp.push_back(TemLogger::LogTypeMap[static_cast<int>(type)] + " \t " + TemLogger::GetClockString() + " \t " + log);
 
 	if (TemLogger::Logger.Lines.size() > 100)
 		TemLogger::Logger.WriteLog();
+}
+
+void TemLogger::Cleanup()
+{
+	WriteLog();
 }
 
 void TemLogger::WriteLog()
@@ -56,7 +72,7 @@ void TemLogger::WriteLog()
 	}
 
 	sutil::Append(ManagerPath + "TemLogs.log", log);
-	this->IsWriting = false;
 	TemLogger::Logger.Lines = TemLogger::Logger.Temp;
 	TemLogger::Logger.Temp.clear();
+	this->IsWriting = false;
 }

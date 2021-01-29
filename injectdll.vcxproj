@@ -111,7 +111,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
     <OutDir>..\..\..\..\Desktop\ExtendedManager\bin\</OutDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\UIElements;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\JSON;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\Socket;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Creators;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\String Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Gizmo;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor\SeinVisuals;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Functions;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\TemFramework;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types\Custom Structs;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\UIElements;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\JSON;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses\Socket;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Creators;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\String Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Gizmo;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure;C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein\VisualEditor\SeinVisuals;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Functions;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses\Logger;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Sein;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\GameWorld;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Custom Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Animation;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\framework;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata\Types;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp\appdata;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Il2Cpp;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes;C:\Users\Tekoppar\source\repos\injectdll\injectdll\MessageClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers;C:\Users\Tekoppar\source\repos\injectdll\injectdll\RaceClasses;C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\TemFramework;C:\Users\Tekoppar\source\repos\injectdll\injectdll;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\Detour;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -238,6 +238,9 @@
   <ItemGroup>
     <ClCompile Include="BaseClasses\Gizmo\GizmoEvents.cpp" />
     <ClCompile Include="BaseClasses\Creators\Collision.cpp" />
+    <ClCompile Include="Custom Types\Vector2.cpp" />
+    <ClCompile Include="Custom Types\Vector3.cpp" />
+    <ClCompile Include="Custom Types\Vector4.cpp" />
     <ClCompile Include="Moon Helpers\Scenes\SceneStructure\Component.cpp" />
     <ClCompile Include="BaseClasses\Gizmo\Gizmo.cpp" />
     <ClCompile Include="BaseClasses\Creators\MeshUtility.cpp" />
@@ -300,10 +303,16 @@
     <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.cpp" />
     <ClCompile Include="BaseClasses\UIEvents.cpp" />
     <ClCompile Include="DrawerClasses\UIElements\TreeItem.cpp" />
+    <ClCompile Include="Moon Helpers\Scenes\SceneStructure\SceneData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseClasses\Creators\Collision.h" />
+    <ClInclude Include="Custom Types\Matrix4x4.h" />
+    <ClInclude Include="Custom Types\Custom Structs\SharedUpdateData.h" />
+    <ClInclude Include="Custom Types\Custom Structs\ExplosionSettings.h" />
+    <ClInclude Include="Custom Types\Custom Structs\AnimatorStateInfo.h" />
     <ClInclude Include="Custom Types\Bounds.h" />
+    <ClInclude Include="Custom Types\Custom Structs\AnimationContext.h" />
     <ClInclude Include="Moon Helpers\Scenes\SceneStructure\Component.h" />
     <ClInclude Include="Custom Types\TemMath.h" />
     <ClInclude Include="Custom Types\UVCalculator.h" />
@@ -405,6 +414,7 @@
     <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneHierarchy.h" />
     <ClInclude Include="BaseClasses\UIEvents.h" />
     <ClInclude Include="DrawerClasses\UIElements\TreeItem.h" />
+    <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneData.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
