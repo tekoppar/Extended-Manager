@@ -70,6 +70,8 @@ static bool EXITING_THREAD = false;
 static bool READ_THREAD_DONE = false;
 static bool HAS_LOADED_WORLD = false;
 
+bool flipFlopTest = false;
+
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
 Graph graphDrawerDebug;
@@ -228,6 +230,13 @@ void InitializeDLL()
 
 	app::PlayerInput* playerInput = (*app::PlayerInput__TypeInfo)->static_fields->Instance;
 
+	/*app::List_1_Moon_Timeline_MoonTimeline_* allTimelines = (*app::MoonTimeline__TypeInfo)->static_fields->All;
+	
+	for (int i = 0; i < allTimelines->fields._size; i++)
+	{
+		app::TimelineEntity_StartPlayback((app::TimelineEntity*)allTimelines->fields._items->vector[i], NULL);
+	}*/
+
 	MANAGER_INITIALIZED = 1;
 }
 
@@ -294,7 +303,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				{
 					Global* object = MDV::AllObjectsToCallUpdate[i];
 					if (object != nullptr)
-						object->Update();
+						object->Update(); //something weird is occuring that breaks pausing
 				}
 			}
 		}
@@ -302,6 +311,17 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 		LastTime = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
 		ProgramStart = LastTime;
+
+		app::Dictionary_2_SmartInput_IButtonInput_Core_Input_InputButtonProcessor_* inputs = (*app::PlayerInput__TypeInfo)->static_fields->Instance->fields.m_InputProcessorPairs;
+
+		for (int i = 0; i < inputs->fields.count; i++)
+		{
+			//inputs->fields.entries->vector[i].value->fields.IsPressed = flipFlopTest;
+			//inputs->fields.entries->vector[i].value->fields.WasPressed = !flipFlopTest;
+			//app::Input_InputButtonProcessor_Update(inputs->fields.entries->vector[i].value, flipFlopTest, NULL);
+		}
+
+		flipFlopTest = !flipFlopTest;
 
 		std::unordered_map<MessageType, Message> messages = MessagesManager.GetMessages();
 		for (auto& message : messages)
@@ -960,6 +980,9 @@ void ReadString(char* output) {
 
 DWORD WINAPI ThreadMain(HMODULE hIns)
 {
+	//is this a valid path?
+	//assets/scenes/gameScenes/scenes/swampGetSpiritBlade.unity
+
 	if (std::filesystem::exists(std::filesystem::temp_directory_path()))
 		managerPath = ManagerPath = sutil::ReadFile(std::filesystem::temp_directory_path().string() + "\\extendedmanager.tmp");
 
@@ -1049,7 +1072,6 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	std::vector<std::string> messages;
 	while (IsProcessRunning(proccessID) && loopBool)
 	{
-
 		buffer[512];
 		memset(buffer, 0, 512);
 		ReadString(buffer);

@@ -121,7 +121,7 @@ void RaceManager::SetupManager()
 			raceSC = (app::RaceSystem*)il2cpp_object_new((Il2CppClass*)(*app::RaceSystem__TypeInfo));
 
 		if (std::filesystem::exists(racePath + "Default") == false)
-			std::filesystem::create_directory(racePath + "Default");
+			std::filesystem::create_directory(std::filesystem::u8path(racePath + "Default"));
 
 		AttemptManager.Filename = racePath + "Default\\default.ghostdata";
 		AttemptManager.GetAttempts();

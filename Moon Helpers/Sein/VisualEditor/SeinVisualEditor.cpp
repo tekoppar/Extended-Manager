@@ -97,7 +97,7 @@ void SeinVisualEditor::LoadJsonFile(std::string& path)
 	VisualSetting.OriVisualSetting.OriTrail = jj1["OriVisualSettings"]["OriTrail"].get<tem::Vector4>() * 0.003921568627451f;
 	VisualSetting.OriVisualSetting.TexturePath = jj1["OriVisualSettings"]["TexturePath"].get<std::string>();
 
-	VisualSetting.OriVisualSetting.HatVisualSettings.Hat= jj1["OriVisualSettings"]["HatVisualSettings"]["Hat"].get<tem::Vector4>() * 0.003921568627451f;
+	VisualSetting.OriVisualSetting.HatVisualSettings.Hat = jj1["OriVisualSettings"]["HatVisualSettings"]["Hat"].get<tem::Vector4>() * 0.003921568627451f;
 	VisualSetting.OriVisualSetting.HatVisualSettings.HatEmissive = jj1["OriVisualSettings"]["HatVisualSettings"]["HatEmissive"].get<tem::Vector4>() * 0.003921568627451f;
 	VisualSetting.OriVisualSetting.HatVisualSettings.TexturePath = jj1["OriVisualSettings"]["HatVisualSettings"]["TexturePath"].get<std::string>();
 
