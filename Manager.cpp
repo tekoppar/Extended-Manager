@@ -133,10 +133,10 @@ void InitializeDLL()
 
 	tem::UIEvents::Instance = new tem::UIEvents();
 	tem::Gizmo::Instance.SetupGizmo();
-	MDV::AllObjectsToCallUpdate.push_back(&tem::Gizmo::Instance);
+	//MDV::AllObjectsToCallUpdate.push_back(&tem::Gizmo::Instance); One of these causes weapon wheels pause to not effect Ori
 	tem::CollisionCreator::Instance = tem::CollisionCreator();
 	tem::CollisionCreator::Instance.AddCollisionToolbar();
-	MDV::AllObjectsToCallUpdate.push_back(&tem::CollisionCreator::Instance);
+	//MDV::AllObjectsToCallUpdate.push_back(&tem::CollisionCreator::Instance); One of these causes weapon wheels pause to not effect Ori
 
 	for (int i = 0; i < 6; i++)
 	{
