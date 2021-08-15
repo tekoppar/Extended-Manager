@@ -30,6 +30,7 @@ public:
 	static void SaveUberStates(std::string path);
 	static void LoadUberStates(std::string path);
 	static void ResetUberStates();
+	static void AddUberStates(int UberGroupID, int UberID, bool value);
 	static void SetUberState(int UberGroupID, int UberID, std::uint8_t value);
 	static std::uint8_t GetUberState(int UberGroupID, int UberID);
 	static app::UberStateValueGroup* GetUberGroup(int UberGroupID);

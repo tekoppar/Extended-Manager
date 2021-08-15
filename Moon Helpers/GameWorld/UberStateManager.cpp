@@ -195,6 +195,23 @@ void UberStateManager::SetUberState(int UberGroupID, int UberID, std::uint8_t va
 	}
 }
 
+void UberStateManager::AddUberStates(int UberGroupID, int UberID, bool value)
+{
+	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
+	app::UberStateValueGroup* UberStateValueGroup = UberStateManager::GetUberGroup(UberGroupID);
+
+	if (UberStateValueGroup != nullptr)
+	{
+		app::UberID* uberID = (app::UberID*)il2cpp_object_new((Il2CppClass*)(*app::UberID__TypeInfo));
+		app::UberID__ctor_1(uberID, UberID, NULL);
+		uberID->fields.m_id = UberID;
+		app::Dictionary_2_Moon_UberID_System_Boolean__set_Item(UberStateValueGroup->fields.m_boolStateMap, uberID, value, (*app::Dictionary_2_Moon_UberID_System_Boolean__set_Item__MethodInfo));
+
+		app::UberStateController_SetState(uberStates, NULL);
+		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::UberStateApplyContext__Enum_ValueChanged, NULL);
+	}
+}
+
 std::uint8_t UberStateManager::GetUberState(int UberGroupID, int UberID)
 {
 	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);

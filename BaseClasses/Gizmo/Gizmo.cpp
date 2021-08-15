@@ -34,7 +34,6 @@ namespace tem {
 		app::GameObject__ctor(GizmoHandle, string_new("GizmoHandle"), NULL);
 		app::GameObject_set_layer(GizmoHandle, 11, NULL);
 
-
 		app::Type* typeSelectable = GetType("UnityEngine.UI", "Selectable");
 		app::Type* typeImage = GetType("UnityEngine.UI", "Image");
 		app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
@@ -529,9 +528,16 @@ namespace tem {
 
 	void tem::Gizmo::SetFreeze(bool value)
 	{
-		app::GameObject_set_active(ToolbarSelectablesObjects[0], !value, NULL);
-		app::GameObject_set_active(ToolbarSelectablesObjects[1], value, NULL);
-		app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, value, NULL);
-		app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, value, NULL);
+		if (app::GameObject_get_active(ToolbarSelectablesObjects[0], NULL) != value)
+			app::GameObject_set_active(ToolbarSelectablesObjects[0], !value, NULL);
+
+		if (app::GameObject_get_active(ToolbarSelectablesObjects[1], NULL) != !value)
+			app::GameObject_set_active(ToolbarSelectablesObjects[1], value, NULL);
+
+		if (app::SeinController_get_IsSuspended(MDV::MoonSein->fields.Controller, NULL) != !value)
+			app::SeinController_set_IsSuspended(MDV::MoonSein->fields.Controller, value, NULL);
+
+		if (app::CharacterPlatformMovement_get_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, NULL) != !value)
+			app::CharacterPlatformMovement_set_IsSuspended(MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement, value, NULL);
 	}
 }

@@ -24,6 +24,7 @@
 #include <filesystem>
 
 #define IL2CPP true
+#define WOTWMODDING false
 
 //app::Array_Resize_35();
 
@@ -131,12 +132,16 @@ void InitializeDLL()
 	sceneManager = (*app::Scenes__TypeInfo)->static_fields->Manager;
 	TemSceneHelper::SceneManager = sceneManager;
 
+	(*app::SavePedestal__TypeInfo)->static_fields->All->fields._items->vector[0];
+
+#if WOTWMODDING == true
 	tem::UIEvents::Instance = new tem::UIEvents();
 	tem::Gizmo::Instance.SetupGizmo();
-	//MDV::AllObjectsToCallUpdate.push_back(&tem::Gizmo::Instance); One of these causes weapon wheels pause to not effect Ori
+	MDV::AllObjectsToCallUpdate.push_back(&tem::Gizmo::Instance);
 	tem::CollisionCreator::Instance = tem::CollisionCreator();
 	tem::CollisionCreator::Instance.AddCollisionToolbar();
-	//MDV::AllObjectsToCallUpdate.push_back(&tem::CollisionCreator::Instance); One of these causes weapon wheels pause to not effect Ori
+	MDV::AllObjectsToCallUpdate.push_back(&tem::CollisionCreator::Instance);
+#endif
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -237,6 +242,8 @@ void InitializeDLL()
 		app::TimelineEntity_StartPlayback((app::TimelineEntity*)allTimelines->fields._items->vector[i], NULL);
 	}*/
 
+	//UberStateManager::AddUberStates(192, 123456, true);
+
 	MANAGER_INITIALIZED = 1;
 }
 
@@ -289,11 +296,13 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			TransformSetPosition((app::GameObject*)savePedestalObject, MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);*/
 		}
 
+#if WOTWMODDING == true
 		if (HAS_LOADED_WORLD == false && HasLoadedWorldData.valid() && HasLoadedWorldData.wait_for(span) == std::future_status::ready)
 		{
 			HAS_LOADED_WORLD = true;
 			tem::SceneList::SetLoadedHierarchyData();
 		}
+#endif
 
 		if (SetupsAreDone == true)
 		{
@@ -691,6 +700,8 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 				case MessageType::SetOriVisuals: SeinVisualEditor::ManagerLoaded = true; SeinVisualEditor::VisualSettingsUpdated.ResetBooleans(); SeinVisualEditor::LoadJsonFile(message.second.Content); SeinVisualEditor::SetAllVisuals(); break;
 				case MessageType::ResetOriVisuals: SeinVisualEditor::VisualSettingsUpdated.ResetBooleans(); SeinVisualEditor::ResetAllVisuals(); break;
+				
+#if WOTWMODDING == true
 				case MessageType::GetSceneHierarchy: tem::SceneList::Initialize(); MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetSceneHierarchy)) + "|" + tem::SceneList::RootHierarchy.ToString()); break;
 
 				case MessageType::SetSelectedGameObject:
@@ -913,6 +924,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					}
 				}
 				break;
+#endif
 			}
 
 			if (futureExists == false)
