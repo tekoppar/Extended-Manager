@@ -24,7 +24,7 @@
 #include <filesystem>
 
 #define IL2CPP true
-#define WOTWMODDING false
+#define WOTWMODDING true
 
 //app::Array_Resize_35();
 
@@ -38,22 +38,22 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "CPPBeDumb.h"
 #include "Manager.h"
 #include "ManagerDef.h"
+#include "MessageHelper.h"
+
+#if !defined(_WOTW_VISUAL_EDITOR)
+#include "SeinCharacterHelper.h"
 #include "RaceManager.h"
 #include "AreaMapManager.h"
 #include "GraphDrawer.h"
 #include "DebugDrawer.h"
 #include "CreateUI.h"
-#include "SeinCharacterHelper.h"
 #include "TemSceneHelper.h"
-#include "MessageHelper.h"
 #include "MoonAnimationHelper.h"
 #include "TemSocket.h"
 #include "GhostHandler.h"
 #include "TemRecorder.h"
 #include "UberStateManager.h"
 #include "SavesHelper.h"
-#include "SeinVisualEditor.h"
-#include "SimpleJson.h"
 #include "Component.h"
 #include "SceneObject.h"
 #include "SceneHierarchy.h"
@@ -64,6 +64,12 @@ extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
 #include "CollisionCreator.h"
 #include "Gizmo.h"
 #include "UIEvents.h"
+#include "Helper Classes/Playback/Input.h"
+#include "Helper Classes/Playback/InputPlayback.h"
+#endif
+
+#include "SimpleJson.h"
+#include "SeinVisualEditor.h"
 
 static int MANAGER_INITIALIZED = -1;
 static bool WRITE_THREAD_EXITED = false;
@@ -75,19 +81,23 @@ bool flipFlopTest = false;
 
 MessageManager MessagesManager;
 AreaMapManager areaMapManager;
+#if !defined(_WOTW_VISUAL_EDITOR)
 Graph graphDrawerDebug;
 RaceManager raceManager = RaceManager();
+#endif
 
 unsigned long long totalFrames = 0;
 
 std::chrono::high_resolution_clock::time_point ProgramStart = std::chrono::high_resolution_clock::now();
 std::chrono::high_resolution_clock::time_point LastTime;
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 app::Ku* kuRide = nullptr;
 app::MoonGuid* willowPowlBackgroundGUID = nullptr;
 app::GameObject* HitboxDebug = nullptr;
 
 FrameStep frameStep;
+#endif
 bool loopBool = true;
 bool IsWritingToMessageString = false;
 
@@ -97,10 +107,14 @@ DWORD pid;
 HANDLE hProcess;
 std::string managerPath = "";
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 std::future<bool> HasLoadedScenes;
 std::future<bool> HasLoadedWorldData;
+#endif
 bool SetupsAreDone = false;
 std::chrono::milliseconds span(1);
+
+std::vector<std::string> playbackInputs = {};
 
 app::String* string_new(const char* str)
 {
@@ -118,22 +132,27 @@ void InitializeDLL()
 	tem::LOWPTRVALUE = ((std::uintptr_t)assemblyClass->image) - 2199999999;
 	tem::HIGHPTRVALUE = ((std::uintptr_t)assemblyClass->image) + 2791794593265;
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 	MDV::MoonGameWorld = (*app::GameWorld__TypeInfo)->static_fields->Instance;// GetGameWorld(hProcess);
 	MDV::MoonGameController = (*app::GameController__TypeInfo)->static_fields->Instance; // GetGameController(hProcess);
 	MDV::MoonCamera = (app::Camera*)GetComponentByTypeInChildren(MDV::MoonGameController->fields.m_systemsGameObject, "UnityEngine", "Camera");
 	MDV::SeinGameplayCamera = (app::GameplayCamera*)GetComponentByTypeInChildren(MDV::MoonGameController->fields.m_systemsGameObject, "", "GameplayCamera");
+#endif
 	MDV::MoonSein = app::Characters_get_Sein(NULL);// GetSeinCharacter(hProcess);
+#if !defined(_WOTW_VISUAL_EDITOR)
 	MDV::SeinPlayAnimationController = MDV::MoonSein->fields.Controller->fields.m_playAnimationController;
 	MDV::AreaMapUI = (*app::AreaMapUI__TypeInfo)->static_fields->Instance;
+#endif
 
 	auto rectClass = GetClass<>("UnityEngine", "Rect");
 	il2cpp_runtime_class_init((Il2CppClass*)rectClass);
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 	sceneManager = (*app::Scenes__TypeInfo)->static_fields->Manager;
 	TemSceneHelper::SceneManager = sceneManager;
+#endif
 
-	(*app::SavePedestal__TypeInfo)->static_fields->All->fields._items->vector[0];
-
+#if !defined(_WOTW_VISUAL_EDITOR)
 #if WOTWMODDING == true
 	tem::UIEvents::Instance = new tem::UIEvents();
 	tem::Gizmo::Instance.SetupGizmo();
@@ -218,10 +237,12 @@ void InitializeDLL()
 
 	TemSceneHelper::InitializeSceneNodes();
 	TemSceneHelper::FillUberPoolGroups();
+#endif
 
 	app::Vector3__Boxed* myVector3 = (app::Vector3__Boxed*)il2cpp_object_new((Il2CppClass*)(*app::Vector3__TypeInfo));
 	app::Vector3__ctor(myVector3, -612.0f, -4318.0f, 0.0f, NULL);
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 	auto scenes = TemSceneHelper::GetScenesAtPosition(myVector3->fields);
 	app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
 
@@ -229,20 +250,14 @@ void InitializeDLL()
 	TemSceneHelper::LoadScenes(scenes);
 	HasLoadedScenes = std::async(TemSceneHelper::IsScenesLoaded, scenes, false);
 	//MDV::User.Initialize();
+#endif
 
 	app::SimpleFPS* simpleFPS = (*app::SimpleFPS__TypeInfo)->static_fields->Instance;
 	app::Behaviour_set_enabled((app::Behaviour*)simpleFPS, false, NULL);
 
-	app::PlayerInput* playerInput = (*app::PlayerInput__TypeInfo)->static_fields->Instance;
-
-	/*app::List_1_Moon_Timeline_MoonTimeline_* allTimelines = (*app::MoonTimeline__TypeInfo)->static_fields->All;
-	
-	for (int i = 0; i < allTimelines->fields._size; i++)
-	{
-		app::TimelineEntity_StartPlayback((app::TimelineEntity*)allTimelines->fields._items->vector[i], NULL);
-	}*/
-
 	//UberStateManager::AddUberStates(192, 123456, true);
+	//InputPlayback::_Instance = InputPlayback();
+	//MDV::AllObjectsToCallUpdate.push_back(&InputPlayback::_Instance);
 
 	MANAGER_INITIALIZED = 1;
 }
@@ -257,15 +272,24 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 	else
 	{
 		MDV::CanCallMethods = true;
+#if !defined(_WOTW_VISUAL_EDITOR)
 		TemSceneHelper::CanCallMethods = true;
+#endif
 		MDV::ValidatePointers();
 
 		totalFrames++;
+#if !defined(_WOTW_VISUAL_EDITOR)
 		raceManager.totalFrames = totalFrames;
+#endif
 
-		if (MANAGER_INITIALIZED == 1 && SetupsAreDone == false && HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready)
+		if (MANAGER_INITIALIZED == 1 && SetupsAreDone == false
+#if !defined(_WOTW_VISUAL_EDITOR)
+			&& HasLoadedScenes.valid() && HasLoadedScenes.wait_for(span) == std::future_status::ready
+#endif
+			)
 		{
 			//app::SceneRoot* sceneRoot = app::ScenesManager_RegisterSceneByName(sceneManager, string_new("Test1234"), false, true, NULL);
+#if !defined(_WOTW_VISUAL_EDITOR)
 			app::RuntimeSceneMetaData* raceScene = TemSceneHelper::GetSceneByName("inkwaterMarshRaceSetups");
 
 			for (int i = 0; i < sceneManager->fields.ActiveScenes->fields._size; i++)
@@ -276,11 +300,14 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					break;
 				}
 			}
+#endif
 
 			MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::ManagerInitialized)));
+#if !defined(_WOTW_VISUAL_EDITOR)
 			AnimationHelper::GetAnimations();
 			raceManager.racePath = managerPath + "\\RaceSettings\\";
 			raceManager.SetupManager();
+#endif
 			SetupsAreDone = true;
 
 			//app::ScenesManager* scenesManager = (*app::Scenes__TypeInfo)->static_fields->Manager;
@@ -296,12 +323,14 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			TransformSetPosition((app::GameObject*)savePedestalObject, MDV::MoonSein->fields.PlatformBehaviour->fields.PlatformMovement->fields.m_oldPosition);*/
 		}
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 #if WOTWMODDING == true
 		if (HAS_LOADED_WORLD == false && HasLoadedWorldData.valid() && HasLoadedWorldData.wait_for(span) == std::future_status::ready)
 		{
 			HAS_LOADED_WORLD = true;
 			tem::SceneList::SetLoadedHierarchyData();
 		}
+#endif
 #endif
 
 		if (SetupsAreDone == true)
@@ -317,11 +346,27 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			}
 		}
 
+		/*std::vector<std::string> scenePath = {"interactives", "bubblemakerTar (1)"};
+		app::GameObject* foundObject = GetComponentByScenePath("petrifiedForestTarBubbleExposition", scenePath);
+
+		if (foundObject != nullptr)
+		{
+			app::Bubblemaker* bubblemaker = (app::Bubblemaker*)GetComponentByType(foundObject, "", "Bubblemaker");
+
+			std::string bubblemakerName = GetGameObjectName(foundObject);
+
+			if (bubblemaker != nullptr)
+			{
+				float bubbleTime = bubblemaker->fields.m_spawnTimer;
+				MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::ShowInfo)) + "|" + std::to_string(bubbleTime));
+			}
+		}*/
+
 		LastTime = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds timeSpan = std::chrono::duration_cast<std::chrono::milliseconds>(LastTime - ProgramStart);
 		ProgramStart = LastTime;
 
-		app::Dictionary_2_SmartInput_IButtonInput_Core_Input_InputButtonProcessor_* inputs = (*app::PlayerInput__TypeInfo)->static_fields->Instance->fields.m_InputProcessorPairs;
+		/*app::Dictionary_2_SmartInput_IButtonInput_Core_Input_InputButtonProcessor_* inputs = (*app::PlayerInput__TypeInfo)->static_fields->Instance->fields.m_InputProcessorPairs;
 
 		for (int i = 0; i < inputs->fields.count; i++)
 		{
@@ -330,7 +375,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 			//app::Input_InputButtonProcessor_Update(inputs->fields.entries->vector[i].value, flipFlopTest, NULL);
 		}
 
-		flipFlopTest = !flipFlopTest;
+		flipFlopTest = !flipFlopTest;*/
 
 		std::unordered_map<MessageType, Message> messages = MessagesManager.GetMessages();
 		for (auto& message : messages)
@@ -361,11 +406,12 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 
 			switch (message.second.Type)
 			{
-
+#if !defined(_WOTW_VISUAL_EDITOR)
 				case MessageType::CreateCheckpoint:
 				{
 					tCreateCheckpoint oCreateCheckpoint = tCreateCheckpoint(Assembly_BaseAddr + 0x997230);
-					if (oCreateCheckpoint != nullptr) {
+					if (oCreateCheckpoint != nullptr)
+					{
 
 						if (MDV::MoonGameController != nullptr)
 							app::GameController_CreateCheckpointWithSave(MDV::MoonGameController, NULL); // oCreateCheckpoint(pGameController);
@@ -377,18 +423,20 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				case MessageType::StopRecorder: raceManager.TemGhostRecorder.StopRecorder(); break;
 				case MessageType::WriteRecorder: raceManager.TemGhostRecorder.WriteRecorder(sutil::ReplaceSR(sutil::getexepath(), "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost"));  break;
 				case MessageType::GhostPlayerRun: GhostHandler::CreateGhostPublic(sutil::ReplaceSR(sutil::getexepath(), "oriwotw.exe", "oriwotw_Data\\output\\ghosts\\test.ghost")); raceManager.startedWeRacing = totalFrames; break;
-
+#endif
 				case MessageType::EndThread:
 				{
+#if !defined(_WOTW_VISUAL_EDITOR)
 #ifdef TEMSOCKET
 					TemSocket::IsConnected = false;
 #endif
 					SeinCharacterHelper::RestoreSeinAbilities();
 					GhostHandler::Instance.Cleanup();
+#endif
 					loopBool = false;
 				}
 				break;
-
+#if !defined(_WOTW_VISUAL_EDITOR)
 				case MessageType::FrameStep: frameStep.State = FrameStepping::FrameSteppingEnabled; break;
 				case MessageType::CreateRaceCheckpoint:
 				{
@@ -401,7 +449,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				}
 				break;
 
-				case MessageType::CreateScene: 
+				case MessageType::CreateScene:
 				{
 					if (tem::ObjectCreator::temScene1RuntimeMetaData == nullptr)
 					{
@@ -411,7 +459,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					}
 				}
 				break;
-				
+
 				case MessageType::RunRace:
 				{
 					raceManager.CheckHash();
@@ -523,7 +571,10 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				}
 				break;
 
-				case MessageType::KuDash: if (kuRide != nullptr && kuRide->fields.Abilities->fields.Dash != nullptr) { app::KuDash_TryPerformDash(kuRide->fields.Abilities->fields.Dash, NULL); } break;
+				case MessageType::KuDash: if (kuRide != nullptr && kuRide->fields.Abilities->fields.Dash != nullptr)
+				{
+					app::KuDash_TryPerformDash(kuRide->fields.Abilities->fields.Dash, NULL);
+				} break;
 
 				case MessageType::UpdateRaceCheckpoint:
 				{
@@ -540,9 +591,14 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					}
 				}
 				break;
-
-				case MessageType::SetManagerPath: ManagerPath = managerPath = message.second.Content; raceManager.racePath = managerPath + "\\RaceSettings\\"; break;
-
+#endif
+				case MessageType::SetManagerPath:
+					ManagerPath = managerPath = message.second.Content;
+#if !defined(_WOTW_VISUAL_EDITOR)
+					raceManager.racePath = managerPath + "\\RaceSettings\\";
+#endif
+					break;
+#if !defined(_WOTW_VISUAL_EDITOR)
 				case MessageType::ToggleDebugObjects: DebugDrawer::Instance.toggleDebugObjects = !DebugDrawer::Instance.toggleDebugObjects; DebugDrawer::Instance.ToggleDebugObjects(); break;
 
 				case MessageType::UpdateHitbox:
@@ -572,7 +628,10 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				}
 				break;
 
-				case MessageType::RemoveHitbox: if (HitboxDebug != nullptr) { app::Object_1_Destroy_1((app::Object_1*)HitboxDebug, NULL); HitboxDebug = nullptr; } break;
+				case MessageType::RemoveHitbox: if (HitboxDebug != nullptr)
+				{
+					app::Object_1_Destroy_1((app::Object_1*)HitboxDebug, NULL); HitboxDebug = nullptr;
+				} break;
 
 				case MessageType::RestartRace: raceManager.RestartRace(); break;
 
@@ -583,7 +642,8 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						auto scenes = TemSceneHelper::GetScenesAtPosition(raceManager.StartPosition);
 						auto scenes1 = TemSceneHelper::GetScenesAtPosition(raceManager.FinishPosition);
 
-						if (scenes.size() > 0 && scenes1.size() > 0) {
+						if (scenes.size() > 0 && scenes1.size() > 0)
+						{
 							std::vector<TemSceneNode> scenesFound = TemSceneHelper::GetScenePathByName(sutil::convert_csstring(scenes[0]->fields.Scene), sutil::convert_csstring(scenes1[0]->fields.Scene));
 							std::vector<app::RuntimeSceneMetaData*> scenesToLoad = TemSceneHelper::GetScenesByTemSceneNode(scenesFound);
 						}
@@ -685,7 +745,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 								backupsaveInfo += sutil::convert_csstring(backupsave->fields.SaveSlotInfo->fields.AreaName) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Completion) + ";";
 								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Health) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxHealth) + ";";
 								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Energy) + "/" + std::to_string(backupsave->fields.SaveSlotInfo->fields.MaxEnergy) + ";";
-								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Order) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Difficulty) + ";";
+								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Order) + ";" + std::to_string((int)backupsave->fields.SaveSlotInfo->fields.Difficulty) + ";";
 								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.Hours) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Minutes) + ":" + std::to_string(backupsave->fields.SaveSlotInfo->fields.Seconds) + ";";
 								backupsaveInfo += std::to_string(backupsave->fields.SaveSlotInfo->fields.DebugOn) + ";" + std::to_string(backupsave->fields.SaveSlotInfo->fields.WasKilled) + ";" + std::to_string(backupSaveInfo->fields.m_backupSlotIndex) + ";";
 
@@ -693,14 +753,15 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 							}
 
 							MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetSaveInfo)) + "|" + backupsaveInfo);
-						}
-					}
-				}
+			}
+		}
+	}
 				break;
-
+#endif
 				case MessageType::SetOriVisuals: SeinVisualEditor::ManagerLoaded = true; SeinVisualEditor::VisualSettingsUpdated.ResetBooleans(); SeinVisualEditor::LoadJsonFile(message.second.Content); SeinVisualEditor::SetAllVisuals(); break;
 				case MessageType::ResetOriVisuals: SeinVisualEditor::VisualSettingsUpdated.ResetBooleans(); SeinVisualEditor::ResetAllVisuals(); break;
-				
+
+#if !defined(_WOTW_VISUAL_EDITOR)
 #if WOTWMODDING == true
 				case MessageType::GetSceneHierarchy: tem::SceneList::Initialize(); MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetSceneHierarchy)) + "|" + tem::SceneList::RootHierarchy.ToString()); break;
 
@@ -801,7 +862,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 				{
 					std::vector<int> sceneHierarchy = tem::StringToIntVector(message.second.Content, ",");
 					MDV::SelectedObject = tem::SceneList::GetGameObjectFromHierarchyIndex(sceneHierarchy);
-					tem::SceneHierarchy* hierarchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(sceneHierarchy);				
+					tem::SceneHierarchy* hierarchy = tem::SceneList::GetSceneHierarchyPtrFromIndex(sceneHierarchy);
 
 					if (MDV::SelectedObject != nullptr)
 					{
@@ -868,7 +929,9 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 						TemSceneHelper::SceneManager->fields.Settings->fields.MinUtilityToPreventUnloading = 2500;
 						TemSceneHelper::SceneManager->fields.Settings->fields.AllowInstantSceneUnloads = false;
 						TemSceneHelper::SceneManager->fields.Settings->fields.DistanceMovedAwayFromSceneBeforeDisabling = 2500;
+#ifdef _WOTW_PATCH_THREE
 						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityBeforeConsideredUneeded = 2500;
+#endif
 						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityToEnableScene = 1800;
 						TemSceneHelper::SceneManager->fields.Settings->fields.MaxUtilityToLoad = 2000;
 
@@ -901,7 +964,7 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 									if (object != nullptr)
 									{
 										TemLogger::Add("Activating and enabling scene: " + il2cppi_to_string(managerScene->fields.MetaData->fields.Scene), LogType::Normal);
-										
+
 										if (app::GameObject_get_moonReady(object, NULL) == false)
 											app::GameObject_set_moonReady(object, true, NULL);
 
@@ -924,6 +987,18 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 					}
 				}
 				break;
+
+				case MessageType::PlaybackInputs:
+					InputPlayback::_Instance.Reset();
+					bool success = InputPlayback::_Instance.ReadPlaybackFile();
+
+					if (success == true)
+					{
+						InputPlayback::_Instance.GenerateInputs();
+						InputPlayback::_Instance.StartPlayback = true;
+}
+					break;
+#endif
 #endif
 			}
 
@@ -936,8 +1011,34 @@ void __fastcall Mine_CClassFunction(void* __this, int edx)
 	}
 
 	MDV::CanCallMethods = false;
+#if !defined(_WOTW_VISUAL_EDITOR)
 	TemSceneHelper::CanCallMethods = false;
+#endif
+
+	//Real_CClassFunction(__this);
+
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_CClassFunction(__this);
+			frameStep.ShouldFrameStep = false;
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_CClassFunction(__this);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_CClassFunction(__this);
+	}
+#elif _WOTW_VISUAL_EDITOR
 	Real_CClassFunction(__this);
+#endif
 }
 
 typedef void(__thiscall* tMoonDriverSystem)(void* __this);
@@ -950,28 +1051,207 @@ void __fastcall Mine_MoonDriverSystem(void* __this, int edx)
 
 void __fastcall My_GameControllerUpdate(void* __this, int edx)
 {
+#if !defined(_WOTW_VISUAL_EDITOR)
 	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
 	{
-		if (frameStep.ShouldFrameStep == true) {
+		if (frameStep.ShouldFrameStep == true)
+		{
 			Real_GameControllerUpdate(__this);
-			frameStep.ShouldFrameStep = false;
 		}
 	}
-	else {
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
 		Real_GameControllerUpdate(__this);
+}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_GameControllerUpdate(__this);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_GameControllerUpdate(__this);
+#endif
+}
+
+void __fastcall My_MoonDriverUpdate(void* __this, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_MoonDriverUpdate(__this);
+		}
 	}
 
-	if (frameStep.State == FrameStepping::IsAutoFrameStepping) {
-		Real_GameControllerUpdate(__this);
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_MoonDriverUpdate(__this);
 	}
 
-	if (frameStep.State == FrameStepping::FrameSteppingDisabled) {
-		Real_GameControllerUpdate(__this);
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_MoonDriverUpdate(__this);
 	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_MoonDriverUpdate(__this);
+#endif
+}
+
+void __fastcall My_MoonDriverFixedUpdate(void* __this, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_MoonDriverFixedUpdate(__this);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_MoonDriverFixedUpdate(__this);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_MoonDriverFixedUpdate(__this);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_MoonDriverFixedUpdate(__this);
+#endif
+}
+
+void __fastcall My_MoonDriverLateUpdate(void* __this, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_MoonDriverLateUpdate(__this);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_MoonDriverLateUpdate(__this);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_MoonDriverLateUpdate(__this);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_MoonDriverLateUpdate(__this);
+#endif
+}
+
+void __fastcall My_MoonDriverTimelineUpdate(void* __this, float deltaTime, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_MoonDriverTimelineUpdate(__this, 16.66666666666667f);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_MoonDriverTimelineUpdate(__this, deltaTime);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_MoonDriverTimelineUpdate(__this, deltaTime);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_MoonDriverTimelineUpdate(__this, deltaTime);
+#endif
+}
+
+void __fastcall My_MoonDriverSystemOnUpdate(void* __this, float deltaTime, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_MoonDriverSystemOnUpdate(__this, 16.66666666666667f);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_MoonDriverSystemOnUpdate(__this, deltaTime);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_MoonDriverSystemOnUpdate(__this, deltaTime);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_MoonDriverSystemOnUpdate(__this, deltaTime);
+#endif
+}
+
+void __fastcall My_UpdateManagerUpdate(void* __this, float deltaTime, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_UpdateManagerUpdate(__this, 16.66666666666667f);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_UpdateManagerUpdate(__this, deltaTime);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_UpdateManagerUpdate(__this, deltaTime);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_UpdateManagerUpdate(__this, deltaTime);
+#endif
+}
+
+void __fastcall My_UnityPlayerLoop(void* __this, int edx)
+{
+#if !defined(_WOTW_VISUAL_EDITOR)
+	if (frameStep.State == FrameStepping::FrameSteppingEnabled)
+	{
+		if (frameStep.ShouldFrameStep == true)
+		{
+			Real_UnityPlayerLoop(__this);
+		}
+	}
+
+	if (frameStep.State == FrameStepping::IsAutoFrameStepping)
+	{
+		Real_UnityPlayerLoop(__this);
+	}
+
+	if (frameStep.State == FrameStepping::FrameSteppingDisabled)
+	{
+		Real_UnityPlayerLoop(__this);
+	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_UnityPlayerLoop(__this);
+#endif
 }
 
 void __fastcall My_SeinOnKill(void* __this, int edx)
 {
+#if !defined(_WOTW_VISUAL_EDITOR)
 	if (raceManager.IsRacing == false)
 	{
 		Real_SeinOnKill(__this);
@@ -980,12 +1260,24 @@ void __fastcall My_SeinOnKill(void* __this, int edx)
 	{
 		raceManager.RestartRace();
 	}
+#elif _WOTW_VISUAL_EDITOR
+	Real_SeinOnKill(__this);
+#endif
 }
 
-void ReadString(char* output) {
+int dashCount = 0;
+
+void __fastcall My_PlayerInputFixedUpdate(void* __this, int edx)
+{
+	Real_tPlayerInputFixedUpdate(__this);
+}
+
+void ReadString(char* output)
+{
 	ULONG read = 0;
 	int index = 0;
-	do {
+	do
+	{
 		ReadFile(fileHandle, output + index++, 1, &read, NULL);
 	} while (read > 0 && *(output + index - 1) != 0 && fileHandle && loopBool);
 }
@@ -1017,29 +1309,79 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	mov rbx,rcx
 	xor esi,esi
 	*/
+#ifdef _WOTW_PATCH_THREE
 	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x692380);// patch 1.3 0x6920c0);// patch 1.2 +0x994520);
-	Real_MoonDriverSystem = tMoonDriverSystem(Assembly_BaseAddr + 0xE463C0);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	Real_CClassFunction = CClassFunction_t(Assembly_BaseAddr + 0x00994520);// patch 1.3 0x6920c0);// patch 1.2 +0x994520);
+#endif
+	//Real_MoonDriverSystem = tMoonDriverSystem(Assembly_BaseAddr + 0xE463C0);
 	/* For finding GameAssembly.il2cpp_string_new <- goto adress subtract gameassembly.dll location
 	mov rdx,FFFFFFFFFFFFFFFF
 	inc rdx
 	cmp byte ptr [rcx+rdx],00
 	jne 7FFD7B303B57
 	*/
+
+#ifdef _WOTW_PATCH_THREE
 	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x279550); // patch 1.3 +0x279570); patch 1.2 0x263B50);
-	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x6EAAE0); // patch 1.3 0x01F2B430);
-	Real_GameControllerUpdate = tGameControllerUpdate(UnityPlayer_BaseAddress + 0x692380);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x6EAAE0); // patch 1.3 0x01F2B430); 0x692380
+	//Real_tPlayerInputFixedUpdate = tPlayerInputFixedUpdate(Assembly_BaseAddr + 0x1416A40);
+	Real_GameControllerUpdate = tGameControllerUpdate(Assembly_BaseAddr + 0x00691E00);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_MoonDriverUpdate = tMoonDriverUpdate(Assembly_BaseAddr + 0x0313C6D0);
+	Real_MoonDriverFixedUpdate = tMoonDriverFixedUpdate(Assembly_BaseAddr + 0x0313C7B0);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_MoonDriverLateUpdate = tMoonDriverLateUpdate(Assembly_BaseAddr + 0x0313C740);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_MoonDriverTimelineUpdate = tMoonDriverTimelineUpdate(Assembly_BaseAddr + 0x0313C820);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_MoonDriverSystemOnUpdate = tMoonDriverSystemOnUpdate(Assembly_BaseAddr + 0x0313D0D0);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_UpdateManagerUpdate = tUpdateManagerUpdate(Assembly_BaseAddr + 0x03137E40);
+
+	Real_UnityPlayerLoop = tUnityPlayerLoop(UnityPlayer_BaseAddress + 0x824700);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	RealIl2cpp_string_new_wrapper = tIl2CppString(Assembly_BaseAddr + 0x263B50); // patch 1.3 +0x279570); patch 1.2 0x263B50);
+	Real_SeinOnKill = tSeinOnKill(Assembly_BaseAddr + 0x00640B50); // patch 1.3 0x01F2B430); 0x692380
+	//Real_tPlayerInputFixedUpdate = tPlayerInputFixedUpdate(Assembly_BaseAddr + 0x1416A40);
+	Real_GameControllerUpdate = tGameControllerUpdate(Assembly_BaseAddr + 0x00994040);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_MoonDriverUpdate = tMoonDriverUpdate(Assembly_BaseAddr + 0x02F374A0);
+	Real_MoonDriverFixedUpdate = tMoonDriverFixedUpdate(Assembly_BaseAddr + 0x02F37580);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_MoonDriverLateUpdate = tMoonDriverLateUpdate(Assembly_BaseAddr + 0x02F37510);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+	Real_MoonDriverTimelineUpdate = tMoonDriverTimelineUpdate(Assembly_BaseAddr + 0x02F375F0);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_MoonDriverSystemOnUpdate = tMoonDriverSystemOnUpdate(Assembly_BaseAddr + 0x02F380C0);// patch 1.3 0x5f0350); //0x994040 gc -  0xA77FA0 sein
+
+	Real_UpdateManagerUpdate = tUpdateManagerUpdate(Assembly_BaseAddr + 0x02F32AF0);
+
+	//TODO missing patch 1.2 offset
+	//Real_UnityPlayerLoop = tUnityPlayerLoop(UnityPlayer_BaseAddress + 0x824700);
+#endif
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)Real_CClassFunction, Mine_CClassFunction);
+	//DetourAttach(&(PVOID&)Real_tPlayerInputFixedUpdate, My_PlayerInputFixedUpdate);
 
 #if defined(IL2CPP)
-	DetourAttach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
+	//DetourAttach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
 	DetourAttach(&(PVOID&)RealIl2cpp_string_new_wrapper, string_new);
 	DetourAttach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
 	DetourAttach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
+
+	//DetourAttach(&(PVOID&)Real_MoonDriverUpdate, My_MoonDriverUpdate);
+	//DetourAttach(&(PVOID&)Real_MoonDriverFixedUpdate, My_MoonDriverFixedUpdate);
+	//DetourAttach(&(PVOID&)Real_MoonDriverLateUpdate, My_MoonDriverLateUpdate);
+	//DetourAttach(&(PVOID&)Real_MoonDriverTimelineUpdate, My_MoonDriverTimelineUpdate);
+
+	//DetourAttach(&(PVOID&)Real_MoonDriverSystemOnUpdate, My_MoonDriverSystemOnUpdate);
+
+	//DetourAttach(&(PVOID&)Real_UpdateManagerUpdate, My_UpdateManagerUpdate);
+
+	//DetourAttach(&(PVOID&)Real_UnityPlayerLoop, My_UnityPlayerLoop);
 	LONG lError = DetourTransactionCommit();
 
 	if (lError == NO_ERROR)
@@ -1072,6 +1414,13 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 
 	std::string managerExeName = "ExtendedManager.exe";
 	DWORD proccessID = FindProcessId(managerExeName);
+
+	if (proccessID == 0)
+	{
+		managerExeName = "WotwVisualEditor.exe";
+		proccessID = FindProcessId(managerExeName);
+	}
+
 	char* buffer = new char[512];
 	READ_THREAD_DONE = true;
 
@@ -1136,6 +1485,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 							newMessage.TypeInt = std::stoi(message);
 						}
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 						if (newMessage.Type == MessageType::FrameStep)
 						{
 							frameStep.ShouldFrameStep = true;
@@ -1157,17 +1507,21 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 								int faces = app::SeinCharacter_get_FacingDirection(MDV::MoonSein, NULL);
 								MDV::MessageToWrite.push_back(std::to_string(static_cast<int>(MessageType::GetSeinFaces)) + "|" + std::to_string(faces));
 							}
-						}
+					}
+#endif
 
 						MessagesManager.AddMessage(newMessage);
-					}
 				}
+			}
 			}
 		}
 		IsWritingToMessageString = false;
-	}
+		}
+
+#if !defined(_WOTW_VISUAL_EDITOR)
 	frameStep.State = FrameStepping::FrameSteppingDisabled;
 	frameStep.ShouldFrameStep = false;
+#endif
 
 	while (MessagesManager.Messages.size() > 0)
 	{
@@ -1193,21 +1547,44 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 	TemLogger::Logger.Cleanup();
 	MDV::AllObjectsToCallUpdate.clear();
 
+#if !defined(_WOTW_VISUAL_EDITOR)
 	graphDrawer.Destroy();
+#endif
 	SeinVisualEditor::Cleanup();
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourDetach(&(PVOID&)Real_CClassFunction, Mine_CClassFunction);
+	//DetourDetach(&(PVOID&)Real_tPlayerInputFixedUpdate, My_PlayerInputFixedUpdate);
 
 #if defined(IL2CPP)
-	DetourDetach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
+	//DetourDetach(&(PVOID&)Real_MoonDriverSystem, Mine_MoonDriverSystem);
 	DetourDetach(&(PVOID&)RealIl2cpp_string_new_wrapper, string_new);
 	DetourDetach(&(PVOID&)Real_SeinOnKill, My_SeinOnKill);
 #endif
 
 	DetourDetach(&(PVOID&)Real_GameControllerUpdate, My_GameControllerUpdate);
-	DetourTransactionCommit();
+
+	//DetourDetach(&(PVOID&)Real_MoonDriverUpdate, My_MoonDriverUpdate);
+	//DetourDetach(&(PVOID&)Real_MoonDriverFixedUpdate, My_MoonDriverFixedUpdate);
+	//DetourDetach(&(PVOID&)Real_MoonDriverLateUpdate, My_MoonDriverLateUpdate);
+	//DetourDetach(&(PVOID&)Real_MoonDriverTimelineUpdate, My_MoonDriverTimelineUpdate);
+
+	//DetourDetach(&(PVOID&)Real_MoonDriverSystemOnUpdate, My_MoonDriverSystemOnUpdate);
+
+	//DetourDetach(&(PVOID&)Real_UpdateManagerUpdate, My_UpdateManagerUpdate);
+
+	//DetourDetach(&(PVOID&)Real_UnityPlayerLoop, My_UnityPlayerLoop);
+	lError = DetourTransactionCommit();
+
+	if (lError == NO_ERROR)
+		sutil::Append("C:\\moon\\manager_error.log", "Read thread detours hooked.\r\n");
+	else if (lError == ERROR_INVALID_DATA)
+		sutil::Append("C:\\moon\\manager_error.log", "Target function was changed by third party between steps of the transaction.\r\n");
+	else if (lError == ERROR_INVALID_OPERATION)
+		sutil::Append("C:\\moon\\manager_error.log", "No pending transaction exists.\r\n");
+	else
+		sutil::Append("C:\\moon\\manager_error.log", "Unkown error:" + std::to_string(lError) + ".\r\n");
 
 	CloseHandle(fileHandle);
 	CloseHandle(fileHandleWrite);
@@ -1219,7 +1596,7 @@ DWORD WINAPI ThreadMain(HMODULE hIns)
 		Sleep(25);
 	}
 	FreeLibraryAndExitThread(hIns, 0);
-}
+		}
 
 DWORD WINAPI ThreadWrite(HMODULE hIns)
 {
@@ -1257,13 +1634,20 @@ recreateFile:
 	std::string messageToSend = "";
 	DWORD proccessID = FindProcessId(managerExeName);
 
+	if (proccessID == 0)
+	{
+		managerExeName = "WotwVisualEditor.exe";
+		proccessID = FindProcessId(managerExeName);
+	}
+
 	while (EXITING_THREAD == false || IsProcessRunning(proccessID) && loopBool)
 	{
 		if (IsWritingToMessageString == false && MDV::MessageToWrite.size() > 0)
 		{
 			messageToSend = "";
 
-			if (MDV::MessageToWrite.size() > 100) {
+			if (MDV::MessageToWrite.size() > 100)
+			{
 				MDV::MessageToWrite.clear();
 			}
 

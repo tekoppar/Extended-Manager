@@ -1,0 +1,16 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(499,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Manager.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  ManagerDef.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  TemSocket.cpp
+  GhostHandler.cpp
+  RaceManager.cpp
+detours.lib(detours.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(detours.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+detours.lib(modules.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(modules.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+detours.lib(disasm.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(disasm.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+  injectdll.vcxproj -> C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\injectdll.dll

@@ -46,9 +46,16 @@ public:
 	static app::GameObject* Button(const std::string& text, int fontSize, app::Color color);
 	static app::GameObject* Button(const std::string& name);
 	static app::Button* Button(app::GameObject* object, const std::string& text, int fontSize, app::Color color);
+#ifdef _WOTW_PATCH_THREE
 	static app::GameObject* TreeItem(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
 	static app::GameObject* VerticalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
 	static app::GameObject* HorizontalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	static app::GameObject* TreeItem(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::UpperLeft);
+	static app::GameObject* VerticalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::UpperLeft);
+	static app::GameObject* HorizontalLayoutGroup(const std::string& name, app::TextAnchor__Enum textAnchor = app::TextAnchor__Enum::UpperLeft);
+#endif
 	static DropdownHorizontal CreateDropdownHorizontal(const std::string& name, const std::string& imagePath);
 	static app::GameObject* RectMask2D(const std::string& name, float minWidth = 10, float minHeight = 10, float preferedWidth = 100, float preferedHeight = 100);
 	static app::GameObject* Text(const std::string& name, const std::string& text, int fontSize, app::Color color);

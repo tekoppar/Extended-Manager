@@ -112,9 +112,17 @@ app::Texture2D* DrawUI::LoadImageFromPath(std::string path, int width, int heigh
 	}
 
 	app::Texture2D* texture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+	
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(texture, width, height, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)texture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)texture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(texture, width, height, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)texture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)texture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	app::ImageConversion_LoadImage_1((app::Texture2D*)texture, byteArr, NULL);
 	app::Texture2D_ApplyImpl((app::Texture2D*)texture, true, true, NULL);
@@ -238,8 +246,14 @@ app::GameObject* DrawUI::TreeItem(const std::string& name, app::TextAnchor__Enum
 	app::HorizontalOrVerticalLayoutGroup_set_childForceExpandHeight((app::HorizontalOrVerticalLayoutGroup*)newObject, false, NULL);
 
 	app::ContentSizeFitter* newContentSizeFitter = (app::ContentSizeFitter*)app::GameObject_AddComponent((app::GameObject*)gameObject, typeContentSizeFitter, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
 	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+#endif
 
 	app::LayoutGroup_set_childAlignment((app::LayoutGroup*)newObject, textAnchor, NULL);
 
@@ -260,8 +274,14 @@ app::GameObject* DrawUI::VerticalLayoutGroup(const std::string& name, app::TextA
 	app::HorizontalOrVerticalLayoutGroup_set_childForceExpandHeight((app::HorizontalOrVerticalLayoutGroup*)newObject, false, NULL);
 
 	app::ContentSizeFitter* newContentSizeFitter = (app::ContentSizeFitter*)app::GameObject_AddComponent((app::GameObject*)gameObject, typeContentSizeFitter, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
 	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+#endif
 
 	app::LayoutGroup_set_childAlignment((app::LayoutGroup*)newObject, textAnchor, NULL);
 
@@ -420,7 +440,12 @@ app::GameObject* DrawUI::Scrollbar(app::GameObject* rectHandle, const std::strin
 	app::Scrollbar_set_handleRect(scrollbar, (app::RectTransform*)scrollbarImageTransform, NULL);
 	app::Scrollbar_set_size(scrollbar, 0.01f, NULL);
 	app::Scrollbar_set_value(scrollbar, 0.0f, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::Scrollbar_set_direction(scrollbar, app::Scrollbar_Direction__Enum::Scrollbar_Direction__Enum_LeftToRight, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Scrollbar_set_direction(scrollbar, app::Scrollbar_Direction__Enum::LeftToRight, NULL);
+#endif
 
 	return gameObject;
 }
@@ -555,10 +580,18 @@ DropdownHorizontal DrawUI::CreateDropdownHorizontal(const std::string& name, con
 	app::HorizontalOrVerticalLayoutGroup_set_childForceExpandHeight((app::HorizontalOrVerticalLayoutGroup*)newObject, false, NULL);
 
 	app::ContentSizeFitter* newContentSizeFitter = (app::ContentSizeFitter*)app::GameObject_AddComponent((app::GameObject*)dropdownHorizontal.DropdownObject, typeContentSizeFitter, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
 	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::ContentSizeFitter_FitMode__Enum_PreferredSize, NULL);
 
 	app::LayoutGroup_set_childAlignment((app::LayoutGroup*)newObject, app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::ContentSizeFitter_set_horizontalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+	app::ContentSizeFitter_set_verticalFit(newContentSizeFitter, app::ContentSizeFitter_FitMode__Enum::PreferredSize, NULL);
+
+	app::LayoutGroup_set_childAlignment((app::LayoutGroup*)newObject, app::TextAnchor__Enum::UpperLeft, NULL);
+#endif
 
 	dropdownHorizontal.FoldSelectableObject = DrawUI::Selectable("FoldSelectable");
 	app::Texture2D* image = DrawUI::LoadImageFromPath(imagePath, 64, 64);
@@ -568,7 +601,12 @@ DropdownHorizontal DrawUI::CreateDropdownHorizontal(const std::string& name, con
 	RectTransformSetMinMax(dropdownHorizontal.DropdownObject, tem::Vector2(0.0f, 1.0f), tem::Vector2(0.0f, 1.0f));
 	RectTransformSetPivot(dropdownHorizontal.DropdownObject, tem::Vector2(0.0f, 1.0f));
 
+#ifdef _WOTW_PATCH_THREE
 	dropdownHorizontal.DropdownChildren = DrawUI::HorizontalLayoutGroup("DropdownChildren", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	dropdownHorizontal.DropdownChildren = DrawUI::HorizontalLayoutGroup("DropdownChildren", app::TextAnchor__Enum::UpperLeft);
+#endif
 	dropdownHorizontal.DropdownChildrenLayout = (app::HorizontalLayoutGroup*)app::GameObject_GetComponent(dropdownHorizontal.DropdownChildren, typeHorizontalLayoutGroup, NULL);
 
 	TransformSetParent(dropdownHorizontal.DropdownChildren, dropdownHorizontal.DropdownObject);
@@ -587,7 +625,12 @@ TreeItemStruct DrawUI::CreateTreeItem(const std::string& name)
 	app::Type* typeLayoutElement = GetType("UnityEngine.UI", "LayoutElement");
 
 	treeStruct.TreeItemObject = DrawUI::TreeItem("TreeRoot");
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* treeItemHeader = DrawUI::HorizontalLayoutGroup("TreeItemHeader", app::TextAnchor__Enum::TextAnchor__Enum_UpperCenter);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* treeItemHeader = DrawUI::HorizontalLayoutGroup("TreeItemHeader", app::TextAnchor__Enum::UpperCenter);
+#endif
 	treeStruct.TreeItemObjectLayout = (app::VerticalLayoutGroup*)app::GameObject_GetComponent(treeItemHeader, typeVerticalLayoutGroup, NULL);
 	treeStruct.FoldButtonObject = DrawUI::Button("X", 14, tem::Vector4(0.0f, 0.0f, 0.0f, 1.0f).ToColor());
 	treeStruct.ObjectButtonObject = DrawUI::Button(name, 14, tem::Vector4(0.0f, 0.0f, 0.0f, 1.0f).ToColor());
@@ -604,7 +647,12 @@ TreeItemStruct DrawUI::CreateTreeItem(const std::string& name)
 	RectTransformSetMinMax(treeItemHeader, tem::Vector2(0.0f, 1.0f), tem::Vector2(0.0f, 1.0f));
 	RectTransformSetPivot(treeItemHeader, tem::Vector2(0.0f, 1.0f));
 
+#ifdef _WOTW_PATCH_THREE
 	treeStruct.ChildrenTree = DrawUI::VerticalLayoutGroup("TreeItemChildren", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	treeStruct.ChildrenTree = DrawUI::VerticalLayoutGroup("TreeItemChildren", app::TextAnchor__Enum::UpperLeft);
+#endif
 	treeStruct.TreeItemChildrenLayout = (app::VerticalLayoutGroup*)app::GameObject_GetComponent(treeStruct.ChildrenTree, typeVerticalLayoutGroup, NULL);
 	app::RectOffset_set_left(treeStruct.TreeItemChildrenLayout->fields._._.m_Padding, 12.0, NULL);
 

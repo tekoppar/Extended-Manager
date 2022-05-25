@@ -8,7 +8,13 @@
 #include <iomanip>
 #include <unordered_map>
 
+#ifdef _WOTW_PATCH_THREE
 #include "il2cpp-metadata-version.h"
+#endif
+
+#ifdef _WOTW_PATCH_TWO
+#include "../appdata_1_2/il2cpp-metadata-version.h"
+#endif
 
 // Helper function to get the module base address
 uintptr_t il2cppi_get_base_address();
@@ -31,7 +37,8 @@ void utf8_to_utf16(const std::string& utf8, std::u16string& utf16);
 #endif
 
 // Helper function to check if a metadata usage pointer is initialized
-template<typename T> bool il2cppi_is_initialized(T* metadataItem) {
+template<typename T> bool il2cppi_is_initialized(T* metadataItem)
+{
 #if __IL2CPP_METADATA_VERISON < 270
 	return *metadataItem != 0;
 #else
@@ -41,7 +48,8 @@ template<typename T> bool il2cppi_is_initialized(T* metadataItem) {
 }
 
 // Helper function to convert a pointer to hex
-template<typename T> std::string to_hex_string(T i) {
+template<typename T> std::string to_hex_string(T i)
+{
 	std::stringstream stream;
 	stream << "0x" << std::setfill('0') << std::setw(sizeof(T) * 2) << std::hex << i;
 	return stream.str();

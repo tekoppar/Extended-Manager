@@ -1,0 +1,6 @@
+﻿cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Manager.cpp
+detours.lib(detours.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(detours.obj)' or at 'C:\Users\Tekoppar\Desktop\ExtendedManager\bin\detours.pdb'; linking object as if no debug info
+detours.lib(modules.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(modules.obj)' or at 'C:\Users\Tekoppar\Desktop\ExtendedManager\bin\detours.pdb'; linking object as if no debug info
+detours.lib(disasm.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(disasm.obj)' or at 'C:\Users\Tekoppar\Desktop\ExtendedManager\bin\detours.pdb'; linking object as if no debug info
+  injectdll.vcxproj -> C:\Users\Tekoppar\Desktop\ExtendedManager\bin\injectdll_patch2.dll

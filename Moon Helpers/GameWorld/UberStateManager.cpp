@@ -13,7 +13,7 @@
 
 bool UberStateManager::RunnerUberStatesSaved = false;
 
-std::string UberGroup::ToString() 
+std::string UberGroup::ToString()
 {
 	std::string s = std::to_string(UberGroupID) + "||:";
 
@@ -82,36 +82,36 @@ void UberGroup::LoadData(std::string data)
 			{
 				switch (i)
 				{
-				case 1:
-				{
-					UberInts[std::stoi(values[x])] = std::stoi(values[x + 1]);
-				}
-				break;
+					case 1:
+					{
+						UberInts[std::stoi(values[x])] = std::stoi(values[x + 1]);
+					}
+					break;
 
-				case 2:
-				{
-					UberFloats[std::stoi(values[x])] = std::stof(values[x + 1]);
-				}
-				break;
+					case 2:
+					{
+						UberFloats[std::stoi(values[x])] = std::stof(values[x + 1]);
+					}
+					break;
 
-				case 3:
-				{
-					UberBools[std::stoi(values[x])] = std::stoi(values[x + 1]);
-				}
-				break;
+					case 3:
+					{
+						UberBools[std::stoi(values[x])] = std::stoi(values[x + 1]);
+					}
+					break;
 
-				case 4:
-				{
-					UberBytes[std::stoi(values[x])] = (std::uint8_t)std::stoi(values[x + 1]);
-				}
-				break;
+					case 4:
+					{
+						UberBytes[std::stoi(values[x])] = (std::uint8_t)std::stoi(values[x + 1]);
+					}
+					break;
 				}
 			}
 		}
 	}
 }
 
-void UberStateManager::SaveUberStates(std::string path) 
+void UberStateManager::SaveUberStates(std::string path)
 {
 	app::UberStateValueStore* uberStates = app::UberStateController_get_CurrentStateValueStore(NULL);
 	std::unordered_map<int, UberGroup> ubergroups;
@@ -133,7 +133,7 @@ void UberStateManager::SaveUberStates(std::string path)
 }
 
 void UberStateManager::LoadUberStates(std::string path)
-{	
+{
 	app::UberStateController_ApplyPendingChanges(NULL);
 	app::UberStateController_ApplyChanges(app::UberStateController_get_Instance(NULL), NULL);
 
@@ -172,7 +172,12 @@ void UberStateManager::LoadUberStates(std::string path)
 		}
 
 		app::UberStateController_SetState(uberStates, NULL);
+#ifdef _WOTW_PATCH_THREE
 		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::UberStateApplyContext__Enum_ValueChanged, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::ValueChanged, NULL);
+#endif
 	}
 }
 
@@ -208,7 +213,12 @@ void UberStateManager::AddUberStates(int UberGroupID, int UberID, bool value)
 		app::Dictionary_2_Moon_UberID_System_Boolean__set_Item(UberStateValueGroup->fields.m_boolStateMap, uberID, value, (*app::Dictionary_2_Moon_UberID_System_Boolean__set_Item__MethodInfo));
 
 		app::UberStateController_SetState(uberStates, NULL);
+#ifdef _WOTW_PATCH_THREE
 		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::UberStateApplyContext__Enum_ValueChanged, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::UberStateController_ApplyAll(app::UberStateApplyContext__Enum::ValueChanged, NULL);
+#endif
 	}
 }
 

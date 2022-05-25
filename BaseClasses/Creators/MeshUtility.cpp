@@ -240,14 +240,30 @@ app::GameObject* MeshUtility::CreateMeshObjectFromFile(std::string filepath)
 	app::GameObject__ctor(gameObject, string_new("MeshObject"), NULL);
 
 	app::Texture2D* collisionTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(collisionTexture, 32, 32, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)collisionTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)collisionTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(collisionTexture, 32, 32, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)collisionTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)collisionTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	FillPixels(collisionTexture, 32, 32, tem::Vector4(1.0f, 1.0f, 1.0f, 1.0f).ToColor());
 	app::Texture2D_Apply_1(collisionTexture, true, NULL);
 
+#ifdef _WOTW_PATCH_THREE
+	//shader found using AssetStudioGUI.exe, the last string is the filename of the shader itself
 	app::Material* material = CreateNewMaterial("Hidden/UberShader/DF362EF066C0701751D3088D28729049"); //calls app::Material__ctor() using the material found app::Shader_Find(standardMatS, NULL); // "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Material* material = CreateNewMaterial("Hidden/UberShader/F5A69BB0739F02A248C520E7108A582F");
+#endif
+
+	if (material == nullptr)
+		return nullptr;
 
 	auto Il2ClassMeshFilter = GetClass("UnityEngine", "MeshFilter");
 	app::Type* MeshFilterType = GetTypeFromClass(Il2ClassMeshFilter);

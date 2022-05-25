@@ -221,7 +221,12 @@ bool TemRecorder::WriteRecorder(std::string filePath, LeaderboardEntryType type,
 		//GhostHandler::WaitingOnLastFrame = true;
 #endif
 		//app::String* MRecorderPath = string_new((ManagerPath + "RaceSettings\\" + "Default").c_str());
+#ifdef _WOTW_PATCH_THREE
 		app::GhostRecorder_WriteToFile(GhostRecorder, GhostRecorder->fields.m_filePath, false, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::GhostRecorder_WriteToFile(GhostRecorder, NULL);
+#endif
 
 		app::String* raceFile = app::GhostRecorder_get_FilePath(GhostRecorder, NULL);
 		std::string raceFileS = sutil::convert_csstring(raceFile);

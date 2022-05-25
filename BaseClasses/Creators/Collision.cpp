@@ -33,10 +33,13 @@ namespace tem {
 		app::List_1_System_Int32___ctor(faces, static_cast<int>(Positions.size() * 2), (*app::List_1_System_Int32___ctor__MethodInfo));
 
 		app::Transform* transform = app::GameObject_get_transform(colliderPreview, NULL);
+
+#ifdef _WOTW_PATCH_THREE
 		Collider->fields._._.m_cachedGameObject = colliderPreview;
 		Collider->fields._._.m_cachedTransform = transform;
 		Collider->fields._._.m_gameObjectCached = true;
 		Collider->fields._._.m_transformCached = true;
+#endif
 		std::vector<tem::Vector3> uvVertexs;
 
 		tem::Vector3 pos1 = Positions[0];

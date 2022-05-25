@@ -13,9 +13,16 @@
 
 std::vector<SeinStateUpdate> SeinCharacterHelper::SeinAbilitiesUpgrades;
 std::vector<SeinStateUpdate> SeinCharacterHelper::SeinAbilitiesStates;
+#ifdef _WOTW_PATCH_THREE
 app::AbilityType__Enum SeinCharacterHelper::BoundAbility1 = app::AbilityType__Enum::AbilityType__Enum_None;
 app::AbilityType__Enum SeinCharacterHelper::BoundAbility2 = app::AbilityType__Enum::AbilityType__Enum_None;
 app::AbilityType__Enum SeinCharacterHelper::BoundAbility3 = app::AbilityType__Enum::AbilityType__Enum_None;
+#endif
+#ifdef _WOTW_PATCH_TWO
+app::AbilityType__Enum SeinCharacterHelper::BoundAbility1 = app::AbilityType__Enum::None;
+app::AbilityType__Enum SeinCharacterHelper::BoundAbility2 = app::AbilityType__Enum::None;
+app::AbilityType__Enum SeinCharacterHelper::BoundAbility3 = app::AbilityType__Enum::None;
+#endif
 SeinRestoreState SeinCharacterHelper::CurrentState = SeinRestoreState::IsEmpty;
 SeinRestoreState SeinCharacterHelper::CurrentShardState = SeinRestoreState::IsEmpty;
 SeinRestoreState SeinCharacterHelper::CurrentBoundAbilitiesState = SeinRestoreState::IsEmpty;
@@ -33,7 +40,7 @@ void SeinCharacterHelper::UpdateSeinStates(std::unordered_map<int, SeinStateUpda
 	for (int i = 0; i < inventoryList->fields._size; i++)
 	{
 		auto item = inventoryList->fields._items->vector[i];
-		tempInventoryMap[item->fields.m_type] = i;
+		tempInventoryMap[(int)item->fields.m_type] = i;
 	}
 
 	for (int i = 0; i < currentAbilities->fields._count; i++)
@@ -90,7 +97,7 @@ void SeinCharacterHelper::SetSeinState(SeinStateUpdate newState)
 	for (int i = 0; i < inventoryList->fields._size; i++)
 	{
 		auto item = inventoryList->fields._items->vector[i];
-		tempInventoryMap[item->fields.m_type] = i;
+		tempInventoryMap[(int)item->fields.m_type] = i;
 	}
 
 	app::PlayerAbilities_SetAbility(MDV::MoonSein->fields.PlayerAbilities, newState.AbilityType, newState.Active, NULL);
@@ -531,6 +538,7 @@ void SeinCharacterHelper::StoreSeinAbilities()
 	seinStateUpdate.Active = app::CharacterAbility_get_HasAbility(MDV::MoonSein->fields.PlayerAbilities->fields.WeaponCharge, NULL);
 	SeinAbilitiesStates.push_back(seinStateUpdate);
 
+#ifdef _WOTW_PATCH_THREE
 	seinStateUpdate.AbilityType = app::AbilityType__Enum::AbilityType__Enum_DamageUpgradeA;
 	seinStateUpdate.Active = app::PlayerAbilities_HasAbility(MDV::MoonSein->fields.PlayerAbilities, app::AbilityType__Enum::AbilityType__Enum_DamageUpgradeA, NULL);
 	SeinAbilitiesStates.push_back(seinStateUpdate);
@@ -538,6 +546,16 @@ void SeinCharacterHelper::StoreSeinAbilities()
 	seinStateUpdate.AbilityType = app::AbilityType__Enum::AbilityType__Enum_DamageUpgradeB;
 	seinStateUpdate.Active = app::PlayerAbilities_HasAbility(MDV::MoonSein->fields.PlayerAbilities, app::AbilityType__Enum::AbilityType__Enum_DamageUpgradeB, NULL);
 	SeinAbilitiesStates.push_back(seinStateUpdate);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	seinStateUpdate.AbilityType = app::AbilityType__Enum::DamageUpgradeA;
+	seinStateUpdate.Active = app::PlayerAbilities_HasAbility(MDV::MoonSein->fields.PlayerAbilities, app::AbilityType__Enum::DamageUpgradeA, NULL);
+	SeinAbilitiesStates.push_back(seinStateUpdate);
+
+	seinStateUpdate.AbilityType = app::AbilityType__Enum::DamageUpgradeB;
+	seinStateUpdate.Active = app::PlayerAbilities_HasAbility(MDV::MoonSein->fields.PlayerAbilities, app::AbilityType__Enum::DamageUpgradeB, NULL);
+	SeinAbilitiesStates.push_back(seinStateUpdate);
+#endif
 
 	SeinCharacterHelper::CurrentState = SeinRestoreState::IsStored;
 }
@@ -553,7 +571,7 @@ void SeinCharacterHelper::RestoreSeinAbilities()
 		for (int i = 0; i < inventoryList->fields._size; i++)
 		{
 			auto item = inventoryList->fields._items->vector[i];
-			tempInventoryMap[item->fields.m_type] = i;
+			tempInventoryMap[(int)item->fields.m_type] = i;
 		}
 
 		for (auto& state : SeinCharacterHelper::SeinAbilitiesStates)
@@ -587,10 +605,10 @@ void SeinCharacterHelper::UpdateSeinAbilitiesUpgradesStates(std::unordered_map<i
 {
 	for (auto state : newStates)
 	{
-		if (AbilityUpgradeToByte.find(state.second.AbilityType) != AbilityUpgradeToByte.end())
+		if (AbilityUpgradeToByte.find((int)state.second.AbilityType) != AbilityUpgradeToByte.end())
 		{
 			char active = state.second.Active == true ? 0x1 : 0x0;
-			int value = AbilityUpgradeToByte.at(state.second.AbilityType);
+			int value = AbilityUpgradeToByte.at((int)state.second.AbilityType);
 			UberStateManager::SetUberState(3440, value, active);
 		}
 	}
@@ -619,10 +637,10 @@ void SeinCharacterHelper::RestoreSeinAbilitiesUpgrades()
 {
 	for (auto state : SeinAbilitiesUpgrades)
 	{
-		if (AbilityUpgradeToByte.find(state.AbilityType) != AbilityUpgradeToByte.end())
+		if (AbilityUpgradeToByte.find((int)state.AbilityType) != AbilityUpgradeToByte.end())
 		{
 			char active = state.Active == true ? 0x1 : 0x0;
-			int value = AbilityUpgradeToByte.at(state.AbilityType);
+			int value = AbilityUpgradeToByte.at((int)state.AbilityType);
 			UberStateManager::SetUberState(3440, value, active);
 		}
 	}
@@ -630,6 +648,7 @@ void SeinCharacterHelper::RestoreSeinAbilitiesUpgrades()
 
 app::AbilityType__Enum SeinCharacterHelper::StringToAbilityType(std::string ability)
 {
+#ifdef _WOTW_PATCH_THREE
 	switch (sutil::hash(ability.data()))
 	{
 	case sutil::hash("None"):
@@ -725,13 +744,118 @@ app::AbilityType__Enum SeinCharacterHelper::StringToAbilityType(std::string abil
 	default:
 		return app::AbilityType__Enum::AbilityType__Enum_None;
 	}
+#endif
+#ifdef _WOTW_PATCH_TWO
+	switch (sutil::hash(ability.data()))
+	{
+		case sutil::hash("None"):
+		{
+			return app::AbilityType__Enum::None;
+		}
+		break;
+
+		case sutil::hash("Sword"):
+		{
+			return app::AbilityType__Enum::Sword;
+		}
+		break;
+
+		case sutil::hash("Bow"):
+		{
+			return app::AbilityType__Enum::Bow;
+		}
+		break;
+
+		case sutil::hash("SpiritSpearSpell"):
+		{
+			return app::AbilityType__Enum::SpiritSpearSpell;
+		}
+		break;
+
+		case sutil::hash("Hammer"):
+		{
+			return app::AbilityType__Enum::Hammer;
+		}
+		break;
+
+		case sutil::hash("ChakramSpell"):
+		{
+			return app::AbilityType__Enum::ChakramSpell;
+		}
+		break;
+
+		case sutil::hash("Grenade"):
+		{
+			return app::AbilityType__Enum::Grenade;
+		}
+		break;
+
+		case sutil::hash("MeditateSpell"):
+		{
+			return app::AbilityType__Enum::MeditateSpell;
+		}
+		break;
+
+		case sutil::hash("FeatherFlap"):
+		{
+			return app::AbilityType__Enum::FeatherFlap;
+		}
+		break;
+
+		case sutil::hash("Blaze"):
+		{
+			return app::AbilityType__Enum::Blaze;
+		}
+		break;
+
+		case sutil::hash("LightSpell"):
+		{
+			return app::AbilityType__Enum::LightSpell;
+		}
+		break;
+
+		case sutil::hash("TurretSpell"):
+		{
+			return app::AbilityType__Enum::TurretSpell;
+		}
+		break;
+
+		case sutil::hash("ChargeJump"):
+		{
+			return app::AbilityType__Enum::ChargeJump;
+		}
+		break;
+
+		case sutil::hash("DamageUpgradeA"):
+		{
+			return app::AbilityType__Enum::DamageUpgradeA;
+		}
+		break;
+
+		case sutil::hash("DamageUpgradeB"):
+		{
+			return app::AbilityType__Enum::DamageUpgradeB;
+		}
+		break;
+
+		default:
+			return app::AbilityType__Enum::None;
+	}
+#endif
 }
 
 void SeinCharacterHelper::StoreBoundAbilities()
 {
+#ifdef _WOTW_PATCH_THREE
 	SeinCharacterHelper::BoundAbility1 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability1, NULL);
 	SeinCharacterHelper::BoundAbility2 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability2, NULL);
 	SeinCharacterHelper::BoundAbility3 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability3, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	SeinCharacterHelper::BoundAbility1 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability1, NULL);
+	SeinCharacterHelper::BoundAbility2 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability2, NULL);
+	SeinCharacterHelper::BoundAbility3 = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability3, NULL);
+#endif
 
 	SeinCharacterHelper::CurrentBoundAbilitiesState = SeinRestoreState::IsStored;
 }
@@ -739,13 +863,21 @@ void SeinCharacterHelper::StoreBoundAbilities()
 void SeinCharacterHelper::SetBoundAbility(int index, std::string ability)
 {
 	app::AbilityType__Enum abilityType = SeinCharacterHelper::StringToAbilityType(ability);
+#ifdef _WOTW_PATCH_THREE
 	app::AbilityType__Enum boundAbility = app::AbilityType__Enum::AbilityType__Enum_None;
 	app::EquipmentType__Enum equipmentType = app::EquipmentType__Enum::EquipmentType__Enum_None;
 	app::EquipmentType__Enum boundEquipment = app::EquipmentType__Enum::EquipmentType__Enum_None;
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::AbilityType__Enum boundAbility = app::AbilityType__Enum::None;
+	app::EquipmentType__Enum equipmentType = app::EquipmentType__Enum::None;
+	app::EquipmentType__Enum boundEquipment = app::EquipmentType__Enum::None;
+#endif
 
 	if (AbilityTypeToEquipmentType.find(abilityType) != AbilityTypeToEquipmentType.end())
 		equipmentType = AbilityTypeToEquipmentType.at(abilityType);
 
+#ifdef _WOTW_PATCH_THREE
 	switch (index)
 	{
 	default:
@@ -785,6 +917,48 @@ void SeinCharacterHelper::SetBoundAbility(int index, std::string ability)
 	}
 	break;
 	}
+#endif
+#ifdef _WOTW_PATCH_TWO
+	switch (index)
+	{
+		default:
+		case 1:
+		{
+			boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonX, NULL);
+			boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability1, NULL);
+			if (equipmentType != app::EquipmentType__Enum::None && equipmentType != boundEquipment)
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonX, equipmentType, NULL);
+
+			if (boundAbility != abilityType)
+				app::SeinInput_BindButton(MDV::MoonSein->fields.Input, abilityType, app::Input_Command__Enum::Ability1, NULL);
+		}
+		break;
+
+		case 2:
+		{
+			boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonY, NULL);
+			boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability2, NULL);
+			if (equipmentType != app::EquipmentType__Enum::None && equipmentType != boundEquipment)
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonY, equipmentType, NULL);
+
+			if (boundAbility != abilityType)
+				app::SeinInput_BindButton(MDV::MoonSein->fields.Input, abilityType, app::Input_Command__Enum::Ability2, NULL);
+		}
+		break;
+
+		case 3:
+		{
+			boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonB, NULL);
+			boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability3, NULL);
+			if (equipmentType != app::EquipmentType__Enum::None && equipmentType != boundEquipment)
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonB, equipmentType, NULL);
+
+			if (boundAbility != abilityType)
+				app::SeinInput_BindButton(MDV::MoonSein->fields.Input, abilityType, app::Input_Command__Enum::Ability3, NULL);
+		}
+		break;
+	}
+#endif
 
 	//app::PlayerUberStateAbilities_SetAbility(MDV::MoonSein->fields.PlayerAbilities->fields.StateDescriptor->fields.m_state->fields.Abilities, abilityType, true, NULL);
 
@@ -795,6 +969,7 @@ void SeinCharacterHelper::RestoreBoundAbilities()
 {
 	if (SeinCharacterHelper::CurrentBoundAbilitiesState == SeinRestoreState::IsModified)
 	{
+#ifdef _WOTW_PATCH_THREE
 		app::EquipmentType__Enum boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::SpellInventory_Binding__Enum_ButtonX, NULL);
 		app::AbilityType__Enum boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Input_Command__Enum_Ability1, NULL);
 		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
@@ -833,6 +1008,47 @@ void SeinCharacterHelper::RestoreBoundAbilities()
 		if (boundAbility != SeinCharacterHelper::BoundAbility3)
 			app::SeinInput_BindButton(MDV::MoonSein->fields.Input, SeinCharacterHelper::BoundAbility3, app::Input_Command__Enum::Input_Command__Enum_Ability3, NULL);
 
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::EquipmentType__Enum boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonX, NULL);
+		app::AbilityType__Enum boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability1, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
+		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility1) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility1 != app::AbilityType__Enum::None)
+		{
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility1) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonX, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility1), NULL);
+		}
+
+		if (boundAbility != SeinCharacterHelper::BoundAbility1)
+			app::SeinInput_BindButton(MDV::MoonSein->fields.Input, SeinCharacterHelper::BoundAbility1, app::Input_Command__Enum::Ability1, NULL);
+
+
+		boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonY, NULL);
+		boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability2, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
+		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility2) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility2 != app::AbilityType__Enum::None)
+		{
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility2) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonY, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility2), NULL);
+		}
+
+		if (boundAbility != SeinCharacterHelper::BoundAbility2)
+			app::SeinInput_BindButton(MDV::MoonSein->fields.Input, SeinCharacterHelper::BoundAbility2, app::Input_Command__Enum::Ability2, NULL);
+
+
+		boundEquipment = app::SpellInventory_GetBoundEquipmentType(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonB, NULL);
+		boundAbility = app::SeinInput_GetAssignedAbility(MDV::MoonSein->fields.Input, app::Input_Command__Enum::Ability3, NULL);
+		app::SpellInventory_UnbindItem(MDV::MoonSein->fields.PlayerSpells, boundEquipment, NULL);
+		if (AbilityTypeToEquipmentType.find(SeinCharacterHelper::BoundAbility3) != AbilityTypeToEquipmentType.end() && SeinCharacterHelper::BoundAbility3 != app::AbilityType__Enum::None)
+		{
+			if (boundEquipment != AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility3) || boundEquipment != AbilityTypeToEquipmentType.at(boundAbility))
+				app::SpellInventory_UpdateBinding_1(MDV::MoonSein->fields.PlayerSpells, app::SpellInventory_Binding__Enum::ButtonB, AbilityTypeToEquipmentType.at(SeinCharacterHelper::BoundAbility3), NULL);
+		}
+
+		if (boundAbility != SeinCharacterHelper::BoundAbility3)
+			app::SeinInput_BindButton(MDV::MoonSein->fields.Input, SeinCharacterHelper::BoundAbility3, app::Input_Command__Enum::Ability3, NULL);
+
+#endif
 		app::SeinAbilities_RefreshStateCache(MDV::MoonSein->fields.Abilities, NULL);
 		app::SeinSpells_RefreshStateCache(MDV::MoonSein->fields.Spells, NULL);
 		//app::PlayerAbilities_ResetAbilitiesCache(MDV::MoonSein->fields.PlayerAbilities, NULL);
@@ -962,7 +1178,14 @@ void SeinCharacterHelper::ClearData()
 	SeinCharacterHelper::SeinShards.clear();
 	SeinCharacterHelper::SeinShards.clear();
 	SeinCharacterHelper::SeinEquippedShards.clear();
+#ifdef _WOTW_PATCH_THREE
 	SeinCharacterHelper::BoundAbility1 = app::AbilityType__Enum::AbilityType__Enum_None;
 	SeinCharacterHelper::BoundAbility2 = app::AbilityType__Enum::AbilityType__Enum_None;
 	SeinCharacterHelper::BoundAbility3 = app::AbilityType__Enum::AbilityType__Enum_None;
+#endif
+#ifdef _WOTW_PATCH_TWO
+	SeinCharacterHelper::BoundAbility1 = app::AbilityType__Enum::None;
+	SeinCharacterHelper::BoundAbility2 = app::AbilityType__Enum::None;
+	SeinCharacterHelper::BoundAbility3 = app::AbilityType__Enum::None;
+#endif
 }

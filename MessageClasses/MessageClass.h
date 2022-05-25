@@ -60,7 +60,9 @@ enum class MessageType
 	AddCollisionPosition = 46,
 	GetFieldsPropertiesGameObject = 47,
 	StoppedRace = 48,
-	ManagerInitialized = 49
+	ManagerInitialized = 49,
+	PlaybackInputs = 50,
+	ShowInfo = 51,
 };
 
 class Message {

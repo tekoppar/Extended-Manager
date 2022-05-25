@@ -6,7 +6,6 @@
 #include "StringUtils.h"
 #include "ManagerDef.h"
 #include "Adresses.h"
-#include "GraphDrawer.h"
 
 #include "MessageHelper.h"
 
@@ -168,7 +167,9 @@ void MessageHelper::SetMessage(app::GameObject* messageBoxObject, std::string te
 				//TransformSetScale((app::GameObject*)textBox, tem::Vector3(textSize * 0.02f, textSize * 0.02f, textSize * 0.02f));
 
 				if (color == nullptr)
-					textBox->fields.color = GraphColors::Grey;
+				{
+					textBox->fields.color.a = textBox->fields.color.b = textBox->fields.color.g = textBox->fields.color.r = 1.0f;
+				}
 				else
 					textBox->fields.color = *color;
 			}

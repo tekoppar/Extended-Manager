@@ -637,7 +637,7 @@ namespace tem {
 		return json + "]}";
 	}
 
-	std::vector<std::string> tem::TemFramework::IllegalClasses = { "UberShaderModifier" };
+	std::vector<std::string> tem::TemFramework::IllegalClasses = { "UberShaderModifier", "StringBuilder"};
 
 	bool tem::TemFramework::IsMethodVirtual(Il2CppClass* objectClass, Il2CppClass* returnClass, std::string methodName)
 	{

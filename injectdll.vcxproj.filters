@@ -261,6 +261,12 @@
     <ClCompile Include="Custom Types\Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helper Classes\Playback\InputPlayback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper Classes\Playback\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inject.h">
@@ -588,6 +594,66 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Moon Helpers\Scenes\SceneStructure\SceneData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper Classes\Playback\InputPlayback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper Classes\Playback\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\il2cpp-types-ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\il2cpp-metadata-version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\il2cpp-api-functions-ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\il2cpp-api-functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types7.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Types\il2cpp-types9.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Functions\il2cpp-functions1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Functions\il2cpp-functions2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Functions\il2cpp-functions3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Functions\il2cpp-functions4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Il2Cpp\appdata_1_2\Functions\il2cpp-functions5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

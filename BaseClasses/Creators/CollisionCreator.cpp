@@ -147,7 +147,12 @@ namespace tem {
 
 	void tem::CollisionCreator::SetupRenderer(tem::Collision& collision)
 	{
+#ifdef _WOTW_PATCH_THREE
 		collision.colliderPreview = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		collision.colliderPreview = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 		app::Object_1_set_name((app::Object_1*)collision.colliderPreview, string_new("CollisionMesh"), NULL);
 
 		app::BoxCollider* boxCollider = (app::BoxCollider*)GetComponentByType(collision.colliderPreview, "UnityEngine", "BoxCollider");
@@ -160,9 +165,17 @@ namespace tem {
 		app::Collider_set_enabled((app::Collider*)collision.Collider, true, NULL);
 
 		app::Texture2D* collisionTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+
+#ifdef _WOTW_PATCH_THREE
 		app::Texture2D__ctor_3(collisionTexture, 32, 32, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 		app::Texture_set_wrapMode((app::Texture*)collisionTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 		app::Texture_set_filterMode((app::Texture*)collisionTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::Texture2D__ctor_3(collisionTexture, 32, 32, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+		app::Texture_set_wrapMode((app::Texture*)collisionTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+		app::Texture_set_filterMode((app::Texture*)collisionTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 		FillPixels(collisionTexture, 32, 32, tem::Vector4(1.0f, 0.0f, 0.0f, 1.0f).ToColor());
 
 		app::Material* debugMaterial = CreateNewMaterial(); //calls app::Material__ctor() using the material found app::Shader_Find(standardMatS, NULL); // "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");

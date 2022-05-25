@@ -75,9 +75,16 @@ void DebugDrawer::SetupTexture(app::Color color, tem::Vector3 position)
 	debugMaterial = CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
 	debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
 	HasCreatedResources = true;
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	app::Color colorMod = color;
 	colorMod.a = 0.5;
@@ -95,7 +102,12 @@ void DebugDrawer::SetupTexture(app::Color color, tem::Vector3 position)
 	app::Material_set_mainTexture(debugMaterial, (app::Texture*)debugTexture, NULL);
 
 	app::String* debugName = string_new("Race Checkpoint");
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 	app::Object_1_set_name((app::Object_1*)debugObject, debugName, NULL);
 
 	app::BoxCollider* boxCollider = (app::BoxCollider*)GetComponentByType(debugObject, "UnityEngine", "BoxCollider");
@@ -129,9 +141,16 @@ app::GameObject* DebugDrawer::CreateDebugObjectStatic(app::Color color, tem::Vec
 
 	app::Material* debugMaterial = CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
 	app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	app::Color colorMod = color;
 	colorMod.a = 0.5;
@@ -146,7 +165,12 @@ app::GameObject* DebugDrawer::CreateDebugObjectStatic(app::Color color, tem::Vec
 	app::Material_set_mainTexture(debugMaterial, (app::Texture*)debugTexture, NULL);
 
 	app::String* debugName = string_new("Race Checkpoint");
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 	app::Object_1_set_name((app::Object_1*)debugObject, debugName, NULL);
 
 	app::BoxCollider* boxCollider = (app::BoxCollider*)GetComponentByType(debugObject, "UnityEngine", "BoxCollider");
@@ -181,9 +205,16 @@ app::GameObject* DebugDrawer::CreateDebugObject(app::Color color, tem::Vector3 p
 
 	app::Material* debugMaterial = CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
 	app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	app::Color colorMod = color;
 	colorMod.a = 0.5;
@@ -198,7 +229,12 @@ app::GameObject* DebugDrawer::CreateDebugObject(app::Color color, tem::Vector3 p
 	app::Material_set_mainTexture(debugMaterial, (app::Texture*)debugTexture, NULL);
 
 	app::String* debugName = string_new("Race Checkpoint");
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 	app::Object_1_set_name((app::Object_1*)debugObject, debugName, NULL);
 
 	app::BoxCollider* boxCollider = (app::BoxCollider*)GetComponentByType(debugObject, "UnityEngine", "BoxCollider");
@@ -237,9 +273,16 @@ app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::V
 		return nullptr;
 
 	app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	app::Color colorMod = color;
 	colorMod.a = 0.25f;
@@ -254,7 +297,12 @@ app::GameObject* DebugDrawer::CreateDebugObjectDetached(app::Color color, tem::V
 	app::Material_set_mainTexture(debugMaterial, (app::Texture*)debugTexture, NULL);
 
 	app::String* debugName = string_new("Race Checkpoint");
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* debugObject = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 	app::Object_1_set_name((app::Object_1*)debugObject, debugName, NULL);
 
 	app::BoxCollider* boxCollider = (app::BoxCollider*)GetComponentByType(debugObject, "UnityEngine", "BoxCollider");

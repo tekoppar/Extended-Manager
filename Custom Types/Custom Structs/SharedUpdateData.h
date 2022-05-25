@@ -28,6 +28,7 @@ namespace tem {
 			HasUltraMagnet = hasUltraMagnet;
 		}
 
+#ifdef _WOTW_PATCH_THREE
 		SharedUpdateData(app::DropPickup_SharedUpdateData* value)
 		{
 			OriPos = value->OriPos;
@@ -48,6 +49,7 @@ namespace tem {
 
 			return value;
 		}
+#endif
 
 		std::string ToString()
 		{

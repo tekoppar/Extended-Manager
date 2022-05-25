@@ -15,7 +15,8 @@
 
 #include "UIEvents.h"
 
-namespace tem {
+namespace tem
+{
 
 	tOnPointerClick Real_OnPointerClick;
 
@@ -62,13 +63,23 @@ namespace tem {
 
 		app::GameObject* newCanvas = CreateNewCanvas();
 		app::CanvasScaler* scaler = (app::CanvasScaler*)GetComponentByTypeInChildren(newCanvas, "UnityEngine.UI", "CanvasScaler");
+#ifdef _WOTW_PATCH_THREE
 		app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::CanvasScaler_ScaleMode__Enum_ScaleWithScreenSize, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::ScaleWithScreenSize, NULL);
+#endif
 		app::CanvasScaler_set_referenceResolution(scaler, tem::Vector3::ToVector2(1920, 1080), NULL);
 		app::GameObject_set_layer(newCanvas, 11, NULL);
 
 		app::GameObject* eventSystem = DrawUI::EventSystem("EventSystem");
 		EventSystem = (app::EventSystem*)GetComponentByType(eventSystem, "UnityEngine.EventSystems", "EventSystem");
+#ifdef _WOTW_PATCH_THREE
 		EditorToolbar = DrawUI::HorizontalLayoutGroup("HorizontalToolbar", app::TextAnchor__Enum::TextAnchor__Enum_UpperLeft);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		EditorToolbar = DrawUI::HorizontalLayoutGroup("HorizontalToolbar", app::TextAnchor__Enum::UpperLeft);
+#endif
 		app::GameObject_set_layer(eventSystem, 11, NULL);
 		app::GameObject_set_layer(EditorToolbar, 11, NULL);
 
@@ -171,7 +182,12 @@ namespace tem {
 	{
 		bool isLeftMouseDown = app::Input_GetMouseButton(0, NULL);
 		bool isRightMouseDown = app::Input_GetMouseButton(1, NULL);
+#ifdef _WOTW_PATCH_THREE
 		bool isDeletePressed = app::Input_GetKey(app::KeyCode__Enum::KeyCode__Enum_Delete, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		bool isDeletePressed = app::Input_GetKey(app::KeyCode__Enum::Delete, NULL);
+#endif
 		bool movedMouse = false;
 		void* clickedObjectPtr = nullptr;
 		app::GameObject* mouseEnterObject = nullptr;
@@ -181,8 +197,8 @@ namespace tem {
 		app::Ray ray = app::Camera_ScreenPointToRay_2(MDV::MoonCamera, tem::Vector3(position.X, position.Y, std::fabs(cameraPosition.Z)).ToMoon(), NULL); //29.0f
 		app::RaycastHit hit = app::RaycastHit();
 		bool hitSomething = app::Physics_Raycast_14(ray, &hit, 500, NULL);*/
-		
-		if (EventSystem != nullptr) 
+
+		if (EventSystem != nullptr)
 		{
 			if (StandaloneInputModule == nullptr)
 				StandaloneInputModule = (app::StandaloneInputModule*)EventSystem->fields.m_CurrentInputModule;
@@ -214,7 +230,7 @@ namespace tem {
 							tem::UIEvents::Instance->OnClickEvents[reinterpret_cast<void*>(OldHoveredEvent)]->OnEvent(tem::EventType::MouseLeave, CurrentHoveredObject);
 
 						tem::OnEvents* event = tem::UIEvents::Instance->OnClickEvents[CurrentHoveredObject];
-						OldHoveredEvent = (std::uintptr_t)&event;
+						OldHoveredEvent = (std::uintptr_t) & event;
 						CurrentHoveredObject = StandaloneInputModule->fields.m_CurrentFocusedGameObject;
 					}
 					else if (CurrentHoveredObject == nullptr)

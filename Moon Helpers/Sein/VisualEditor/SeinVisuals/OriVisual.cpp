@@ -126,8 +126,12 @@ void OriVisualSettings::SetOriHat(OriHatVisualSettings hatSettings)
 
 	if (SeinVisualEditor::OriHat != nullptr) {
 		app::GameObject* hatParent = TransformGetParent(SeinVisualEditor::OriHat);
-		app::Object_1_Destroy_1((app::Object_1*)SeinVisualEditor::OriHat, NULL);
-		app::Object_1_Destroy_1((app::Object_1*)hatParent, NULL);
+		
+		if (hatParent != nullptr)
+		{
+			app::Object_1_Destroy_1((app::Object_1*)SeinVisualEditor::OriHat, NULL);
+			app::Object_1_Destroy_1((app::Object_1*)hatParent, NULL);
+		}
 		SeinVisualEditor::OriHat = nullptr;
 	}
 
@@ -137,11 +141,20 @@ void OriVisualSettings::SetOriHat(OriHatVisualSettings hatSettings)
 	if (textureTemp != "")
 	{
 		app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 		app::Texture2D__ctor_3(debugTexture, 256, 256, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 		app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 		app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
 
 		SeinVisualEditor::SeinVisualEditor::OriHat = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::Texture2D__ctor_3(debugTexture, 256, 256, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+		app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+		app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+
+		SeinVisualEditor::SeinVisualEditor::OriHat = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 		app::Object_1_set_name((app::Object_1*)SeinVisualEditor::OriHat, string_new("SantaHat"), NULL);
 
 		app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(SeinVisualEditor::OriHat, "UnityEngine", "MeshRenderer");
@@ -158,7 +171,14 @@ void OriVisualSettings::SetOriHat(OriHatVisualSettings hatSettings)
 		app::Texture2D_ApplyImpl((app::Texture2D*)debugTexture, true, true, NULL);
 
 		app::GameObject* gamyobj = app::Component_1_get_gameObject((app::Component_1*)MDV::MoonSein, NULL);
+#ifdef _WOTW_PATCH_THREE
 		app::Material* debugMaterial = CreateNewMaterial("Hidden/UberShader/DF362EF066C0701751D3088D28729049"); //calls app::Material__ctor() using the material found app::Shader_Find(standardMatS, NULL); // "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");// "Hidden/UberShader/E48C37CFA39B1500F0D8A6A5D0B46307");
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::Material* debugMaterial = CreateNewMaterial("Hidden/UberShader/F5A69BB0739F02A248C520E7108A582F");
+#endif
+		
+		
 		std::vector<std::string> scenePath = { "ori3D", "mirrorHolder", "rigHolder", "oriRig", "Model_GRP", "body_MDL" };
 		app::GameObject* oriModel = GetComponentByPath(gamyobj, scenePath);
 		app::Type* skinnedMeshRendererType = GetType("UnityEngine", "SkinnedMeshRenderer");

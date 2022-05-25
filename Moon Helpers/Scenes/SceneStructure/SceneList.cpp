@@ -20,6 +20,8 @@
 #include "SceneList.h"
 
 namespace tem {
+	bool tem::SceneList::HasBeenInitialized = false;
+
 	app::Type* tem::SceneList::ComponentType = nullptr;
 	tem::SceneHierarchy* tem::SceneList::ActiveHiearchy = nullptr;
 	tem::SceneHierarchy tem::SceneList::RootHierarchy = tem::SceneHierarchy(tem::SceneObject(false, false, "Scene Roots", "", 0x0, "", std::vector<tem::Component>(), std::vector<int>{999}, 999), std::unordered_map<int, tem::SceneHierarchy>());
@@ -46,7 +48,14 @@ namespace tem {
 		//tem::SceneList::ConstructSceneHierarchy(app::Component_1_get_gameObject((app::Component_1*)MDV::MoonGameController, NULL), 4, 600);
 		tem::SceneList::SpecialSceneHierarchyMap["Editor Canvas"] = (std::uintptr_t)tem::UIEvents::Instance->CanvasObject;
 		tem::SceneList::SpecialSceneHierarchyIndexMap[700] = (std::uintptr_t)tem::UIEvents::Instance->CanvasObject;
-		tem::SceneList::ConstructSceneHierarchy({999, 700}, 1);
+
+		//tem::SceneList::SpecialSceneHierarchyMap["Systems"] = (std::uintptr_t)(*app::GameController__TypeInfo)->static_fields->Instance->fields.m_systemsGameObject;
+		//tem::SceneList::SpecialSceneHierarchyIndexMap[800] = (std::uintptr_t)(*app::GameController__TypeInfo)->static_fields->Instance->fields.m_systemsGameObject;
+
+		tem::SceneList::ConstructSceneHierarchy({ 999, 700 }, 1);
+		//tem::SceneList::ConstructSceneHierarchy({ 999, 800 }, 1);
+
+		tem::SceneList::HasBeenInitialized = true;
 	}
 
 	bool tem::SceneList::LoadHierarchy()
@@ -119,7 +128,7 @@ namespace tem {
 				TransformSetLocalPosition(clone, tem::Vector3(0.0f));
 				TransformSetPosition(clone, TransformGetPosition(cloneGameObject));
 				hierarchy->Object.ClonedPosition = TransformGetPosition(cloneGameObject);
-				
+
 				if (app::GameObject_get_moonReady(clone, NULL) == false)
 					app::GameObject_set_moonReady(clone, true, NULL);
 
@@ -242,7 +251,7 @@ namespace tem {
 
 			std::string name = il2cppi_to_string(app::Object_1_get_name((app::Object_1*)clone, NULL));
 			app::Object_1_set_name((app::Object_1*)clone, string_new((name + "clone").data()), NULL);
-			
+
 			if (name.find("Placeholder") != std::string::npos)
 			{
 				parent->VerifyHierarchy();
@@ -301,7 +310,7 @@ namespace tem {
 		tem::SceneHierarchy* ptr = &tem::SceneList::RootHierarchy;
 		int i = indexes[0] == 999 ? 1 : 0;
 
-		for (;i < indexes.size(); i++)
+		for (; i < indexes.size(); i++)
 		{
 			int index = indexes[i];
 			if (ptr->SceneChildren.find(index) != ptr->SceneChildren.end())
@@ -696,7 +705,7 @@ namespace tem {
 
 		if (tempHierarchy.size() > 1 && tempHierarchy[0] == "Scene Roots")
 			tempHierarchy.erase(tempHierarchy.begin());
-		
+
 		if (tempHierarchy.size() < 1 || (tempHierarchy.size() == 1 && (tempHierarchy[0] == "Scene Roots" || tempHierarchy[0] == "")))
 			return nullptr;
 
@@ -781,5 +790,40 @@ namespace tem {
 		}
 
 		return scenes;
+	}
+
+	app::GameObject* tem::SceneList::GetGameObject(int hierarchyIndex, std::vector<std::string> hierarchyPath)
+	{
+		if (tem::SceneList::HasBeenInitialized == false)
+		{
+			tem::SceneList::Initialize();
+		}
+
+		if (tem::SceneList::RootHierarchy.HasChild(hierarchyIndex) == false)
+		{
+			for (int i = 0; i < TemSceneHelper::SceneManager->fields.ActiveScenes->fields._size; i++)
+			{
+				if (TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.SceneRoot != nullptr && TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.MetaData->fields.LinearId == hierarchyIndex)
+				{
+					tem::SceneList::ConstructSceneHierarchy({ 999, TemSceneHelper::SceneManager->fields.ActiveScenes->fields._items->vector[i]->fields.MetaData->fields.LinearId }, 1);
+				}
+			}
+		}
+
+		std::vector<std::string> hierarchyIndexes = tem::SceneList::DoesHierarchyExists(hierarchyPath);
+		if (hierarchyIndexes.size() < hierarchyPath.size())
+		{
+			tem::SceneList::ConstructSceneHierarchy(hierarchyPath, hierarchyPath.size());
+		}
+
+		if (tem::SceneList::RootHierarchy.HasChild(hierarchyIndex) == true)
+		{
+			app::GameObject* foundObject = tem::SceneList::GetGameObjectFromHierarchyName(hierarchyPath);
+
+			if (foundObject != nullptr)
+				return foundObject;
+		}
+
+		return nullptr;
 	}
 }

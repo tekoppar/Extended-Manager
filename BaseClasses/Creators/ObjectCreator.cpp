@@ -150,9 +150,16 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 
 
 	app::Texture2D* debugTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(debugTexture, 1, 1, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)debugTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)debugTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 	app::Material* debugMaterial = CreateNewMaterial("Hidden/UberShader/4B897D76B847170D884884FBA5CEBC13");
 
 	FillPixels(debugTexture, 1, 1, GraphColors::Pink);
@@ -168,7 +175,12 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 	app::Material_SetTexture(debugMaterial, TextureName, (app::Texture*)debugTexture, NULL);
 	app::Material_set_mainTexture(debugMaterial, (app::Texture*)debugTexture, NULL);
 
+#ifdef _WOTW_PATCH_THREE
 	app::GameObject* gameObject1 = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum_Cube, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::GameObject* gameObject1 = app::GameObject_CreatePrimitive(app::PrimitiveType__Enum::Cube, NULL);
+#endif
 	app::Object_1_set_name((app::Object_1*)gameObject1, string_new("art"), NULL);
 
 	app::MeshRenderer* meshRenderer = (app::MeshRenderer*)GetComponentByType(gameObject1, "UnityEngine", "MeshRenderer");
@@ -335,7 +347,9 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 
 	app::TimeSlicedActivationTask__ctor(sceneActivation, gameObjectsToEnable, preEnableObservers, postEnableObservers, false, true, gameObject, NULL, string_new(name.data()), NULL);
 	sceneActivation->fields._.m_hasStarted = false;
+#ifdef _WOTW_PATCH_THREE
 	sceneActivation->fields._._AvailableBudget_k__BackingField = sceneActivation->fields._._CustomTimeBudget_k__BackingField = 1.0f;
+#endif
 	temScene1Root->fields.m_postEnabledObservers = postEnableObservers;
 	temScene1Root->fields.m_preDisableObservers = postEnableObservers;
 
@@ -469,7 +483,12 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 	temScene1Root->fields.MetaData = temScene1MetaData;
 	temScene1Root->fields.m_sceneSettings = sceneSettingsComponent;
 	temScene1Root->fields.m_highPriorityEnabling = false;
+#ifdef _WOTW_PATCH_THREE
 	temScene1Root->fields.m_state = app::SceneState__Enum::SceneState__Enum_Disabled;
+#endif
+#ifdef _WOTW_PATCH_TWO
+	temScene1Root->fields.m_state = app::SceneState__Enum::Disabled;
+#endif
 	temScene1Root->fields.m_activationTask = sceneActivation;
 	temScene1Root->fields.m_objectsToTimesliceDisable = gameObjectsToEnable;
 	temScene1Root->fields.m_objectsToTimeSliceEnable = gameObjectsToEnable;
@@ -479,8 +498,10 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 	app::Component_1__Array* componentArr = (app::Component_1__Array*)app::Array_CreateInstance_1(componentArrType, 1, NULL);
 	componentArr->vector[0] = (app::Component_1*)gameObjectT;
 	temScene1Root->fields.m_frustumOptimizedObjects = componentArr;
+#ifdef _WOTW_PATCH_THREE
 	temScene1Root->fields._._._.m_cachedGameObject = temScene1;
 	temScene1Root->fields._._._.m_cachedTransform = gameObjectT;
+#endif
 
 	/*app::List_1_UnityEngine_GameObject_* gameObjectsToEnable = (app::List_1_UnityEngine_GameObject_*)il2cpp_object_new((Il2CppClass*)(*app::List_1_UnityEngine_GameObject___TypeInfo));
 	app::List_1_UnityEngine_GameObject___ctor(gameObjectsToEnable, 10, (*app::List_1_UnityEngine_GameObject___ctor__MethodInfo));
@@ -522,7 +543,12 @@ void tem::ObjectCreator::CreateScene(std::string name, tem::Vector3 position, te
 
 	auto Il2ClassSceneManagerScene = GetClass("", "SceneManagerScene");
 	temScene1ManagerScene = (app::SceneManagerScene*)il2cpp_object_new((Il2CppClass*)Il2ClassSceneManagerScene);
+#ifdef _WOTW_PATCH_THREE
 	app::SceneManagerScene__ctor(temScene1ManagerScene, temScene1Root, temScene1RuntimeMetaData, app::SceneState__Enum::SceneState__Enum_Loaded, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::SceneManagerScene__ctor(temScene1ManagerScene, temScene1Root, temScene1RuntimeMetaData, app::SceneState__Enum::Loaded, NULL);
+#endif
 	temScene1ManagerScene->fields.HasStartBeenCalled = true;
 	app::Object_1_DontDestroyOnLoad((app::Object_1*)temScene1ManagerScene, NULL);
 	MDV::GCHandles.push_back(il2cpp_gchandle_new((Il2CppObject*)temScene1ManagerScene, true));

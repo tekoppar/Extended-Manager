@@ -7,7 +7,9 @@
 #include <vector>
 
 #include "StringUtils.h"
+#if !defined(_WOTW_VISUAL_EDITOR)
 #include "SeinCharacterHelper.h"
+#endif
 #include "ManagerDef.h"
 #include "SeinVisualEditor.h"
 
@@ -48,10 +50,18 @@ void MDV::ValidatePointers()
 		AreaMapUI = (*app::AreaMapUI__TypeInfo)->static_fields->Instance;
 
 	//update visuals
+#ifdef _WOTW_PATCH_THREE
 	if (SeinVisualEditor::ManagerLoaded == true && MoonGameController != nullptr && stateMachine->fields._CurrentState_k__BackingField == app::GameStateMachine_State__Enum::GameStateMachine_State__Enum_Game && MoonSein != nullptr)
 	{
 		SeinVisualEditor::SetAllVisuals();
 	}
+#endif
+#ifdef _WOTW_PATCH_TWO
+	if (SeinVisualEditor::ManagerLoaded == true && MoonGameController != nullptr && stateMachine->fields._CurrentState_k__BackingField == app::GameStateMachine_State__Enum::Game && MoonSein != nullptr)
+	{
+		SeinVisualEditor::SetAllVisuals();
+	}
+#endif
 }
 
 app::GameObject* GetSceneByName(std::string sceneToFind)
@@ -282,6 +292,16 @@ app::GameObject* GetComponentByPath(app::GameObject* object, std::vector<std::st
 	return currentObject;
 }
 
+std::string GetGameObjectName(app::GameObject* gameobject)
+{
+	app::String* oName = app::Object_1_get_name((app::Object_1*)gameobject, NULL);
+
+	if (oName != nullptr)
+		return il2cppi_to_string(oName);
+	else
+		return "";
+}
+
 std::vector<app::GameObject*> GetComponentsByName(app::GameObject* object, std::string componentName)
 {
 	std::vector<app::GameObject*> foundComponents;
@@ -290,24 +310,24 @@ std::vector<app::GameObject*> GetComponentsByName(app::GameObject* object, std::
 
 	if (object != nullptr)
 	{
-			app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(object, transformType, true, NULL);
+		app::Component_1__Array* components = app::GameObject_GetComponentsInChildren_1(object, transformType, true, NULL);
 
-			if (components != nullptr)
+		if (components != nullptr)
+		{
+			for (int i = 0; i < components->max_length; i++)
 			{
-				for (int i = 0; i < components->max_length; i++)
+				if (components->vector[i] != nullptr)
 				{
-					if (components->vector[i] != nullptr)
-					{
-						app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
-						app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
-						bool same = app::String_Equals_1(activeObjectName, oName, NULL);
+					app::GameObject* gamyobj = app::Component_1_get_gameObject(components->vector[i], NULL);
+					app::String* oName = app::Object_1_get_name((app::Object_1*)gamyobj, NULL);
+					bool same = app::String_Equals_1(activeObjectName, oName, NULL);
 
-						if (same && object != gamyobj)
-						{
-							foundComponents.push_back(gamyobj);
-						}
+					if (same && object != gamyobj)
+					{
+						foundComponents.push_back(gamyobj);
 					}
 				}
+			}
 		}
 	}
 
@@ -386,20 +406,35 @@ void DrawLine(app::Texture2D* tex, int x0, int y0, int x1, int y1, app::Color co
 	int dx = (int)(x1 - x0);
 	int stepx, stepy;
 
-	if (dy < 0) { dy = -dy; stepy = -1; }
-	else { stepy = 1; }
-	if (dx < 0) { dx = -dx; stepx = -1; }
-	else { stepx = 1; }
+	if (dy < 0)
+	{
+		dy = -dy; stepy = -1;
+	}
+	else
+	{
+		stepy = 1;
+	}
+	if (dx < 0)
+	{
+		dx = -dx; stepx = -1;
+	}
+	else
+	{
+		stepx = 1;
+	}
 	dy <<= 1;
 	dx <<= 1;
 
 	float fraction = 0;
 
 	app::Texture2D_SetPixel(tex, x0, y0, color, NULL);
-	if (dx > dy) {
+	if (dx > dy)
+	{
 		fraction = (float)dy - (dx >> 1);
-		while (std::abs(x0 - x1) > 1) {
-			if (fraction >= 0) {
+		while (std::abs(x0 - x1) > 1)
+		{
+			if (fraction >= 0)
+			{
 				y0 += stepy;
 				fraction -= dx;
 			}
@@ -408,10 +443,13 @@ void DrawLine(app::Texture2D* tex, int x0, int y0, int x1, int y1, app::Color co
 			app::Texture2D_SetPixel(tex, x0, y0, color, NULL);
 		}
 	}
-	else {
+	else
+	{
 		fraction = (float)dx - (dy >> 1);
-		while (std::abs(y0 - y1) > 1) {
-			if (fraction >= 0) {
+		while (std::abs(y0 - y1) > 1)
+		{
+			if (fraction >= 0)
+			{
 				x0 += stepx;
 				fraction -= dy;
 			}
@@ -473,7 +511,7 @@ std::vector<app::GameObject*> GetChildrenByName(app::GameObject* parent, std::st
 			if (tem::PtrInRange(childObject) == true)
 			{
 				app::String* oName = app::Object_1_get_name((app::Object_1*)childObject, NULL);
-				
+
 				if (app::String_Equals_1(nameS, oName, NULL) == true)
 					foundChildren.push_back(childObject);
 			}
@@ -536,8 +574,8 @@ void TransformSetScale(app::GameObject* object, tem::Vector3 scale)
 	{
 		transformType = GetTypeFromClass((Il2CppClass*)(*app::Transform__TypeInfo));
 	}
-		app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
-		app::Transform_set_localScale(objectTransform, scale.ToMoon(), NULL);
+	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+	app::Transform_set_localScale(objectTransform, scale.ToMoon(), NULL);
 }
 
 tem::Vector3 TransformGetScale(app::GameObject* object)
@@ -612,7 +650,12 @@ void TransformSetRotation(app::GameObject* object, tem::Vector3 rotation)
 	}
 
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::Transform_Rotate(objectTransform, rotation.ToMoon(), app::Space__Enum::Space__Enum_Self, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Transform_Rotate(objectTransform, rotation.ToMoon(), app::Space__Enum::Self, NULL);
+#endif
 }
 
 void TransformSetEulerAngles(app::GameObject* object, tem::Vector3 angles)
@@ -625,7 +668,12 @@ void TransformSetEulerAngles(app::GameObject* object, tem::Vector3 angles)
 	}
 
 	app::Transform* objectTransform = (app::Transform*)app::GameObject_GetComponent(object, transformType, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::Transform_Rotate(objectTransform, angles.ToMoon(), app::Space__Enum::Space__Enum_World, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Transform_Rotate(objectTransform, angles.ToMoon(), app::Space__Enum::World, NULL);
+#endif
 	//app::Transform_set_eulerAngles(objectTransform, angles.ToMoon(), NULL);
 }
 
@@ -684,7 +732,7 @@ void TransformSetParent(app::GameObject* object, app::GameObject* parent, bool s
 		app::Transform_SetParent_1((app::Transform*)objectTransform, (parent == NULL ? NULL : parentTransform), true, NULL);
 	else
 		TemLogger::Add("Failed to set parent, one of the transforms is missing a game object.", LogType::Warning);
-	
+
 	if (setAsLastSibling == true)
 		app::Transform_SetAsLastSibling((app::Transform*)objectTransform, NULL);
 }
@@ -759,8 +807,14 @@ app::Vector2 RectTransformGetPivot(app::GameObject* object)
 void RectTransformSetWidthHeight(app::GameObject* object, float width, float height)
 {
 	app::Transform* objectTransform = app::GameObject_get_transform((app::GameObject*)object, NULL);
+#ifdef _WOTW_PATCH_THREE
 	app::RectTransform_SetSizeWithCurrentAnchors((app::RectTransform*)objectTransform, app::RectTransform_Axis__Enum::RectTransform_Axis__Enum_Vertical, height, NULL);
 	app::RectTransform_SetSizeWithCurrentAnchors((app::RectTransform*)objectTransform, app::RectTransform_Axis__Enum::RectTransform_Axis__Enum_Horizontal, width, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::RectTransform_SetSizeWithCurrentAnchors((app::RectTransform*)objectTransform, app::RectTransform_Axis__Enum::Vertical, height, NULL);
+	app::RectTransform_SetSizeWithCurrentAnchors((app::RectTransform*)objectTransform, app::RectTransform_Axis__Enum::Horizontal, width, NULL);
+#endif
 	app::Rect rect = app::RectTransform_get_rect((app::RectTransform*)objectTransform, NULL);
 	app::Rect* rectP = &rect;
 	rectP->m_Height = height;

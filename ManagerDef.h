@@ -45,6 +45,7 @@ bool IsSceneLoadedByName(std::string sceneToFind);
 app::GameObject* PreloadSceneByName(std::string sceneToPreload);
 app::GameObject* EnableSceneByName(std::string sceneToPreload);
 
+std::string GetGameObjectName(app::GameObject* gameobject);
 app::GameObject* GetComponentByScenePath(std::string sceneName, std::vector<std::string> scenePath);
 app::GameObject* GetComponentByPath(app::GameObject* object, std::vector<std::string> scenePath);
 std::vector<app::GameObject*> GetComponentsByName(app::GameObject* object, std::string scenePath);

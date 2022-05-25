@@ -389,9 +389,16 @@ void Graph::SetupTextures(int width, int height)
 	app::Material_EnableKeyword_1(RaceDataBlackMaterial, UNITY_UI_CLIP_RECTName, NULL);
 
 	graphColorTexture = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(graphColorTexture, width, GraphHeight, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, false, false, NULL);
 	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(graphColorTexture, width, GraphHeight, app::TextureFormat__Enum::RGBA32, false, false, NULL);
+	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	//app::Material_SetInt(RaceDataMaterial, srcBlendName, (int)app::BlendMode__Enum::BlendMode__Enum_One, NULL);
 	//app::Material_SetInt(RaceDataMaterial, dstBlendName, (int)app::BlendMode__Enum::BlendMode__Enum_OneMinusSrcAlpha, NULL);
@@ -404,9 +411,16 @@ void Graph::SetupTextures(int width, int height)
 	ClearGraph(graphColorTexture, GraphColors::Transparent, width);
 
 	lightMap = (app::Texture2D*)il2cpp_object_new((Il2CppClass*)(*app::Texture2D__TypeInfo));
+#ifdef _WOTW_PATCH_THREE
 	app::Texture2D__ctor_3(lightMap, GraphWidth, GraphHeight, app::TextureFormat__Enum::TextureFormat__Enum_RGBA32, true, true, NULL);
 	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::TextureWrapMode__Enum_Repeat, NULL);
 	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::FilterMode__Enum_Point, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+	app::Texture2D__ctor_3(lightMap, GraphWidth, GraphHeight, app::TextureFormat__Enum::RGBA32, true, true, NULL);
+	app::Texture_set_wrapMode((app::Texture*)graphColorTexture, app::TextureWrapMode__Enum::Repeat, NULL);
+	app::Texture_set_filterMode((app::Texture*)graphColorTexture, app::FilterMode__Enum::Point, NULL);
+#endif
 
 	//app::Material_SetInt(RaceDataBlackMaterial, srcBlendName, (int)app::BlendMode__Enum::BlendMode__Enum_One, NULL);
 	//app::Material_SetInt(RaceDataBlackMaterial, dstBlendName, (int)app::BlendMode__Enum::BlendMode__Enum_OneMinusSrcAlpha, NULL);
@@ -457,7 +471,12 @@ void Graph::SetupUI(int width, int height)
 
 		newCanvas = CreateNewCanvas();
 		app::CanvasScaler* scaler = (app::CanvasScaler*)GetComponentByTypeInChildren(newCanvas, "UnityEngine.UI", "CanvasScaler");
+#ifdef _WOTW_PATCH_THREE
 		app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::CanvasScaler_ScaleMode__Enum_ScaleWithScreenSize, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::ScaleWithScreenSize, NULL);
+#endif
 		app::CanvasScaler_set_referenceResolution(scaler, tem::Vector3::ToVector2(1920, 1080), NULL);
 		//app::CanvasScaler_set_uiScaleMode(scaler, app::CanvasScaler_ScaleMode__Enum::CanvasScaler_ScaleMode__Enum_ConstantPixelSize, NULL);
 		//app::CanvasScaler_set_scaleFactor(scaler, 0.75f, NULL);
@@ -479,8 +498,14 @@ void Graph::SetupUI(int width, int height)
 		app::Image_set_material(canvasImage, RaceDataMaterial, NULL);
 
 		//graphHorizontalLayout = DrawUI::HorizontalLayoutGroup("LabelLayout", app::TextAnchor__Enum::TextAnchor__Enum_UpperRight);
+#ifdef _WOTW_PATCH_THREE
 		canvasVerticalLayout = DrawUI::VerticalLayoutGroup("canvasVerticalLayout", app::TextAnchor__Enum::TextAnchor__Enum_UpperCenter);
 		labelLayout = DrawUI::HorizontalLayoutGroup("LabelLayout", app::TextAnchor__Enum::TextAnchor__Enum_MiddleCenter);
+#endif
+#ifdef _WOTW_PATCH_TWO
+		canvasVerticalLayout = DrawUI::VerticalLayoutGroup("canvasVerticalLayout", app::TextAnchor__Enum::UpperCenter);
+		labelLayout = DrawUI::HorizontalLayoutGroup("LabelLayout", app::TextAnchor__Enum::MiddleCenter);
+#endif
 
 		GraphLabel* zoomInButton = new GraphLabel();
 		auto class1 = GetClass<>("UnityEngine", "MonoBehaviour");

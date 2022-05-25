@@ -281,7 +281,12 @@ namespace tem {
 			FrameDelay++;
 			bool isLeftMouse = app::Input_GetMouseButtonDown(0, NULL);
 			bool isLeftMouseHeld = app::Input_GetMouseButton(0, NULL);
+#ifdef _WOTW_PATCH_THREE
 			bool isMiddleMouseHeld = app::Input_GetKey(app::KeyCode__Enum::KeyCode__Enum_Mouse2, NULL);
+#endif
+#ifdef _WOTW_PATCH_TWO
+			bool isMiddleMouseHeld = app::Input_GetKey(app::KeyCode__Enum::Mouse2, NULL);
+#endif
 			tem::Vector3 mousePosition = app::Input_get_mousePosition(NULL);
 			tem::Vector3 mouseDelta = PreviouisMousePosition - mousePosition;
 

@@ -35,6 +35,7 @@ namespace tem {
 	class SceneList
 	{
 	public:
+		static bool HasBeenInitialized;
 		static app::Type* ComponentType;
 		static tem::SceneHierarchy RootHierarchy;
 		static tem::SceneData RootSceneData;
@@ -59,6 +60,8 @@ namespace tem {
 		static std::vector<app::RuntimeSceneMetaData*> GetScenesToLoad();
 		static app::SceneManagerScene* GetSceneManagerSceneFromHierarchy(std::vector<int> hierarchy);
 		static app::SceneManagerScene* GetSceneManagerSceneFromHierarchyName(std::vector<std::string> hierarchy);
+
+		static app::GameObject* GetGameObject(int hierarchyIndex, std::vector<std::string> hierarchyPath);
 
 	private:
 		static std::vector<int> DoesHierarchyExists(std::vector<int> indexes);

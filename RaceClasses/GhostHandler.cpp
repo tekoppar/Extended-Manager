@@ -8,6 +8,7 @@
 #include "MessageHelper.h"
 #include "GraphDrawer.h"
 #include "Global.h"
+#include "AreaMapManager.h"
 
 #include "GhostHandler.h"
 

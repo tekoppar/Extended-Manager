@@ -1,0 +1,99 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(499,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  pch-il2cpp.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  GizmoEvents.cpp
+  Collision.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Vector2.cpp
+  Vector3.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Vector4.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Input.cpp
+  InputPlayback.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  Component.cpp
+  Gizmo.cpp
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  MeshUtility.cpp
+  CollisionCreator.cpp
+  Tem.cpp
+  ScenesJSON.cpp
+  FieldHelper.cpp
+  PropertyHelper.cpp
+  FrameworkJSON.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\TemFramework\FieldHelper.cpp(646,16): warning C4244: 'return': conversion from 'uint16_t' to 'char', possible loss of data
+  TemFramework.cpp
+  GrenadeVisual.cpp
+  HammerVisual.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Creators\Collision.cpp(229,50): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\BaseClasses\Creators\CollisionCreator.cpp(406,208): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  GlideVisual.cpp
+  BowVisual.cpp
+  CreateUI.cpp
+  DebugDrawer.cpp
+  GraphDrawer.cpp
+  MD5.cpp
+  ObjectCreator.cpp
+  TemRecorder.cpp
+  Adresses.cpp
+  Base64.cpp
+  Global.cpp
+  ManagerDef.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\TemFramework\TemFramework.cpp(434,47): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  helpers.cpp
+  il2cpp-init.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\String Helpers\Base64.cpp(69,69): warning C4267: '=': conversion from 'size_t' to 'BYTE', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Helper Classes\String Helpers\Base64.cpp(86,65): warning C4267: '=': conversion from 'size_t' to 'BYTE', possible loss of data
+  Manager.cpp
+  MessageHelper.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\DrawerClasses\CreateUI.cpp(657,84): warning C4244: 'argument': conversion from 'double' to 'int32_t', possible loss of data
+  SimpleJson.cpp
+  TemSocket.cpp
+  TemUser.cpp
+  MoonAnimationHelper.cpp
+  AreaMapManager.cpp
+  GameWorldHelper.cpp
+  TemSceneHelper.cpp
+  SeinCharacterHelper.cpp
+  GhostHandler.cpp
+  FrameLogger.cpp
+  FrameLoggerSingleFrame.cpp
+  RaceManager.cpp
+  RaceTime.cpp
+  UberStateManager.cpp
+  SavesHelper.cpp
+  SeinVisualEditor.cpp
+  TorchVisual.cpp
+  OriVisual.cpp
+  SeinVisual.cpp
+  SwordVisual.cpp
+  SceneList.cpp
+  TemLogger.cpp
+  SceneObject.cpp
+  SceneHierarchy.cpp
+  UIEvents.cpp
+  TreeItem.cpp
+  SceneData.cpp
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure\SceneList.cpp(192,66): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure\SceneList.cpp(269,47): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure\SceneList.cpp(428,74): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Tekoppar\source\repos\injectdll\injectdll\Moon Helpers\Scenes\SceneStructure\SceneList.cpp(816,79): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+cl : command line warning D9025: overriding '/sdl' with '/GS-'
+  inject.cpp
+detours.lib(detours.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(detours.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+detours.lib(modules.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(modules.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+detours.lib(disasm.obj) : warning LNK4099: PDB 'detours.pdb' was not found with 'detours.lib(disasm.obj)' or at 'C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\detours.pdb'; linking object as if no debug info
+  injectdll.vcxproj -> C:\Users\Tekoppar\source\repos\WotwVisualEditor\WotwVisualEditor\bin\Debug\injectdll_patch2.dll

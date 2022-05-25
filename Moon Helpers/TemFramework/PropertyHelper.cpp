@@ -88,8 +88,14 @@ namespace tem {
 			{
 				Il2CppObject* iL2object = PropertyHelper::InvokePropertyMethod(object, Property);
 				void* objectUnboxed = il2cpp_object_unbox(iL2object);
+#ifdef _WOTW_PATCH_THREE
 				if (iL2object != nullptr && iL2object->klass != nullptr && (std::uintptr_t)iL2object->klass > 0x00ffffff && iL2object->klass->klass != nullptr)
 				{
+#endif
+#ifdef _WOTW_PATCH_TWO
+					if (iL2object != nullptr && iL2object->Il2CppClass.klass != nullptr && (std::uintptr_t)iL2object->Il2CppClass.klass > 0x00ffffff && iL2object->Il2CppClass.klass->klass != nullptr)
+					{
+#endif
 					Il2CppClass* typeClass = il2cpp_class_from_type(Property->get->return_type);
 					if (typeClass != nullptr)
 					{
@@ -128,8 +134,14 @@ namespace tem {
 						}
 					}
 
+#ifdef _WOTW_PATCH_THREE
 					switch (iL2object->klass->byval_arg.data.klassIndex)
 					{
+#endif
+#ifdef _WOTW_PATCH_TWO
+						switch (iL2object->Il2CppClass.klass->byval_arg.data.klassIndex)
+						{
+#endif
 						case 188:
 						{
 							app::Boolean* boolean = (app::Boolean*)iL2object;
@@ -299,6 +311,7 @@ namespace tem {
 						}
 						break;
 
+#ifdef _WOTW_PATCH_THREE
 						case 16033:
 						{
 							app::DropPickup_SharedUpdateData* SharedUpdateDataValue = reinterpret_cast<app::DropPickup_SharedUpdateData*>(objectUnboxed);
@@ -306,6 +319,7 @@ namespace tem {
 							ReturnType = tem::VariableType::String;
 						}
 						break;
+#endif
 
 						case 16366:
 						{
@@ -395,14 +409,28 @@ namespace tem {
 			TemLogger::Add("object was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
 		}
+#ifdef _WOTW_PATCH_THREE
 		if (tem::PtrInRange(il2object->klass) == false) {
 			TemLogger::Add("object klass was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
 		}
-		if (il2object->klass->initialized == 0) {
+		if (tem::PtrInRange(il2object->klass) == true && il2object->klass->initialized == 0) {
 			TemLogger::Add("klass is not initialized, not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
 		}
+#endif
+#ifdef _WOTW_PATCH_TWO
+		if (tem::PtrInRange(il2object->Il2CppClass.klass) == false)
+		{
+			TemLogger::Add("object klass was nullptr, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+		if (tem::PtrInRange(il2object->Il2CppClass.klass) == true && il2object->Il2CppClass.klass->initialized == 0)
+		{
+			TemLogger::Add("klass is not initialized, not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+#endif
 		if (returnTypeClass->klass->native_size < 0) {
 			TemLogger::Add("return type native size is less then 0, not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
@@ -427,10 +455,19 @@ namespace tem {
 			TemLogger::Add("base and declaring class was nullptr,  not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
 		}
+#ifdef _WOTW_PATCH_THREE
 		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->klass) == false)) {
 			TemLogger::Add("declaring type was nullptr and class is not assignable,  not getting data from " + std::string(Property->name), LogType::Warning);
 			return nullptr;
 		}
+#endif
+#ifdef _WOTW_PATCH_TWO
+		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->Il2CppClass.klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->Il2CppClass.klass) == false))
+		{
+			TemLogger::Add("declaring type was nullptr and class is not assignable,  not getting data from " + std::string(Property->name), LogType::Warning);
+			return nullptr;
+		}
+#endif
 
 		std::string className = declaringClass->name;
 		bool isIllegal = vector::contains(tem::TemFramework::IllegalClasses, className);
@@ -467,10 +504,18 @@ namespace tem {
 			else
 				return nullptr;
 
+#ifdef _WOTW_PATCH_THREE
 			if (tem::PtrInRange(returnObject) == true && tem::PtrInRange(returnObject->klass) == true)
 			{
 				return returnObject;
 			}
+#endif
+#ifdef _WOTW_PATCH_TWO
+			if (tem::PtrInRange(returnObject) == true && tem::PtrInRange(returnObject->Il2CppClass.klass) == true)
+			{
+				return returnObject;
+			}
+#endif
 		}
 		catch (Il2CppExceptionWrapper e)
 		{
@@ -510,6 +555,7 @@ namespace tem {
 			TemLogger::Add("object was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
 		}
+#ifdef _WOTW_PATCH_THREE
 		if (tem::PtrInRange(il2object->klass) == false) {
 			TemLogger::Add("object klass was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
@@ -518,6 +564,19 @@ namespace tem {
 			TemLogger::Add("klass is not initialized, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
 		}
+#endif
+#ifdef _WOTW_PATCH_TWO
+		if (tem::PtrInRange(il2object->Il2CppClass.klass) == false)
+		{
+			TemLogger::Add("object klass was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+		if (il2object->Il2CppClass.klass->initialized == 0)
+		{
+			TemLogger::Add("klass is not initialized, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+#endif
 		/*if (returnTypeClass->klass->native_size < 0) {
 			TemLogger::Add("return type native size is less then 0, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
@@ -538,10 +597,19 @@ namespace tem {
 			TemLogger::Add("base and declaring class was nullptr, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
 		}
+#ifdef _WOTW_PATCH_THREE
 		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->klass) == false)) {
 			TemLogger::Add("declaring type was nullptr and class is not assignable, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
 			return;
 		}
+#endif
+#ifdef _WOTW_PATCH_TWO
+		if (tem::PtrInRange(declaringType) == false && (il2cpp_class_is_assignable_from(il2object->Il2CppClass.klass, declaringType) == false || il2cpp_class_is_assignable_from(declaringType, il2object->Il2CppClass.klass) == false))
+		{
+			TemLogger::Add("declaring type was nullptr and class is not assignable, not setting object data: " + std::string(Property->name) + " with value: " + value, LogType::Warning);
+			return;
+		}
+#endif
 
 		try
 		{
